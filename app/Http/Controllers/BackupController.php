@@ -64,7 +64,7 @@ class BackupController extends Controller
             $ruta   = $this->backupDir . '/' . $nombre;
             file_put_contents($ruta, $sql);
 
-            return back()->with('success', "Backup <strong>{$nombre}</strong> creado correctamente (" . $this->formatBytes(filesize($ruta)) . ").");
+            return back()->with('success', "Backup \"{$nombre}\" creado correctamente (" . $this->formatBytes(filesize($ruta)) . ").");
         } catch (\Throwable $e) {
             return back()->with('error', 'Error al crear el backup: ' . $e->getMessage());
         }
@@ -87,7 +87,7 @@ class BackupController extends Controller
 
         if (file_exists($ruta) && str_ends_with($nombre, '.sql')) {
             unlink($ruta);
-            return back()->with('success', "Backup <strong>{$nombre}</strong> eliminado.");
+            return back()->with('success', "Backup \"{$nombre}\" eliminado.");
         }
 
         return back()->with('error', 'Archivo no encontrado.');
@@ -119,8 +119,17 @@ class BackupController extends Controller
             $statements = preg_split('/;\s*[\r\n]+/', $contenido);
 
             foreach ($statements as $stmt) {
+                // Los bloques de comentarios (-- ...) del backup quedan pegados al inicio
+                // del statement real (no terminan en ";"), así que hay que quitarlos línea
+                // por línea antes de evaluar si el bloque es una sentencia ejecutable. Antes
+                // se comprobaba si el bloque completo "empezaba" con "--" y se descartaba
+                // entero, lo que también botaba el DROP TABLE/CREATE TABLE que venía después
+                // del comentario en el mismo bloque (causaba "table already exists" al
+                // restaurar, porque el DROP TABLE nunca se ejecutaba).
+                $stmt = preg_replace('/^(--[^\r\n]*[\r\n]+)+/', '', ltrim($stmt));
                 $stmt = trim($stmt);
-                if (empty($stmt) || preg_match('/^--/', $stmt) || preg_match('/^\/\*/', $stmt)) {
+
+                if ($stmt === '' || str_starts_with($stmt, '/*')) {
                     continue;
                 }
                 DB::unprepared($stmt);
@@ -128,7 +137,7 @@ class BackupController extends Controller
 
             DB::statement('SET FOREIGN_KEY_CHECKS=1');
 
-            return back()->with('success', 'Base de datos restaurada correctamente. Se guardó un backup automático previo (<strong>' . $autoNombre . '</strong>).');
+            return back()->with('success', 'Base de datos restaurada correctamente. Se guardó un backup automático previo ("' . $autoNombre . '").');
         } catch (\Throwable $e) {
             DB::statement('SET FOREIGN_KEY_CHECKS=1');
             return back()->with('error', 'Error al restaurar: ' . $e->getMessage());

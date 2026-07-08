@@ -175,22 +175,6 @@
 
 @section('content')
 
-{{-- ── Alertas ── --}}
-@if(session('success'))
-<div class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2" style="border-radius:12px;border:none;background:#d1fae5;color:#065f46;">
-    <i class="fas fa-check-circle fa-lg"></i>
-    <div>{!! session('success') !!}</div>
-    <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
-</div>
-@endif
-@if(session('error'))
-<div class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2" style="border-radius:12px;border:none;">
-    <i class="fas fa-exclamation-circle fa-lg"></i>
-    <div>{!! session('error') !!}</div>
-    <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
-</div>
-@endif
-
 {{-- ══════════ HERO ══════════ --}}
 <div class="backup-hero">
     <div class="d-flex align-items-start justify-content-between flex-wrap gap-3" style="position:relative;z-index:1;">

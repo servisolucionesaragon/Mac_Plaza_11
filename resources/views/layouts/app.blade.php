@@ -500,7 +500,7 @@
         <a href="{{ route('backup.index') }}"
            class="nav-link {{ request()->routeIs('backup.*') ? 'active' : '' }}">
             <span class="nav-icon"><i class="fas fa-database"></i></span>
-            Backup & Restore
+            Backup & Restauración
         </a>
         @endif
     </nav>
