@@ -19,6 +19,7 @@ con control de acceso por roles.
 - [Base de datos](#base-de-datos)
 - [Estructura del proyecto](#estructura-del-proyecto)
 - [Notas de despliegue](#notas-de-despliegue)
+- [Problemas conocidos y decisiones de diseño](#problemas-conocidos-y-decisiones-de-diseño)
 
 ---
 
@@ -30,11 +31,12 @@ con control de acceso por roles.
 | **Clientes** | Registro con DNI/RUC, tipo particular/empresa, historial de compras y reparaciones, búsqueda y filtros. |
 | **Inventario (Productos)** | Stock en tiempo real, alertas de stock mínimo, specs técnicas (IMEI/serial, RAM, almacenamiento), condición (nuevo/reacondicionado/usado), márgenes automáticos. |
 | **Ventas (POS)** | Búsqueda de productos en tiempo real, impuesto configurable, descuentos, métodos de pago editables, numeración automática (`VTA-000001`), cancelación con restauración de stock, recibo para hoja y tirilla. |
-| **Reparaciones** | Órdenes de servicio con 7 estados (recibido → diagnóstico → esperando repuesto → reparación → listo → entregado), prioridad (baja/media/alta/urgente), asignación de técnico, garantía, historial de cambios de estado, recibo en una sola hoja con falla reportada / diagnóstico técnico / solución aplicada. |
+| **Reparaciones** | Órdenes de servicio con 7 estados (recibido → diagnóstico → esperando repuesto → reparación → listo → entregado), prioridad (baja/media/alta/urgente), asignación de técnico, garantía (con fecha de vencimiento calculada), historial de cambios de estado. Recibo en una sola hoja: datos completos de la tienda (NIT, teléfono, dirección, correo/web), datos del equipo, y diagnóstico separado en 3 secciones (falla reportada por el cliente / diagnóstico técnico / solución aplicada). Se abre en la misma pantalla (no en pestaña nueva) desde un único botón "Recibo". |
 | **Catálogos** | Gestión (crear/editar/activar-desactivar/eliminar) de categorías, marcas, condición, almacenamiento, RAM y métodos de pago — antes eran listas fijas hardcodeadas, ahora son catálogos dinámicos y protegidos contra borrado si tienen productos/ventas asociadas. |
 | **Reportes** | Filtro por fechas, ventas por día/método de pago, top 10 productos/clientes, reparaciones por estado. |
+| **Mi Perfil** | Cualquier usuario autenticado (sin importar rol) puede editar su nombre, correo y teléfono, y cambiar su contraseña (requiere confirmar la contraseña actual). Accesible desde el dropdown de usuario en la esquina superior derecha. |
 | **Configuración** | Datos del negocio (nombre, NIT, teléfono, dirección, ciudad/departamento, correo, web), logo, zona horaria, moneda, % de impuesto configurable, gestión de usuarios y permisos por rol. |
-| **Backup & Restauración** | Exportar/importar la BD en SQL, restauración con backup automático previo, 3 niveles de reset. |
+| **Backup & Restauración** | Exportar/importar la BD completa en SQL, restauración con backup automático previo, 3 niveles de reset. |
 
 ## Roles y permisos
 
@@ -51,6 +53,10 @@ con control de acceso por roles.
 
 Control de acceso vía middleware `permiso:{modulo}` (`VerificarPermisoModulo`) + tabla
 `permisos_rol`, editable desde Configuración sin tocar código.
+
+"Mi Perfil" no aparece en la tabla porque no está sujeto a permisos por módulo — lo
+puede usar cualquier usuario autenticado (Administrador, Vendedor o Técnico) para
+editar sus propios datos.
 
 ## Requisitos
 
@@ -147,3 +153,30 @@ modelo para evitarlo — revisar ese patrón antes de agregar recursos nuevos en
   producto), no `Storage::url()`.
 - Backups de base de datos y código de referencia (no necesariamente la última
   versión) se conservan fuera del repositorio, en el NAS interno del equipo.
+
+## Problemas conocidos y decisiones de diseño
+
+- **Impresión de vistas y grillas Bootstrap:** el ancho útil de una hoja tamaño carta
+  al imprimir (con `@page { margin: 10mm; }`) es ~741px — **por debajo** del breakpoint
+  `md` de Bootstrap (768px). Cualquier `col-md-*`/`offset-md-*` usado en una vista
+  pensada para imprimirse (ej. el recibo de reparaciones) se apila en una sola columna
+  al imprimir aunque en pantalla se vea en varias, alargando el documento a más de una
+  hoja. En vistas de impresión, usar `col-*`/`offset-*` sin breakpoint.
+- **Mensajes flash (`session('success')`/`session('error')`):** ya se renderizan una
+  sola vez de forma global en `resources/views/layouts/app.blade.php` (escapados con
+  `{{ }}` a propósito, porque algunos controladores meten texto escrito por el propio
+  usuario — nombre de un catálogo, de un valor — directo en el mensaje sin sanitizar).
+  **No agregar un bloque `@if(session('success'))...@endif` propio en una vista
+  nueva** — ya salió duplicado en 4 vistas por este motivo. Tampoco meter HTML
+  (`<strong>`, etc.) dentro de un mensaje flash, porque se escapa y se ve el tag
+  literal.
+- **Restauración de backups (`BackupController::restaurar()`):** el archivo `.sql` se
+  parte en sentencias individuales por `;` porque Laravel/PDO no ejecuta múltiples
+  statements en una sola llamada por defecto. El parser quita las líneas de comentario
+  (`-- ...`) que preceden a cada sentencia real antes de decidir si ejecutarla —
+  necesario porque el `DROP TABLE IF EXISTS` de cada tabla queda pegado (sin `;` de por
+  medio) al bloque de comentario que la antecede en el backup generado por
+  `generarSQL()`.
+- **Nombres en español y pluralización automática:** ver nota en
+  [Estructura del proyecto](#estructura-del-proyecto) — mismo cuidado aplica a
+  cualquier tabla/ruta/recurso nuevo con nombre en español.
