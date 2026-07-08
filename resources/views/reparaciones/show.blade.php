@@ -33,10 +33,7 @@
         </p>
     </div>
     <div class="d-flex gap-2">
-        <button onclick="window.print()" class="btn btn-outline-secondary px-4">
-            <i class="fas fa-print me-2"></i>Imprimir
-        </button>
-        <a href="{{ route('reparaciones.recibo', $reparacion) }}" target="_blank" class="btn btn-outline-primary px-4">
+        <a href="{{ route('reparaciones.recibo', $reparacion) }}" class="btn btn-outline-primary px-4">
             <i class="fas fa-receipt me-2"></i>Recibo
         </a>
         <a href="{{ route('reparaciones.edit', $reparacion) }}" class="btn btn-primary px-4">

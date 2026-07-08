@@ -53,6 +53,12 @@
                         <div>
                             <div style="font-weight:700; font-size:17px;">{{ $config->nombre_tienda ?? 'CRM Celulares' }}</div>
                             <div style="font-size:12px; color:#9ca3af;">Recibo de Orden de Reparación</div>
+                            <div style="font-size:11px; color:#6b7280; line-height:1.5;">
+                                @if($config->ruc) NIT: {{ $config->ruc }} @endif
+                                @if($config->telefono) · Tel: {{ $config->telefono }} @endif
+                                @if($config->direccion || $config->ciudad) <br>{{ $config->direccion }}{{ $config->direccion && $config->ciudad ? ', ' : '' }}{{ $config->ciudad }}{{ $config->departamento ? ' - '.$config->departamento : '' }} @endif
+                                @if($config->email || $config->pagina_web) <br>{{ $config->email }}{{ $config->email && $config->pagina_web ? ' · ' : '' }}{{ $config->pagina_web }} @endif
+                            </div>
                         </div>
                     </div>
                     <div class="text-end">
@@ -121,9 +127,19 @@
 
                 {{-- Diagnóstico --}}
                 <div class="mb-3">
-                    <div class="recibo-label mb-1">Diagnóstico</div>
-                    <div class="recibo-box" style="font-size:13px; color:#374151;">
-                        {{ $reparacion->diagnostico ?: 'Pendiente de diagnóstico.' }}
+                    <div class="recibo-box p-0" style="overflow:hidden;">
+                        <div class="px-3 py-2" style="border-bottom:1px solid #e5e7eb;">
+                            <div class="recibo-label mb-1">Falla Reportada por el Cliente</div>
+                            <div style="font-size:13px; color:#374151;">{{ $reparacion->falla_reportada ?: '—' }}</div>
+                        </div>
+                        <div class="px-3 py-2" style="border-bottom:1px solid #e5e7eb;">
+                            <div class="recibo-label mb-1">Diagnóstico Técnico</div>
+                            <div style="font-size:13px; color:#374151;">{{ $reparacion->diagnostico ?: 'Pendiente de diagnóstico.' }}</div>
+                        </div>
+                        <div class="px-3 py-2">
+                            <div class="recibo-label mb-1">Solución Aplicada</div>
+                            <div style="font-size:13px; color:#374151;">{{ $reparacion->solucion ?: '—' }}</div>
+                        </div>
                     </div>
                 </div>
 
