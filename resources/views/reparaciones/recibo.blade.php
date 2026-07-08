@@ -43,11 +43,11 @@
                 {{-- Cabecera: negocio + orden --}}
                 <div class="d-flex align-items-start justify-content-between mb-4 pb-3" style="border-bottom:2px solid #e9d5ff;">
                     <div class="d-flex align-items-center gap-3">
-                        <div style="width:52px; height:52px; border-radius:12px; overflow:hidden; background:linear-gradient(135deg,#a855f7,#ec4899); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                        <div style="width:70px; height:70px; border-radius:14px; overflow:hidden; background:linear-gradient(135deg,#a855f7,#ec4899); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                             @if($config->logo)
                                 <img src="{{ asset('storage/' . $config->logo) }}" alt="Logo" style="width:100%; height:100%; object-fit:cover;">
                             @else
-                                <i class="fas fa-mobile-alt" style="color:#fff; font-size:22px;"></i>
+                                <i class="fas fa-mobile-alt" style="color:#fff; font-size:30px;"></i>
                             @endif
                         </div>
                         <div>
@@ -69,14 +69,17 @@
 
                 {{-- Cliente y Técnico --}}
                 <div class="row g-3 mb-3">
-                    <div class="col-md-6">
+                    <div class="col-8">
                         <div class="recibo-box">
                             <div class="recibo-label">Cliente</div>
                             <div class="recibo-value">{{ $reparacion->cliente->nombre_completo ?? '—' }}</div>
-                            <div style="font-size:12px; color:#6b7280;">{{ $reparacion->cliente->telefono ?? '' }}</div>
+                            <div style="font-size:12px; color:#6b7280;">
+                                {{ $reparacion->cliente->telefono ?? '—' }}
+                                @if($reparacion->cliente->direccion ?? null) · {{ $reparacion->cliente->direccion }} @endif
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-4">
                         <div class="recibo-box">
                             <div class="recibo-label">Técnico</div>
                             <div class="recibo-value">{{ $reparacion->tecnico->name ?? '—' }}</div>
@@ -86,13 +89,13 @@
 
                 {{-- Fechas --}}
                 <div class="row g-3 mb-3">
-                    <div class="col-md-6">
+                    <div class="col-6">
                         <div class="recibo-box">
                             <div class="recibo-label">Fecha Recibido</div>
                             <div class="recibo-value">{{ optional($reparacion->fecha_recepcion)->format('d/m/Y H:i') ?? '—' }}</div>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-6">
                         <div class="recibo-box">
                             <div class="recibo-label">Fecha Entregado</div>
                             <div class="recibo-value">{{ optional($reparacion->fecha_entrega)->format('d/m/Y H:i') ?? 'Pendiente' }}</div>
@@ -105,19 +108,19 @@
                     <div class="recibo-label mb-1">Datos del Equipo</div>
                     <div class="recibo-box">
                         <div class="row g-2">
-                            <div class="col-md-3">
+                            <div class="col-3">
                                 <div class="recibo-label">Dispositivo</div>
                                 <div class="recibo-value">{{ $reparacion->dispositivo }}</div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-3">
                                 <div class="recibo-label">Marca / Modelo</div>
                                 <div class="recibo-value">{{ $reparacion->marca ?: '—' }} {{ $reparacion->modelo }}</div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-3">
                                 <div class="recibo-label">Color</div>
                                 <div class="recibo-value">{{ $reparacion->color ?: '—' }}</div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-3">
                                 <div class="recibo-label">IMEI / Serie</div>
                                 <div class="recibo-value">{{ $reparacion->imei ?: '—' }}</div>
                             </div>
@@ -144,8 +147,8 @@
                 </div>
 
                 {{-- Costo y garantía --}}
-                <div class="row g-3 mb-4">
-                    <div class="col-md-{{ $reparacion->garantia ? '6' : '12' }}">
+                <div class="row g-3 mb-3">
+                    <div class="col-{{ $reparacion->garantia ? '6' : '12' }}">
                         <div class="p-3 rounded-3 text-center" style="background:#d1fae5;">
                             <div style="font-size:11px; color:#065f46; margin-bottom:2px;">COSTO FINAL</div>
                             <div style="font-size:24px; font-weight:700; color:#059669;">
@@ -154,19 +157,24 @@
                         </div>
                     </div>
                     @if($reparacion->garantia)
-                    <div class="col-md-6">
+                    @php
+                        $fechaFinGarantia = ($reparacion->fecha_entrega ?? $reparacion->fecha_recepcion ?? now())
+                            ->copy()->addDays($reparacion->dias_garantia);
+                    @endphp
+                    <div class="col-6">
                         <div class="p-3 rounded-3 text-center" style="background:#e0f2fe;">
                             <div style="font-size:11px; color:#0369a1; margin-bottom:2px;"><i class="fas fa-shield-alt me-1"></i>GARANTÍA INCLUIDA</div>
                             <div style="font-size:20px; font-weight:700; color:#0369a1;">{{ $reparacion->dias_garantia }} días</div>
+                            <div style="font-size:11px; color:#0369a1;">Vence: {{ $fechaFinGarantia->format('d/m/Y') }}</div>
                         </div>
                     </div>
                     @endif
                 </div>
 
                 {{-- Firma de recibido --}}
-                <div class="row g-3 mt-4 pt-3" style="border-top:1px solid #e5e7eb;">
-                    <div class="col-md-6 offset-md-6">
-                        <div style="border-top:1px solid #374151; margin-top:50px; padding-top:6px; text-align:center; font-size:12px; color:#6b7280;">
+                <div class="row g-3 mt-3 pt-2" style="border-top:1px solid #e5e7eb;">
+                    <div class="col-6 offset-6">
+                        <div style="border-top:1px solid #374151; margin-top:30px; padding-top:6px; text-align:center; font-size:12px; color:#6b7280;">
                             Firma de conformidad de recibido
                         </div>
                     </div>
