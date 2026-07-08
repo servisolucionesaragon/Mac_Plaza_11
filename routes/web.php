@@ -14,6 +14,7 @@ use App\Http\Controllers\BackupController;
 use App\Http\Controllers\CatalogoController;
 use App\Http\Controllers\CatalogoTipoController;
 use App\Http\Controllers\CatalogoValorController;
+use App\Http\Controllers\PerfilController;
 
 // ── Autenticación ─────────────────────────────────────────────────────────────
 Route::middleware('guest')->group(function () {
@@ -75,6 +76,11 @@ Route::middleware(['auth', 'nocache'])->group(function () {
 
     // Reportes
     Route::get('/reportes', [ReporteController::class, 'index'])->name('reportes.index')->middleware('permiso:reportes');
+
+    // Mi Perfil (disponible para cualquier usuario autenticado, sin permiso de módulo)
+    Route::get('/perfil', [PerfilController::class, 'edit'])->name('perfil.edit');
+    Route::put('/perfil', [PerfilController::class, 'update'])->name('perfil.update');
+    Route::put('/perfil/password', [PerfilController::class, 'updatePassword'])->name('perfil.updatePassword');
 
     // Configuración
     Route::middleware('permiso:configuracion')->group(function () {

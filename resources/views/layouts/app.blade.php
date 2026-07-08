@@ -550,7 +550,7 @@
                     <i class="fas fa-user-circle"></i>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" style="border-radius:12px; font-size:13px;">
-                    <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2 text-muted"></i>Mi Perfil</a></li>
+                    <li><a class="dropdown-item {{ request()->routeIs('perfil.*') ? 'active' : '' }}" href="{{ route('perfil.edit') }}"><i class="fas fa-user me-2 text-muted"></i>Mi Perfil</a></li>
                     <li><hr class="dropdown-divider"></li>
                     <li>
                         <form action="{{ route('logout') }}" method="POST">
