@@ -141,9 +141,9 @@
                             <div class="d-flex gap-1 justify-content-end">
                                 @if($cliente->cumpleAnioEsteMes() && $cliente->numeroWhatsapp())
                                 @php
-                                    $mensajeCumple = "🎉 ¡Hola {$cliente->nombre}! 🎂 Este es tu mes de cumpleaños y de parte de *"
+                                    $mensajeCumple = "¡Hola {$cliente->nombre}! Este es tu mes de cumpleaños y de parte de *"
                                         . ($config->nombre_tienda ?? 'nuestra tienda')
-                                        . "* queremos celebrar contigo con un descuento especial en tu próxima compra. ¡Te esperamos! ✨";
+                                        . "* queremos celebrar contigo con un descuento especial en tu próxima compra. ¡Te esperamos!";
                                 @endphp
                                 <a href="{{ $cliente->whatsappUrl($mensajeCumple) }}" target="_blank" rel="noopener"
                                    class="btn btn-sm" style="background:#25D366; color:#fff; border-radius:8px; padding:5px 10px;" title="Enviar saludo de cumpleaños por WhatsApp">
