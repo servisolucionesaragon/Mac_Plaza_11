@@ -99,6 +99,15 @@ class ReparacionController extends Controller
         return view('reparaciones.recibo', compact('reparacion'));
     }
 
+    /** Recibo de reparación accesible sin login, vía link firmado (para compartir por WhatsApp). */
+    public function reciboPublico(Reparacion $reparacion)
+    {
+        $reparacion->load(['cliente', 'tecnico']);
+        $layout = 'layouts.publico';
+        $publico = true;
+        return view('reparaciones.recibo', compact('reparacion', 'layout', 'publico'));
+    }
+
     public function edit(Reparacion $reparacion)
     {
         $clientes = Cliente::where('activo', true)->orderBy('nombre')->get();

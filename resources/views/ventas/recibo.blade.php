@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends($layout ?? 'layouts.app')
 @section('title', 'Recibo '.$venta->numero_venta)
 
 @section('breadcrumb')
@@ -53,20 +53,22 @@
         <button onclick="window.print()" class="btn btn-primary px-4">
             <i class="fas fa-print me-2"></i>Imprimir
         </button>
-        @if($venta->cliente && $venta->cliente->numeroWhatsapp())
-        @php
-            $mensajeReciboVenta = "Hola {$venta->cliente->nombre}, te saludamos de *" . ($config->nombre_tienda ?? 'la tienda') . "*"
-                . ". Aquí tienes el recibo de tu compra {$venta->numero_venta}: "
-                . route('ventas.recibo', $venta);
-        @endphp
-        <a href="{{ $venta->cliente->whatsappUrl($mensajeReciboVenta) }}" target="_blank" rel="noopener"
-           class="btn px-4" style="background:#25D366; color:#fff;">
-            <i class="fab fa-whatsapp me-2"></i>Enviar por WhatsApp
-        </a>
+        @if(!($publico ?? false))
+            @if($venta->cliente && $venta->cliente->numeroWhatsapp())
+            @php
+                $mensajeReciboVenta = "Hola {$venta->cliente->nombre}, te saludamos de *" . ($config->nombre_tienda ?? 'la tienda') . "*"
+                    . ". Aquí tienes el recibo de tu compra {$venta->numero_venta}: "
+                    . URL::signedRoute('publico.venta.recibo', ['venta' => $venta->id]);
+            @endphp
+            <a href="{{ $venta->cliente->whatsappUrl($mensajeReciboVenta) }}" target="_blank" rel="noopener"
+               class="btn px-4" style="background:#25D366; color:#fff;">
+                <i class="fab fa-whatsapp me-2"></i>Enviar por WhatsApp
+            </a>
+            @endif
+            <a href="{{ route('ventas.show', $venta) }}" class="btn btn-outline-secondary px-4">
+                <i class="fas fa-arrow-left me-2"></i>Volver
+            </a>
         @endif
-        <a href="{{ route('ventas.show', $venta) }}" class="btn btn-outline-secondary px-4">
-            <i class="fas fa-arrow-left me-2"></i>Volver
-        </a>
     </div>
 </div>
 
@@ -218,6 +220,11 @@
 {{-- ============ FORMATO TIRILLA 80MM ============ --}}
 <div class="recibo-tirilla-wrap d-none-recibo" id="reciboTirilla">
     <div class="recibo-tirilla">
+        @if($config->logo)
+        <div class="t-center mb-1">
+            <img src="{{ asset('storage/' . $config->logo) }}" alt="Logo" style="max-width:120px; max-height:60px; object-fit:contain;">
+        </div>
+        @endif
         <div class="t-center t-bold" style="font-size:13px;">{{ $config->nombre_tienda ?? 'CRM Celulares' }}</div>
         @if($config->ruc)<div class="t-center">NIT: {{ $config->ruc }}</div>@endif
         @if($config->direccion || $config->ciudad)<div class="t-center">{{ $config->direccion }}{{ $config->direccion && $config->ciudad ? ', ' : '' }}{{ $config->ciudad }}</div>@endif

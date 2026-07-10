@@ -28,6 +28,15 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
+// ── Recibos públicos (link firmado, sin login — para compartir por WhatsApp) ───
+Route::middleware('signed')->group(function () {
+    Route::get('/r/venta/{venta}', [VentaController::class, 'reciboPublico'])->name('publico.venta.recibo');
+    Route::get('/r/reparacion/{reparacion}', [ReparacionController::class, 'reciboPublico'])
+        ->name('publico.reparacion.recibo');
+    Route::get('/r/abono/{venta}/{abono}', [VentaController::class, 'abonoReciboPublico'])
+        ->name('publico.abono.recibo');
+});
+
 // ── Rutas protegidas (requieren autenticación) ────────────────────────────────
 Route::middleware(['auth', 'nocache'])->group(function () {
 

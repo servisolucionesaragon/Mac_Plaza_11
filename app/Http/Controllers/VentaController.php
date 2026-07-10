@@ -429,6 +429,26 @@ class VentaController extends Controller
         return view('ventas.abono-recibo', compact('venta', 'abono'));
     }
 
+    /** Recibo de venta accesible sin login, vía link firmado (para compartir por WhatsApp). */
+    public function reciboPublico(Venta $venta)
+    {
+        $venta->load(['cliente', 'vendedor', 'detalles.producto.marca', 'metodoPago']);
+        $layout = 'layouts.publico';
+        $publico = true;
+        return view('ventas.recibo', compact('venta', 'layout', 'publico'));
+    }
+
+    /** Recibo de abono accesible sin login, vía link firmado (para compartir por WhatsApp). */
+    public function abonoReciboPublico(Venta $venta, Abono $abono)
+    {
+        abort_if($abono->venta_id !== $venta->id, 404);
+        $venta->load('cliente');
+        $abono->load('metodoPago', 'usuario');
+        $layout = 'layouts.publico';
+        $publico = true;
+        return view('ventas.abono-recibo', compact('venta', 'abono', 'layout', 'publico'));
+    }
+
     public function cancelar(Venta $venta)
     {
         if ($venta->estado !== 'completada') {

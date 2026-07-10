@@ -32,6 +32,9 @@ trait TieneWhatsapp
             return null;
         }
 
-        return 'https://wa.me/' . $numero . ($mensaje !== '' ? '?text=' . urlencode($mensaje) : '');
+        // rawurlencode (RFC 3986, %20 para espacios) es lo que WhatsApp recomienda para
+        // el parámetro ?text= de los links wa.me — no urlencode (usa "+" para espacios,
+        // pensado para application/x-www-form-urlencoded, no para este caso).
+        return 'https://wa.me/' . $numero . ($mensaje !== '' ? '?text=' . rawurlencode($mensaje) : '');
     }
 }
