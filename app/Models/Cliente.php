@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\TieneWhatsapp;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Cliente extends Model
 {
-    use HasFactory;
+    use HasFactory, TieneWhatsapp;
 
     protected $fillable = [
         'nombre', 'apellido', 'email', 'telefono', 'celular', 'dni',
@@ -57,30 +58,11 @@ class Cliente extends Model
      */
     public function numeroWhatsapp(): ?string
     {
-        $numero = $this->celular ?: $this->telefono;
-        if (!$numero) {
-            return null;
-        }
-
-        $limpio = preg_replace('/\D+/', '', $numero);
-        if (!$limpio) {
-            return null;
-        }
-
-        if (!str_starts_with($limpio, '57') || strlen($limpio) === 10) {
-            $limpio = '57' . ltrim($limpio, '0');
-        }
-
-        return $limpio;
+        return $this->limpiarNumeroWhatsapp($this->celular ?: $this->telefono);
     }
 
     public function whatsappUrl(string $mensaje = ''): ?string
     {
-        $numero = $this->numeroWhatsapp();
-        if (!$numero) {
-            return null;
-        }
-
-        return 'https://wa.me/' . $numero . ($mensaje !== '' ? '?text=' . urlencode($mensaje) : '');
+        return $this->armarWhatsappUrl($this->numeroWhatsapp(), $mensaje);
     }
 }

@@ -391,11 +391,20 @@
                                 <td class="text-end">
                                     @if($v->cliente && $v->cliente->numeroWhatsapp())
                                     @php
-                                        $mensajeCobro = "Hola {$v->cliente->nombre}, te saludamos de " . ($config->nombre_tienda ?? 'la tienda')
-                                            . ". Te recordamos que tienes un saldo pendiente de {$config->simbolo_moneda} " . number_format($v->saldo_pendiente, 2)
-                                            . " por la compra {$v->numero_venta}"
-                                            . ($v->fecha_vencimiento ? (", con vencimiento el " . $v->fecha_vencimiento->format('d/m/Y')) : '')
-                                            . ". Quedamos atentos para coordinar el pago. ¡Gracias!";
+                                        $tiendaNombreCobro = '*' . ($config->nombre_tienda ?? 'la tienda') . '*';
+                                        if ($v->estaAtrasada()) {
+                                            $diasAtraso = (int) now()->diffInDays($v->fecha_vencimiento);
+                                            $mensajeCobro = "Hola {$v->cliente->nombre}, te saludamos de {$tiendaNombreCobro}."
+                                                . " Te contactamos porque tienes {$diasAtraso} día(s) de mora en el saldo pendiente de {$config->simbolo_moneda} " . number_format($v->saldo_pendiente, 2)
+                                                . " por la compra {$v->numero_venta} (venció el " . $v->fecha_vencimiento->format('d/m/Y') . ")."
+                                                . " Agradecemos ponerte al día lo antes posible. Quedamos atentos para coordinar el pago. ¡Gracias!";
+                                        } else {
+                                            $mensajeCobro = "Hola {$v->cliente->nombre}, te saludamos de {$tiendaNombreCobro}."
+                                                . " Te recordamos que tienes un saldo pendiente de {$config->simbolo_moneda} " . number_format($v->saldo_pendiente, 2)
+                                                . " por la compra {$v->numero_venta}"
+                                                . ($v->fecha_vencimiento ? (", con vencimiento el " . $v->fecha_vencimiento->format('d/m/Y')) : '')
+                                                . ". Quedamos atentos para coordinar el pago. ¡Gracias!";
+                                        }
                                     @endphp
                                     <a href="{{ $v->cliente->whatsappUrl($mensajeCobro) }}" target="_blank" rel="noopener"
                                        class="btn btn-sm" style="background:#25D366; color:#fff; border-radius:8px; padding:5px 8px;" title="Gestionar cobro por WhatsApp">

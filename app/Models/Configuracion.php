@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\TieneWhatsapp;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Configuracion extends Model
 {
-    use HasFactory;
+    use HasFactory, TieneWhatsapp;
 
     protected $table = 'configuracion';
 
@@ -37,5 +38,15 @@ class Configuracion extends Model
             'simbolo_moneda' => '$',
             'timezone'       => 'America/Bogota',
         ]);
+    }
+
+    public function numeroWhatsapp(): ?string
+    {
+        return $this->limpiarNumeroWhatsapp($this->telefono);
+    }
+
+    public function whatsappUrl(string $mensaje = ''): ?string
+    {
+        return $this->armarWhatsappUrl($this->numeroWhatsapp(), $mensaje);
     }
 }

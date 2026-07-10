@@ -29,6 +29,17 @@
         <button onclick="window.print()" class="btn btn-primary px-4">
             <i class="fas fa-print me-2"></i>Imprimir
         </button>
+        @if($reparacion->cliente && $reparacion->cliente->numeroWhatsapp())
+        @php
+            $mensajeReciboRep = "Hola {$reparacion->cliente->nombre}, te saludamos de *" . ($config->nombre_tienda ?? 'la tienda') . "*"
+                . ". Aquí tienes el recibo de tu orden de reparación {$reparacion->numero_orden}: "
+                . route('reparaciones.recibo', $reparacion);
+        @endphp
+        <a href="{{ $reparacion->cliente->whatsappUrl($mensajeReciboRep) }}" target="_blank" rel="noopener"
+           class="btn px-4" style="background:#25D366; color:#fff;">
+            <i class="fab fa-whatsapp me-2"></i>Enviar por WhatsApp
+        </a>
+        @endif
         <a href="{{ route('reparaciones.show', $reparacion) }}" class="btn btn-outline-secondary px-4">
             <i class="fas fa-arrow-left me-2"></i>Volver
         </a>

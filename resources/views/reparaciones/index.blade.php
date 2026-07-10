@@ -163,7 +163,7 @@
                             <div class="d-flex gap-1 justify-content-end">
                                 @if($rep->estado === 'listo' && $rep->cliente && $rep->cliente->numeroWhatsapp())
                                 @php
-                                    $mensajeListoIdx = "Hola {$rep->cliente->nombre}, te saludamos de " . ($config->nombre_tienda ?? 'la tienda')
+                                    $mensajeListoIdx = "Hola {$rep->cliente->nombre}, te saludamos de *" . ($config->nombre_tienda ?? 'la tienda') . "*"
                                         . ". Tu equipo {$rep->dispositivo}" . ($rep->modelo ? " {$rep->modelo}" : '')
                                         . " (orden {$rep->numero_orden}) ya está listo para recoger. ¡Te esperamos!";
                                 @endphp

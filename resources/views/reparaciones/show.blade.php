@@ -35,7 +35,7 @@
     <div class="d-flex gap-2">
         @if($reparacion->estado === 'listo' && $reparacion->cliente && $reparacion->cliente->numeroWhatsapp())
         @php
-            $mensajeListo = "Hola {$reparacion->cliente->nombre}, te saludamos de " . ($config->nombre_tienda ?? 'la tienda')
+            $mensajeListo = "Hola {$reparacion->cliente->nombre}, te saludamos de *" . ($config->nombre_tienda ?? 'la tienda') . "*"
                 . ". Tu equipo {$reparacion->dispositivo}" . ($reparacion->modelo ? " {$reparacion->modelo}" : '')
                 . " (orden {$reparacion->numero_orden}) ya está listo para recoger. ¡Te esperamos!";
         @endphp

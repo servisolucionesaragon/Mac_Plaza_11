@@ -280,7 +280,7 @@
                     <div class="d-flex flex-column gap-1">
                         @if($rep->estado === 'listo' && $rep->cliente && $rep->cliente->numeroWhatsapp())
                         @php
-                            $mensajeListoDash = "Hola {$rep->cliente->nombre}, te saludamos de " . ($config->nombre_tienda ?? 'la tienda')
+                            $mensajeListoDash = "Hola {$rep->cliente->nombre}, te saludamos de *" . ($config->nombre_tienda ?? 'la tienda') . "*"
                                 . ". Tu equipo {$rep->dispositivo}" . ($rep->modelo ? " {$rep->modelo}" : '')
                                 . " (orden {$rep->numero_orden}) ya está listo para recoger. ¡Te esperamos!";
                         @endphp

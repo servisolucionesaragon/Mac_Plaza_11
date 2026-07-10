@@ -326,9 +326,16 @@
                             Recordarme
                         </label>
                     </div>
-                    <a href="#" class="text-accent text-decoration-none" style="font-size:13px;">
-                        ¿Olvidaste tu contraseña?
+                    @php
+                        $mensajeOlvidoClave = 'Hola, necesito ayuda para restablecer mi contraseña de acceso al sistema de *'
+                            . ($config->nombre_tienda ?? 'la tienda') . '*.';
+                        $whatsappOlvidoClave = isset($config) ? $config->whatsappUrl($mensajeOlvidoClave) : null;
+                    @endphp
+                    @if($whatsappOlvidoClave)
+                    <a href="{{ $whatsappOlvidoClave }}" target="_blank" rel="noopener" class="text-accent text-decoration-none" style="font-size:13px;">
+                        <i class="fab fa-whatsapp me-1"></i>¿Olvidaste tu contraseña?
                     </a>
+                    @endif
                 </div>
 
                 <button type="submit" class="btn-login">

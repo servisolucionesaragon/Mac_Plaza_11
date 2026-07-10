@@ -52,6 +52,17 @@
         <button onclick="window.print()" class="btn btn-primary px-4">
             <i class="fas fa-print me-2"></i>Imprimir
         </button>
+        @if($venta->cliente && $venta->cliente->numeroWhatsapp())
+        @php
+            $mensajeReciboAbono = "Hola {$venta->cliente->nombre}, te saludamos de *" . ($config->nombre_tienda ?? 'la tienda') . "*"
+                . ". Aquí tienes el recibo de tu abono a la compra {$venta->numero_venta}: "
+                . route('ventas.abonos.recibo', [$venta, $abono]);
+        @endphp
+        <a href="{{ $venta->cliente->whatsappUrl($mensajeReciboAbono) }}" target="_blank" rel="noopener"
+           class="btn px-4" style="background:#25D366; color:#fff;">
+            <i class="fab fa-whatsapp me-2"></i>Enviar por WhatsApp
+        </a>
+        @endif
         <a href="{{ route('ventas.show', $venta) }}" class="btn btn-outline-secondary px-4">
             <i class="fas fa-arrow-left me-2"></i>Volver a la Venta
         </a>
