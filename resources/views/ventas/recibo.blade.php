@@ -270,6 +270,17 @@
 </div>
 
 <script>
+let formatoActual = 'hoja';
+
+function actualizarAltoTirilla() {
+    if (formatoActual !== 'tirilla') return;
+    const pageStyle = document.getElementById('printPageStyle');
+    const contenido = document.querySelector('#reciboTirilla .recibo-tirilla');
+    const alturaPx = contenido.getBoundingClientRect().height;
+    const alturaMm = Math.ceil(alturaPx / 3.7795275591) + 10;
+    pageStyle.textContent = '@page { size: 80mm ' + alturaMm + 'mm; margin: 2mm 3mm; }';
+}
+
 function setFormatoRecibo(formato) {
     const hoja = document.getElementById('reciboHoja');
     const tirilla = document.getElementById('reciboTirilla');
@@ -277,12 +288,14 @@ function setFormatoRecibo(formato) {
     const btnTirilla = document.getElementById('btnFormatoTirilla');
     const pageStyle = document.getElementById('printPageStyle');
 
+    formatoActual = formato;
+
     if (formato === 'tirilla') {
         hoja.classList.add('d-none-recibo');
         tirilla.classList.remove('d-none-recibo');
         btnHoja.classList.remove('active');
         btnTirilla.classList.add('active');
-        pageStyle.textContent = '@page { size: 80mm auto; margin: 2mm 3mm; }';
+        actualizarAltoTirilla();
     } else {
         hoja.classList.remove('d-none-recibo');
         tirilla.classList.add('d-none-recibo');
@@ -292,6 +305,8 @@ function setFormatoRecibo(formato) {
     }
     localStorage.setItem('recibo_venta_formato', formato);
 }
+
+window.addEventListener('beforeprint', actualizarAltoTirilla);
 
 document.addEventListener('DOMContentLoaded', function () {
     setFormatoRecibo(localStorage.getItem('recibo_venta_formato') || 'hoja');
