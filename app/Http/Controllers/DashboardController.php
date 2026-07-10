@@ -33,6 +33,10 @@ class DashboardController extends Controller
         $reparacionesPendientes = Reparacion::whereNotIn('estado', ['entregado', 'no_reparable'])->count();
         $reparacionesListas    = Reparacion::where('estado', 'listo')->count();
 
+        $carteraPendiente     = Venta::where('es_credito', true)->where('saldo_pendiente', '>', 0)->sum('saldo_pendiente');
+        $carteraAtrasadaCount = Venta::where('es_credito', true)->where('saldo_pendiente', '>', 0)
+            ->whereDate('fecha_vencimiento', '<', $hoy)->count();
+
         // ── Gráfica de ventas por día (últimos 7 días) ────────────────────
         $ventasSemana = Venta::select(
                 DB::raw('DATE(fecha_venta) as fecha'),
@@ -102,6 +106,7 @@ class DashboardController extends Controller
             'totalClientes', 'clientesNuevosMes',
             'totalProductos', 'stockBajo',
             'reparacionesPendientes', 'reparacionesListas',
+            'carteraPendiente', 'carteraAtrasadaCount',
             'diasSemana', 'ventasPorMes', 'topProductos',
             'ultimasVentas', 'ultimasReparaciones'
         ));

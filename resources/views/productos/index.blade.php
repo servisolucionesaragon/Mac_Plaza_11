@@ -14,9 +14,14 @@
             <span class="text-danger fw-500">{{ $productos->where('stock', '<=', 0)->count() }} sin stock</span>
         </p>
     </div>
-    <a href="{{ route('productos.create') }}" class="btn btn-primary px-4">
-        <i class="fas fa-plus me-2"></i>Nuevo Producto
-    </a>
+    <div class="d-flex gap-2">
+        <a href="{{ route('productos.exportar') }}" class="btn btn-outline-success px-4">
+            <i class="fas fa-file-excel me-2"></i>Descargar Excel
+        </a>
+        <a href="{{ route('productos.create') }}" class="btn btn-primary px-4">
+            <i class="fas fa-plus me-2"></i>Nuevo Producto
+        </a>
+    </div>
 </div>
 
 {{-- Filtros --}}

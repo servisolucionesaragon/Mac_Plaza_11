@@ -28,9 +28,12 @@
             --page-bg:       #f4f0fb;
             --text-dark:     #1e1b4b;
             --text-muted:    #6b7280;
-            --sidebar-text:  rgba(255,255,255,0.75);
+            --sidebar-text:  {{ $config->color_menu_texto ?? '#c9c3d9' }};
             --sidebar-active:#ffffff;
+            --menu-active-bg:{{ $config->color_menu_activo ?? '#a855f7' }};
             --nav-hover-bg:  rgba(168,85,247,0.2);
+            --btn-bg:        {{ $config->color_boton_fondo ?? '#a855f7' }};
+            --btn-text:      {{ $config->color_boton_texto ?? '#ffffff' }};
         }
 
         * { box-sizing: border-box; }
@@ -133,7 +136,7 @@
         }
 
         .sidebar-nav .nav-link.active {
-            background: var(--gradient);
+            background: var(--menu-active-bg);
             color: var(--sidebar-active);
             font-weight: 600;
         }
@@ -307,6 +310,7 @@
         .bg-grad-pink   { background: linear-gradient(135deg, #ec4899, #db2777); }
         .bg-grad-cyan   { background: linear-gradient(135deg, #06b6d4, #0284c7); }
         .bg-grad-green  { background: linear-gradient(135deg, #10b981, #059669); }
+        .bg-grad-orange { background: linear-gradient(135deg, #f59e0b, #d97706); }
 
         /* ── TABLE STYLES ────────────────────────────────────────── */
         .table { font-size: 13.5px; }
@@ -332,11 +336,12 @@
 
         /* ── BUTTONS ─────────────────────────────────────────────── */
         .btn-primary {
-            background: var(--gradient);
+            background: var(--btn-bg);
+            color: var(--btn-text);
             border: none;
             border-radius: 8px;
         }
-        .btn-primary:hover { opacity: .9; filter: brightness(1.05); }
+        .btn-primary:hover { opacity: .9; filter: brightness(1.05); color: var(--btn-text); }
 
         .btn-outline-primary {
             border-color: var(--accent1);
@@ -434,6 +439,14 @@
         <div class="nav-section-title">Gestión</div>
         @endif
 
+        @if(Auth::user()->puedeAcceder('ventas'))
+        <a href="{{ route('ventas.index') }}"
+           class="nav-link {{ request()->routeIs('ventas.*') ? 'active' : '' }}">
+            <span class="nav-icon"><i class="fas fa-shopping-cart"></i></span>
+            Ventas
+        </a>
+        @endif
+
         @if(Auth::user()->puedeAcceder('clientes'))
         <a href="{{ route('clientes.index') }}"
            class="nav-link {{ request()->routeIs('clientes.*') ? 'active' : '' }}">
@@ -455,14 +468,6 @@
            class="nav-link {{ request()->routeIs('catalogos.*') ? 'active' : '' }}">
             <span class="nav-icon"><i class="fas fa-tags"></i></span>
             Catálogos
-        </a>
-        @endif
-
-        @if(Auth::user()->puedeAcceder('ventas'))
-        <a href="{{ route('ventas.index') }}"
-           class="nav-link {{ request()->routeIs('ventas.*') ? 'active' : '' }}">
-            <span class="nav-icon"><i class="fas fa-shopping-cart"></i></span>
-            Ventas
         </a>
         @endif
 
@@ -539,11 +544,45 @@
             </a>
             @endif
 
-            <button class="topbar-btn">
-                <i class="fas fa-bell"></i>
-                @php $stockBajoCount = \App\Models\Producto::whereColumn('stock','<=','stock_minimo')->count(); @endphp
-                @if($stockBajoCount > 0)<span class="notif-dot"></span>@endif
-            </button>
+            @php
+                $stockBajoCount = \App\Models\Producto::where('activo', true)->whereColumn('stock','<=','stock_minimo')->count();
+                $creditosVencidosCount = 0;
+                $creditosPorVencerCount = 0;
+                if (Auth::user()->puedeAcceder('ventas')) {
+                    $creditosVencidosCount = \App\Models\Venta::where('es_credito', true)->where('saldo_pendiente', '>', 0)
+                        ->whereDate('fecha_vencimiento', '<', now())->count();
+                    $creditosPorVencerCount = \App\Models\Venta::where('es_credito', true)->where('saldo_pendiente', '>', 0)
+                        ->whereDate('fecha_vencimiento', '>=', now())->whereDate('fecha_vencimiento', '<=', now()->addDays(3))->count();
+                }
+                $totalAlertas = $stockBajoCount + $creditosVencidosCount + $creditosPorVencerCount;
+            @endphp
+            <div class="dropdown">
+                <button class="topbar-btn" data-bs-toggle="dropdown">
+                    <i class="fas fa-bell"></i>
+                    @if($totalAlertas > 0)<span class="notif-dot"></span>@endif
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" style="border-radius:12px; font-size:13px; min-width:260px;">
+                    @if($totalAlertas === 0)
+                        <li><span class="dropdown-item-text text-muted">Sin alertas pendientes</span></li>
+                    @else
+                        @if($stockBajoCount > 0)
+                        <li><a class="dropdown-item" href="{{ route('productos.index', ['stock_bajo' => 1]) }}">
+                            <i class="fas fa-box text-warning me-2"></i>{{ $stockBajoCount }} producto(s) con stock bajo
+                        </a></li>
+                        @endif
+                        @if($creditosVencidosCount > 0)
+                        <li><a class="dropdown-item" href="{{ route('reportes.index') }}">
+                            <i class="fas fa-exclamation-circle text-danger me-2"></i>{{ $creditosVencidosCount }} crédito(s) vencido(s)
+                        </a></li>
+                        @endif
+                        @if($creditosPorVencerCount > 0)
+                        <li><a class="dropdown-item" href="{{ route('reportes.index') }}">
+                            <i class="fas fa-clock text-warning me-2"></i>{{ $creditosPorVencerCount }} crédito(s) por vencer (≤3 días)
+                        </a></li>
+                        @endif
+                    @endif
+                </ul>
+            </div>
 
             <div class="dropdown">
                 <button class="topbar-btn" data-bs-toggle="dropdown">

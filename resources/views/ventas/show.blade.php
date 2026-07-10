@@ -27,10 +27,15 @@
         </p>
     </div>
     <div class="d-flex gap-2">
-        <button onclick="window.print()" class="btn btn-outline-primary px-4">
-            <i class="fas fa-print me-2"></i>Imprimir
-        </button>
-        @if($venta->estado === 'completada')
+        <a href="{{ route('ventas.recibo', $venta) }}" class="btn btn-outline-primary px-4">
+            <i class="fas fa-receipt me-2"></i>Recibo
+        </a>
+        @if(Auth::user()->esAdmin() && !in_array($venta->estado, ['cancelada', 'devuelta']))
+        <a href="{{ route('ventas.edit', $venta) }}" class="btn btn-outline-primary px-4">
+            <i class="fas fa-edit me-2"></i>Editar
+        </a>
+        @endif
+        @if($venta->estado === 'completada' && Auth::user()->esAdmin())
         <form action="{{ route('ventas.cancelar', $venta) }}" method="POST"
               onsubmit="return confirm('¿Cancelar esta venta y restaurar el stock?')">
             @csrf @method('PATCH')
@@ -180,9 +185,9 @@
             <div class="card-body p-4">
                 <h6 class="fw-bold mb-3">Acciones Rápidas</h6>
                 <div class="d-grid gap-2">
-                    <button onclick="window.print()" class="btn btn-primary">
-                        <i class="fas fa-print me-2"></i>Imprimir Comprobante
-                    </button>
+                    <a href="{{ route('ventas.recibo', $venta) }}" class="btn btn-primary">
+                        <i class="fas fa-receipt me-2"></i>Recibo
+                    </a>
                     <a href="{{ route('clientes.show', $venta->cliente_id) }}" class="btn btn-outline-primary">
                         <i class="fas fa-user me-2"></i>Ver Perfil del Cliente
                     </a>
@@ -220,4 +225,126 @@
         </div>
     </div>
 </div>
+
+@if($venta->es_credito)
+<div class="row g-4 mt-1">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+                    <h6 class="fw-bold mb-0">Estado de Crédito</h6>
+                    @if($venta->saldo_pendiente <= 0)
+                        <span class="badge" style="background:#d1fae5; color:#065f46; font-size:12px; border-radius:20px; padding:5px 12px;">
+                            <i class="fas fa-check-circle me-1"></i>Pagada
+                        </span>
+                    @elseif($venta->estaAtrasada())
+                        <span class="badge" style="background:#fee2e2; color:#991b1b; font-size:12px; border-radius:20px; padding:5px 12px;">
+                            <i class="fas fa-exclamation-circle me-1"></i>Atrasado
+                        </span>
+                    @else
+                        <span class="badge" style="background:#fef3c7; color:#92400e; font-size:12px; border-radius:20px; padding:5px 12px;">
+                            <i class="fas fa-clock me-1"></i>Al día
+                        </span>
+                    @endif
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="recibo-box p-3 rounded-3" style="background:#f8f5ff;">
+                            <div style="font-size:11px; color:#9ca3af;">SALDO PENDIENTE</div>
+                            <div style="font-size:18px; font-weight:700; color:#1e1b4b;">
+                                {{ $config->simbolo_moneda }} {{ number_format($venta->saldo_pendiente, 2) }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 rounded-3" style="background:#f8f5ff;">
+                            <div style="font-size:11px; color:#9ca3af;">FECHA DE VENCIMIENTO</div>
+                            <div style="font-size:18px; font-weight:700; color:#1e1b4b;">
+                                {{ optional($venta->fecha_vencimiento)->format('d/m/Y') ?? '—' }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 rounded-3" style="background:#f8f5ff;">
+                            <div style="font-size:11px; color:#9ca3af;">TOTAL ABONADO</div>
+                            <div style="font-size:18px; font-weight:700; color:#1e1b4b;">
+                                {{ $config->simbolo_moneda }} {{ number_format($venta->total - $venta->saldo_pendiente, 2) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h6 class="fw-bold mb-2" style="font-size:13px;">Historial de Abonos</h6>
+                @if($venta->abonos->count())
+                <div class="table-responsive mb-4">
+                    <table class="table mb-0" style="font-size:13px;">
+                        <thead>
+                            <tr style="border-bottom:2px solid #e9d5ff;">
+                                <th style="padding:8px 0; color:#6b7280; font-size:11px; text-transform:uppercase;">Fecha</th>
+                                <th style="padding:8px 0; color:#6b7280; font-size:11px; text-transform:uppercase;">Método de Pago</th>
+                                <th style="padding:8px 0; color:#6b7280; font-size:11px; text-transform:uppercase;">Registrado por</th>
+                                <th style="padding:8px 0; color:#6b7280; font-size:11px; text-transform:uppercase; text-align:right;">Monto</th>
+                                <th style="padding:8px 0;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($venta->abonos->sortByDesc('fecha_abono') as $abono)
+                            <tr style="border-bottom:1px solid #f3f4f6;">
+                                <td style="padding:8px 0;">{{ $abono->fecha_abono->format('d/m/Y H:i') }}</td>
+                                <td style="padding:8px 0;">{{ $abono->metodoPago->nombre ?? '—' }}</td>
+                                <td style="padding:8px 0;">{{ $abono->usuario->name ?? '—' }}</td>
+                                <td style="padding:8px 0; text-align:right; font-weight:600;">{{ $config->simbolo_moneda }} {{ number_format($abono->monto, 2) }}</td>
+                                <td style="padding:8px 0; text-align:right;">
+                                    <a href="{{ route('ventas.abonos.recibo', [$venta, $abono]) }}" style="color:#a855f7; font-size:12px; text-decoration:none;">
+                                        <i class="fas fa-receipt me-1"></i>Recibo
+                                    </a>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                @else
+                <div class="text-center py-3 text-muted mb-4" style="font-size:13px;">Aún no se han registrado abonos.</div>
+                @endif
+
+                @if($venta->saldo_pendiente > 0)
+                <h6 class="fw-bold mb-2" style="font-size:13px;">Registrar Abono</h6>
+                <form action="{{ route('ventas.abonos.store', $venta) }}" method="POST">
+                    @csrf
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-3">
+                            <label class="form-label">Monto <span class="text-danger">*</span></label>
+                            <input type="number" name="monto" class="form-control @error('monto') is-invalid @enderror"
+                                   min="0.01" max="{{ $venta->saldo_pendiente }}" step="0.01" required>
+                            @error('monto')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Método de Pago <span class="text-danger">*</span></label>
+                            <select name="metodo_pago_id" class="form-select @error('metodo_pago_id') is-invalid @enderror" required>
+                                <option value="">— Seleccionar —</option>
+                                @foreach(\App\Models\MetodoPago::where('activo', true)->orderBy('nombre')->get() as $mp)
+                                    <option value="{{ $mp->id }}">{{ $mp->nombre }}</option>
+                                @endforeach
+                            </select>
+                            @error('metodo_pago_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Notas</label>
+                            <input type="text" name="notas" class="form-control" placeholder="Opcional">
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-check me-2"></i>Registrar
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
+@endif
 @endsection

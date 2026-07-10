@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ProductosExport;
 use App\Models\Producto;
 use App\Models\Categoria;
 use App\Models\Marca;
@@ -10,10 +11,11 @@ use App\Models\Almacenamiento;
 use App\Models\Ram;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProductoController extends Controller
 {
-    public function index(Request $request)
+    protected function queryFiltrada(Request $request)
     {
         $query = Producto::with(['categoria', 'marca', 'condicion', 'almacenamiento', 'ram']);
 
@@ -41,12 +43,29 @@ class ProductoController extends Controller
             $query->whereColumn('stock', '<=', 'stock_minimo');
         }
 
-        $productos   = $query->orderByDesc('created_at')->paginate(15);
+        return $query;
+    }
+
+    public function index(Request $request)
+    {
+        $productos   = $this->queryFiltrada($request)->orderByDesc('created_at')->paginate(15);
         $categorias  = Categoria::where('activo', true)->orderBy('nombre')->get();
         $marcas      = Marca::where('activo', true)->orderBy('nombre')->get();
         $condiciones = Condicion::where('activo', true)->orderBy('nombre')->get();
 
         return view('productos.index', compact('productos', 'categorias', 'marcas', 'condiciones'));
+    }
+
+    public function exportarExcel(Request $request)
+    {
+        // Exporta siempre el inventario completo, sin aplicar los filtros de pantalla.
+        $query = Producto::with(['categoria', 'marca', 'condicion', 'almacenamiento', 'ram'])
+            ->orderBy('nombre');
+
+        return Excel::download(
+            new ProductosExport($query),
+            'inventario_' . now()->format('Y-m-d_His') . '.xlsx'
+        );
     }
 
     public function create()

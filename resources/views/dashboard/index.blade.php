@@ -4,6 +4,10 @@
 
 @section('content')
 
+@php
+    $paletaGraficos = [$config->color_grafico_1, $config->color_grafico_2, $config->color_grafico_3];
+@endphp
+
 {{-- ── Encabezado ──────────────────────────────────────────────────── --}}
 <div class="d-flex align-items-center justify-content-between mb-4">
     <div>
@@ -73,6 +77,22 @@
             </span>
         </div>
     </div>
+    <div class="col-6 col-xl-3">
+        <div class="kpi-card bg-grad-orange">
+            <div class="kpi-icon"><i class="fas fa-hand-holding-usd"></i></div>
+            <div class="kpi-value">{{ $config->simbolo_moneda }} {{ number_format($carteraPendiente, 0) }}</div>
+            <div class="kpi-label">Cartera Pendiente</div>
+            <span class="kpi-badge">
+                @if($carteraAtrasadaCount > 0)
+                    <i class="fas fa-exclamation-triangle fa-xs"></i>
+                    {{ $carteraAtrasadaCount }} atrasado(s)
+                @else
+                    <i class="fas fa-check fa-xs"></i>
+                    Sin atrasos
+                @endif
+            </span>
+        </div>
+    </div>
 </div>
 
 {{-- ── Gráficas principales ─────────────────────────────────────────── --}}
@@ -111,7 +131,7 @@
                 @forelse($topProductos as $i => $prod)
                     <div class="d-flex align-items-center gap-3 mb-3">
                         <div style="width:28px; height:28px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#fff;
-                            background: {{ ['linear-gradient(135deg,#a855f7,#7c3aed)', 'linear-gradient(135deg,#ec4899,#db2777)', 'linear-gradient(135deg,#06b6d4,#0284c7)', 'linear-gradient(135deg,#10b981,#059669)', 'linear-gradient(135deg,#f59e0b,#d97706)'][$i] }};">
+                            background: {{ $paletaGraficos[$i % count($paletaGraficos)] }};">
                             {{ $i + 1 }}
                         </div>
                         <div class="flex-1" style="min-width:0; flex:1;">
@@ -279,6 +299,16 @@
 @push('scripts')
 <script>
 const MONEDA = "{{ $config->simbolo_moneda }}";
+const colorGrafico1 = "{{ $config->color_grafico_1 }}";
+
+function hexToRgba(hex, alpha) {
+    const h = hex.replace('#', '');
+    const r = parseInt(h.substring(0, 2), 16);
+    const g = parseInt(h.substring(2, 4), 16);
+    const b = parseInt(h.substring(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 // ── Gráfica de ventas por día ───────────────────────────────────────────
 const diasLabels  = @json($diasSemana->pluck('fecha'));
 const diasTotales = @json($diasSemana->pluck('total'));
@@ -286,8 +316,8 @@ const diasTotales = @json($diasSemana->pluck('total'));
 const ctxDias = document.getElementById('chartVentasDias').getContext('2d');
 
 const gradientFill = ctxDias.createLinearGradient(0, 0, 0, 200);
-gradientFill.addColorStop(0, 'rgba(168, 85, 247, 0.3)');
-gradientFill.addColorStop(1, 'rgba(236, 72, 153, 0.03)');
+gradientFill.addColorStop(0, hexToRgba(colorGrafico1, 0.3));
+gradientFill.addColorStop(1, hexToRgba(colorGrafico1, 0.03));
 
 new Chart(ctxDias, {
     type: 'line',
@@ -296,12 +326,12 @@ new Chart(ctxDias, {
         datasets: [{
             label: 'Ventas (' + MONEDA + ')',
             data: diasTotales,
-            borderColor: '#a855f7',
+            borderColor: colorGrafico1,
             backgroundColor: gradientFill,
             borderWidth: 2.5,
             fill: true,
             tension: 0.4,
-            pointBackgroundColor: '#a855f7',
+            pointBackgroundColor: colorGrafico1,
             pointBorderColor: '#fff',
             pointBorderWidth: 2,
             pointRadius: 5,

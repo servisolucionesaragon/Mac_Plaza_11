@@ -7,6 +7,10 @@
 
 @section('content')
 
+@php
+    $paletaGraficos = [$config->color_grafico_1, $config->color_grafico_2, $config->color_grafico_3];
+@endphp
+
 {{-- Encabezado + filtro de fechas --}}
 <div class="d-flex align-items-center justify-content-between mb-4">
     <div>
@@ -98,6 +102,14 @@
             <span class="kpi-badge"><i class="fas fa-users fa-xs"></i> En el período</span>
         </div>
     </div>
+    <div class="col-6 col-xl-3">
+        <div class="kpi-card bg-grad-orange">
+            <div class="kpi-icon"><i class="fas fa-hand-holding-usd"></i></div>
+            <div class="kpi-value">{{ $config->simbolo_moneda }} {{ number_format($ingresosPorAbonos, 0) }}</div>
+            <div class="kpi-label">Abonos de Crédito Cobrados</div>
+            <span class="kpi-badge"><i class="fas fa-coins fa-xs"></i> En el período</span>
+        </div>
+    </div>
 </div>
 
 {{-- Gráficas --}}
@@ -156,7 +168,7 @@
                             <tr>
                                 <td>
                                     <div style="width:24px; height:24px; border-radius:6px; font-size:11px; font-weight:700; color:#fff; display:flex; align-items:center; justify-content:center;
-                                        background:{{ ['linear-gradient(135deg,#a855f7,#7c3aed)','linear-gradient(135deg,#ec4899,#db2777)','linear-gradient(135deg,#06b6d4,#0284c7)','linear-gradient(135deg,#10b981,#059669)','linear-gradient(135deg,#f59e0b,#d97706)'][$i] ?? '#6b7280' }};">
+                                        background:{{ $paletaGraficos[$i % count($paletaGraficos)] }};">
                                         {{ $i+1 }}
                                     </div>
                                 </td>
@@ -199,7 +211,7 @@
                             <tr>
                                 <td>
                                     <div style="width:24px; height:24px; border-radius:6px; font-size:11px; font-weight:700; color:#fff; display:flex; align-items:center; justify-content:center;
-                                        background:{{ ['linear-gradient(135deg,#a855f7,#7c3aed)','linear-gradient(135deg,#ec4899,#db2777)','linear-gradient(135deg,#06b6d4,#0284c7)','linear-gradient(135deg,#10b981,#059669)','linear-gradient(135deg,#f59e0b,#d97706)'][$i] ?? '#6b7280' }};">
+                                        background:{{ $paletaGraficos[$i % count($paletaGraficos)] }};">
                                         {{ $i+1 }}
                                     </div>
                                 </td>
@@ -305,19 +317,115 @@
     </div>
 </div>
 
+{{-- Estadísticas del Sistema --}}
+<div class="row g-4 mt-0">
+    <div class="col-lg-5">
+        <div class="card">
+            <div class="card-body p-4">
+                <h6 class="fw-bold mb-3">Estadísticas del Sistema</h6>
+                @php
+                    $stats = [
+                        ['icon'=>'users','color'=>'#a855f7','label'=>'Usuarios activos','value'=>\App\Models\User::where('activo',true)->count()],
+                        ['icon'=>'users','color'=>'#06b6d4','label'=>'Total clientes','value'=>\App\Models\Cliente::count()],
+                        ['icon'=>'box','color'=>'#10b981','label'=>'Productos en inventario','value'=>\App\Models\Producto::where('activo',true)->count()],
+                        ['icon'=>'shopping-cart','color'=>'#ec4899','label'=>'Ventas registradas','value'=>\App\Models\Venta::count()],
+                        ['icon'=>'tools','color'=>'#f59e0b','label'=>'Órdenes de reparación','value'=>\App\Models\Reparacion::count()],
+                    ];
+                @endphp
+                @foreach($stats as $s)
+                <div class="d-flex align-items-center gap-3 py-2" style="border-bottom:1px solid #f3f4f6; font-size:13px;">
+                    <div style="width:32px;height:32px;background:{{ $s['color'] }}18;border-radius:8px;
+                                display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <i class="fas fa-{{ $s['icon'] }}" style="color:{{ $s['color'] }};font-size:13px;"></i>
+                    </div>
+                    <span class="text-muted flex-grow-1">{{ $s['label'] }}</span>
+                    <strong>{{ $s['value'] }}</strong>
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+
+    {{-- Cartera por Cobrar --}}
+    <div class="col-lg-7">
+        <div class="card h-100">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h6 class="fw-bold mb-0">Cartera por Cobrar</h6>
+                    <span style="background:#fef3c7; color:#92400e; border-radius:20px; padding:3px 12px; font-size:12px;">
+                        {{ $config->simbolo_moneda }} {{ number_format($totalCartera, 2) }}
+                    </span>
+                </div>
+                @if($carteraPendiente->count())
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0" style="font-size:13px;">
+                        <thead>
+                            <tr>
+                                <th>Cliente</th>
+                                <th class="text-end">Total</th>
+                                <th class="text-end">Saldo</th>
+                                <th class="text-center">Vencimiento</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($carteraPendiente as $v)
+                            <tr>
+                                <td>
+                                    <a href="{{ route('ventas.show', $v) }}" style="color:#1e1b4b; text-decoration:none; font-weight:500;">
+                                        {{ $v->cliente->nombre_completo ?? '—' }}
+                                    </a>
+                                    <div style="font-size:11px; color:#9ca3af;">{{ $v->numero_venta }}</div>
+                                </td>
+                                <td class="text-end">{{ $config->simbolo_moneda }} {{ number_format($v->total, 2) }}</td>
+                                <td class="text-end fw-bold" style="color:#dc2626;">{{ $config->simbolo_moneda }} {{ number_format($v->saldo_pendiente, 2) }}</td>
+                                <td class="text-center">
+                                    @if($v->estaAtrasada())
+                                        <span style="background:#fee2e2; color:#991b1b; border-radius:20px; padding:3px 10px; font-size:11px; font-weight:700;">
+                                            {{ optional($v->fecha_vencimiento)->format('d/m/Y') }} ({{ (int) now()->diffInDays($v->fecha_vencimiento) }}d atraso)
+                                        </span>
+                                    @else
+                                        <span style="color:#6b7280; font-size:12px;">{{ optional($v->fecha_vencimiento)->format('d/m/Y') ?? '—' }}</span>
+                                    @endif
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                @else
+                <div class="text-center py-4 text-success" style="font-size:13px;">
+                    <i class="fas fa-check-circle fa-2x mb-2 d-block"></i>
+                    No hay cartera pendiente por cobrar
+                </div>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @push('scripts')
 <script>
 const MONEDA = "{{ $config->simbolo_moneda }}";
+const colorGrafico1 = "{{ $config->color_grafico_1 }}";
+
+function hexToRgba(hex, alpha) {
+    const h = hex.replace('#', '');
+    const r = parseInt(h.substring(0, 2), 16);
+    const g = parseInt(h.substring(2, 4), 16);
+    const b = parseInt(h.substring(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 // Gráfica ventas por día
 const diasLabels  = @json($ventasPorDia->pluck('fecha'));
 const diasTotales = @json($ventasPorDia->pluck('total'));
 
 const ctxDias = document.getElementById('chartDias').getContext('2d');
 const grad = ctxDias.createLinearGradient(0, 0, 0, 220);
-grad.addColorStop(0, 'rgba(168,85,247,.3)');
-grad.addColorStop(1, 'rgba(236,72,153,.02)');
+grad.addColorStop(0, hexToRgba(colorGrafico1, 0.3));
+grad.addColorStop(1, hexToRgba(colorGrafico1, 0.02));
 
 new Chart(ctxDias, {
     type: 'bar',
@@ -327,7 +435,7 @@ new Chart(ctxDias, {
             {
                 label: 'Ventas (' + MONEDA + ')',
                 data: diasTotales,
-                backgroundColor: 'rgba(168,85,247,.75)',
+                backgroundColor: hexToRgba(colorGrafico1, 0.75),
                 borderRadius: 6,
                 borderSkipped: false,
             }
@@ -348,6 +456,7 @@ new Chart(ctxDias, {
 // Gráfica métodos de pago
 const pagoLabels = @json($ventasPorPago->pluck('metodoPago.nombre'));
 const pagoMontos = @json($ventasPorPago->pluck('monto'));
+const pagoColores = @json(collect(range(0, max($ventasPorPago->count() - 1, 0)))->map(fn($i) => $paletaGraficos[$i % count($paletaGraficos)])->values());
 
 new Chart(document.getElementById('chartPago'), {
     type: 'doughnut',
@@ -355,7 +464,7 @@ new Chart(document.getElementById('chartPago'), {
         labels: pagoLabels,
         datasets: [{
             data: pagoMontos,
-            backgroundColor: ['#a855f7','#ec4899','#06b6d4','#10b981'],
+            backgroundColor: pagoColores,
             borderWidth: 0,
             hoverOffset: 8
         }]

@@ -22,7 +22,7 @@
 <div class="card mb-4">
     <div class="card-body p-3">
         <form method="GET" class="row g-2 align-items-end">
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <input type="text" class="form-control" name="buscar"
                        placeholder="N° venta o cliente..." value="{{ request('buscar') }}">
             </div>
@@ -36,12 +36,19 @@
                 </select>
             </div>
             <div class="col-md-2">
+                <select class="form-select" name="tipo_venta">
+                    <option value="">Contado y Crédito</option>
+                    <option value="credito" {{ request('tipo_venta')=='credito'?'selected':'' }}>Solo Crédito</option>
+                    <option value="contado" {{ request('tipo_venta')=='contado'?'selected':'' }}>Solo Contado</option>
+                </select>
+            </div>
+            <div class="col-md-2">
                 <input type="date" class="form-control" name="fecha_desde" value="{{ request('fecha_desde') }}">
             </div>
             <div class="col-md-2">
                 <input type="date" class="form-control" name="fecha_hasta" value="{{ request('fecha_hasta') }}">
             </div>
-            <div class="col-md-3 d-flex gap-2">
+            <div class="col-md-2 d-flex gap-2">
                 <button type="submit" class="btn btn-primary flex-1">
                     <i class="fas fa-filter me-1"></i>Filtrar
                 </button>
@@ -106,6 +113,16 @@
                                 border-radius:20px; padding:4px 10px; font-size:11px; font-weight:500;">
                                 {{ ucfirst($venta->estado) }}
                             </span>
+                            @if($venta->es_credito)
+                                <div style="margin-top:4px;">
+                                    <span style="background:#ede9fe; color:#7c3aed; border-radius:20px; padding:3px 8px; font-size:10.5px; font-weight:600;">
+                                        <i class="fas fa-hand-holding-usd fa-xs"></i> Crédito
+                                        @if($venta->saldo_pendiente > 0)
+                                            · {{ $config->simbolo_moneda }} {{ number_format($venta->saldo_pendiente, 2) }} pend.
+                                        @endif
+                                    </span>
+                                </div>
+                            @endif
                         </td>
                         <td class="text-end pe-4">
                             <div class="d-flex gap-1 justify-content-end">
@@ -113,7 +130,13 @@
                                    class="btn btn-sm" style="background:#ede9fe; color:#7c3aed; border-radius:8px; padding:5px 10px;">
                                     <i class="fas fa-eye fa-sm"></i>
                                 </a>
-                                @if($venta->estado === 'completada')
+                                @if(Auth::user()->esAdmin() && !in_array($venta->estado, ['cancelada', 'devuelta']))
+                                <a href="{{ route('ventas.edit', $venta) }}"
+                                   class="btn btn-sm" style="background:#e0f2fe; color:#0369a1; border-radius:8px; padding:5px 10px;">
+                                    <i class="fas fa-edit fa-sm"></i>
+                                </a>
+                                @endif
+                                @if($venta->estado === 'completada' && Auth::user()->esAdmin())
                                 <form action="{{ route('ventas.cancelar', $venta) }}" method="POST"
                                       onsubmit="return confirm('¿Cancelar esta venta?')">
                                     @csrf @method('PATCH')

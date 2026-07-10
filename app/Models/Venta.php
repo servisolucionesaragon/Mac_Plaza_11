@@ -13,14 +13,18 @@ class Venta extends Model
         'numero_venta', 'cliente_id', 'user_id', 'fecha_venta',
         'subtotal', 'descuento', 'impuesto', 'total', 'modo_precio',
         'metodo_pago_id', 'estado', 'notas',
+        'es_credito', 'saldo_pendiente', 'fecha_vencimiento',
     ];
 
     protected $casts = [
-        'fecha_venta' => 'datetime',
-        'subtotal'    => 'decimal:2',
-        'descuento'   => 'decimal:2',
-        'impuesto'    => 'decimal:2',
-        'total'       => 'decimal:2',
+        'fecha_venta'        => 'datetime',
+        'subtotal'           => 'decimal:2',
+        'descuento'          => 'decimal:2',
+        'impuesto'           => 'decimal:2',
+        'total'              => 'decimal:2',
+        'es_credito'         => 'boolean',
+        'saldo_pendiente'    => 'decimal:2',
+        'fecha_vencimiento'  => 'date',
     ];
 
     public function cliente()
@@ -41,6 +45,19 @@ class Venta extends Model
     public function metodoPago()
     {
         return $this->belongsTo(MetodoPago::class, 'metodo_pago_id');
+    }
+
+    public function abonos()
+    {
+        return $this->hasMany(Abono::class);
+    }
+
+    public function estaAtrasada(): bool
+    {
+        return $this->es_credito
+            && $this->saldo_pendiente > 0
+            && $this->fecha_vencimiento
+            && $this->fecha_vencimiento->isPast();
     }
 
     public static function generarNumero(): string

@@ -38,6 +38,8 @@ Route::middleware(['auth', 'nocache'])->group(function () {
     Route::resource('clientes', ClienteController::class)->middleware('permiso:clientes');
 
     // Productos
+    Route::get('/productos/exportar/excel', [ProductoController::class, 'exportarExcel'])
+        ->name('productos.exportar')->middleware('permiso:productos');
     Route::resource('productos', ProductoController::class)->middleware('permiso:productos');
 
     // Catálogos (categorías, marcas, condición, almacenamiento, ram)
@@ -65,7 +67,15 @@ Route::middleware(['auth', 'nocache'])->group(function () {
 
     // Ventas
     Route::resource('ventas', VentaController::class)->except(['edit', 'update', 'destroy'])->middleware('permiso:ventas');
+    Route::get('/ventas/{venta}/edit', [VentaController::class, 'edit'])->name('ventas.edit')->middleware('permiso:ventas');
+    Route::put('/ventas/{venta}', [VentaController::class, 'update'])->name('ventas.update')->middleware('permiso:ventas');
     Route::patch('/ventas/{venta}/cancelar', [VentaController::class, 'cancelar'])->name('ventas.cancelar')->middleware('permiso:ventas');
+    Route::get('/ventas/{venta}/recibo', [VentaController::class, 'recibo'])
+        ->name('ventas.recibo')->middleware('permiso:ventas');
+    Route::post('/ventas/{venta}/abonos', [VentaController::class, 'registrarAbono'])
+        ->name('ventas.abonos.store')->middleware('permiso:ventas');
+    Route::get('/ventas/{venta}/abonos/{abono}/recibo', [VentaController::class, 'reciboAbono'])
+        ->name('ventas.abonos.recibo')->middleware('permiso:ventas');
 
     // Reparaciones
     Route::resource('reparaciones', ReparacionController::class)->except(['destroy'])

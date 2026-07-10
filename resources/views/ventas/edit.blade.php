@@ -1,9 +1,10 @@
 @extends('layouts.app')
-@section('title', 'Nueva Venta')
+@section('title', 'Editar Venta '.$venta->numero_venta)
 
 @section('breadcrumb')
     <li class="breadcrumb-item"><a href="{{ route('ventas.index') }}" style="color:#a855f7;">Ventas</a></li>
-    <li class="breadcrumb-item active">Nueva Venta</li>
+    <li class="breadcrumb-item"><a href="{{ route('ventas.show', $venta) }}" style="color:#a855f7;">{{ $venta->numero_venta }}</a></li>
+    <li class="breadcrumb-item active">Editar</li>
 @endsection
 
 @section('content')
@@ -13,8 +14,8 @@
     <div class="col-lg-8">
         <div class="card mb-4">
             <div class="card-body p-4">
-                <h5 class="fw-bold mb-1">Registrar Venta</h5>
-                <p class="text-muted mb-4" style="font-size:13px;">Selecciona los productos y completa los datos</p>
+                <h5 class="fw-bold mb-1">Editar Venta {{ $venta->numero_venta }}</h5>
+                <p class="text-muted mb-4" style="font-size:13px;">Modifica los productos y datos de la venta</p>
 
                 @if($errors->any())
                     <div class="alert alert-danger">
@@ -24,15 +25,16 @@
                     </div>
                 @endif
 
-                <form id="formVenta" action="{{ route('ventas.store') }}" method="POST">
+                <form id="formVenta" action="{{ route('ventas.update', $venta) }}" method="POST">
                     @csrf
+                    @method('PUT')
 
                     {{-- Cliente --}}
                     <div class="mb-4 position-relative">
                         <label class="form-label">Cliente <span class="text-danger">*</span></label>
                         <input type="text" id="buscadorCliente" class="form-control"
                                placeholder="Buscar por nombre o número de documento..." autocomplete="off">
-                        <input type="hidden" name="cliente_id" id="clienteIdInput" value="{{ old('cliente_id') }}" required>
+                        <input type="hidden" name="cliente_id" id="clienteIdInput" value="{{ old('cliente_id', $venta->cliente_id) }}" required>
 
                         <div id="clienteResultados" class="list-group position-absolute w-100 shadow-sm"
                              style="z-index:1000; max-height:260px; overflow-y:auto; display:none;"></div>
@@ -138,7 +140,7 @@
                             <select name="metodo_pago_id" class="form-select" required>
                                 <option value="">— Seleccionar —</option>
                                 @foreach($metodosPago as $mp)
-                                    <option value="{{ $mp->id }}" {{ old('metodo_pago_id')==$mp->id ? 'selected' : '' }}>{{ $mp->nombre }}</option>
+                                    <option value="{{ $mp->id }}" {{ old('metodo_pago_id', $venta->metodo_pago_id)==$mp->id ? 'selected' : '' }}>{{ $mp->nombre }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -146,44 +148,47 @@
                             <label class="form-label">Tipo de Venta</label>
                             <div class="d-flex gap-3 mt-2">
                                 <label class="d-flex align-items-center gap-2">
-                                    <input type="radio" name="es_credito" value="0" checked onchange="toggleCredito(false)">
+                                    <input type="radio" name="es_credito" value="0" {{ $venta->es_credito ? '' : 'checked' }} onchange="toggleCredito(false)">
                                     <span style="font-size:13px;">Contado</span>
                                 </label>
                                 <label class="d-flex align-items-center gap-2">
-                                    <input type="radio" name="es_credito" value="1" onchange="toggleCredito(true)">
+                                    <input type="radio" name="es_credito" value="1" {{ $venta->es_credito ? 'checked' : '' }} onchange="toggleCredito(true)">
                                     <span style="font-size:13px;">Crédito</span>
                                 </label>
                             </div>
                         </div>
-                        <div class="col-md-6 d-none" id="campoFechaVencimiento">
+                        <div class="col-md-6 {{ $venta->es_credito ? '' : 'd-none' }}" id="campoFechaVencimiento">
                             <label class="form-label">Fecha de Vencimiento <span class="text-danger">*</span></label>
                             <input type="date" class="form-control" name="fecha_vencimiento" id="fechaVencimiento"
-                                   min="{{ now()->addDay()->format('Y-m-d') }}">
+                                   value="{{ old('fecha_vencimiento', optional($venta->fecha_vencimiento)->format('Y-m-d')) }}">
                         </div>
-                        <div class="col-md-6 d-none" id="campoAbonoInicial">
-                            <label class="form-label">Abono Inicial ({{ $config->simbolo_moneda }})</label>
-                            <input type="number" class="form-control" name="abono_inicial"
-                                   id="abonoInicial" min="0" step="0.01" value="0">
+                        @if($venta->es_credito)
+                        <div class="col-md-6">
+                            <div class="p-2 rounded-3" style="background:#f8f5ff; font-size:12.5px;">
+                                <div class="text-muted">Ya abonado</div>
+                                <div class="fw-bold">{{ $config->simbolo_moneda }} {{ number_format($venta->abonos()->sum('monto'), 2) }}</div>
+                            </div>
                         </div>
+                        @endif
                         <div class="col-md-6">
                             <label class="form-label">Descuento General ({{ $config->simbolo_moneda }})</label>
                             <input type="number" class="form-control" name="descuento_general"
-                                   id="descuentoGeneral" min="0" step="0.01" value="0"
+                                   id="descuentoGeneral" min="0" step="0.01" value="{{ old('descuento_general', $venta->descuento) }}"
                                    oninput="calcularTotales()">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Modo de Precio</label>
                             <div class="d-flex gap-3 mt-2 flex-wrap">
                                 <label class="d-flex align-items-center gap-2">
-                                    <input type="radio" name="modo_precio" value="incluido" checked onchange="calcularTotales()">
+                                    <input type="radio" name="modo_precio" value="incluido" {{ $venta->modo_precio=='incluido' ? 'checked' : '' }} onchange="calcularTotales()">
                                     <span style="font-size:13px;">Impuesto incluido</span>
                                 </label>
                                 <label class="d-flex align-items-center gap-2">
-                                    <input type="radio" name="modo_precio" value="sin_impuesto" onchange="calcularTotales()">
+                                    <input type="radio" name="modo_precio" value="sin_impuesto" {{ $venta->modo_precio=='sin_impuesto' ? 'checked' : '' }} onchange="calcularTotales()">
                                     <span style="font-size:13px;">Sin impuesto</span>
                                 </label>
                                 <label class="d-flex align-items-center gap-2">
-                                    <input type="radio" name="modo_precio" value="subtotal_impuesto" onchange="calcularTotales()">
+                                    <input type="radio" name="modo_precio" value="subtotal_impuesto" {{ $venta->modo_precio=='subtotal_impuesto' ? 'checked' : '' }} onchange="calcularTotales()">
                                     <span style="font-size:13px;">Subtotal + impuesto</span>
                                 </label>
                             </div>
@@ -191,7 +196,7 @@
                         <div class="col-12">
                             <label class="form-label">Notas</label>
                             <textarea class="form-control" name="notas" rows="2"
-                                      placeholder="Observaciones de la venta..."></textarea>
+                                      placeholder="Observaciones de la venta...">{{ old('notas', $venta->notas) }}</textarea>
                         </div>
                     </div>
                 </form>
@@ -235,10 +240,10 @@
                 </div>
 
                 <button type="submit" form="formVenta" class="btn btn-primary w-100 py-2" id="btnVenta" disabled>
-                    <i class="fas fa-cash-register me-2"></i>Registrar Venta
+                    <i class="fas fa-save me-2"></i>Actualizar Venta
                 </button>
 
-                <a href="{{ route('ventas.index') }}" class="btn btn-outline-secondary w-100 mt-2 py-2">
+                <a href="{{ route('ventas.show', $venta) }}" class="btn btn-outline-secondary w-100 mt-2 py-2">
                     Cancelar
                 </a>
             </div>
@@ -315,9 +320,8 @@ document.addEventListener('click', function (e) {
     }
 });
 
-@if(old('cliente_id'))
-seleccionarCliente({{ old('cliente_id') }});
-@endif
+// Precargar cliente de la venta
+seleccionarCliente({{ $venta->cliente_id }});
 
 // ── Buscador y filtros de Producto ───────────────────────────────
 const buscadorProducto   = document.getElementById('buscadorProducto');
@@ -367,7 +371,7 @@ function filtrarProductos() {
 buscadorProducto.addEventListener('input', filtrarProductos);
 filtrosProducto.forEach(el => el.addEventListener('change', filtrarProductos));
 
-function agregarProducto(id) {
+function agregarFilaProducto(id, cantidadInicial, descuentoInicial, imeiInicial, serialInicial) {
     const datos = productosData.find(p => p.id === id);
     if (!datos) return;
 
@@ -375,72 +379,80 @@ function agregarProducto(id) {
     const precio = datos.precio_venta;
     const stock  = datos.stock;
 
+    productosSeleccionados[id] = { nombre, precio, stock };
+    document.getElementById('filaVacia').style.display = 'none';
+
+    const tbody = document.getElementById('productosBody');
+    const tr = document.createElement('tr');
+    tr.id = 'fila-' + id;
+    tr.innerHTML = `
+        <td>
+            <input type="hidden" name="productos[${id}][id]" value="${id}">
+            <div style="font-size:13.5px; font-weight:500;">${nombre}</div>
+            <div style="font-size:11px; color:#9ca3af;">Stock: ${stock}</div>
+        </td>
+        <td>
+            <input type="number" name="productos[${id}][cantidad]" value="${cantidadInicial}" min="1" max="${stock}"
+                   class="form-control form-control-sm cant-input" style="width:65px;"
+                   oninput="calcularFila('${id}')">
+        </td>
+        <td style="font-size:13.5px; font-weight:500;">${MONEDA} ${precio.toFixed(2)}</td>
+        <td>
+            <input type="number" name="productos[${id}][descuento]" value="${descuentoInicial}" min="0" step="0.01"
+                   class="form-control form-control-sm desc-input" style="width:80px;"
+                   oninput="calcularFila('${id}')">
+        </td>
+        <td id="sub-${id}" style="font-size:13.5px; font-weight:600; color:#1e1b4b;">
+            ${MONEDA} ${precio.toFixed(2)}
+        </td>
+        <td>
+            <button type="button" class="btn btn-sm"
+                    style="background:#fee2e2; color:#dc2626; border-radius:8px; padding:4px 8px;"
+                    onclick="quitarProducto('${id}')">
+                <i class="fas fa-times fa-xs"></i>
+            </button>
+        </td>
+    `;
+    tbody.appendChild(tr);
+
+    if (datos.requiere_imei || datos.requiere_serial) {
+        const trExtra = document.createElement('tr');
+        trExtra.id = 'fila-extra-' + id;
+        trExtra.innerHTML = `
+            <td colspan="6" class="pt-0">
+                <div class="row g-2">
+                    ${datos.requiere_imei ? `
+                    <div class="col-md-6">
+                        <input type="text" name="productos[${id}][imei]" class="form-control form-control-sm"
+                               placeholder="IMEI (requerido para este producto)" value="${imeiInicial ?? ''}" required oninput="calcularTotales()">
+                    </div>` : ''}
+                    ${datos.requiere_serial ? `
+                    <div class="col-md-6">
+                        <input type="text" name="productos[${id}][serial]" class="form-control form-control-sm"
+                               placeholder="Serial (requerido para este producto)" value="${serialInicial ?? ''}" required oninput="calcularTotales()">
+                    </div>` : ''}
+                </div>
+            </td>
+        `;
+        tbody.appendChild(trExtra);
+    }
+
+    calcularFila(id);
+}
+
+function agregarProducto(id) {
+    const datos = productosData.find(p => p.id === id);
+    if (!datos) return;
+
     if (productosSeleccionados[id]) {
-        // Ya existe: incrementar cantidad
         const fila = document.getElementById('fila-' + id);
         const cantInput = fila.querySelector('.cant-input');
         const nuevaCant = parseInt(cantInput.value) + 1;
-        if (nuevaCant > stock) { alert('Stock insuficiente'); return; }
+        if (nuevaCant > datos.stock) { alert('Stock insuficiente'); return; }
         cantInput.value = nuevaCant;
         calcularFila(id);
     } else {
-        productosSeleccionados[id] = { nombre, precio, stock };
-        document.getElementById('filaVacia').style.display = 'none';
-
-        const tbody = document.getElementById('productosBody');
-        const tr = document.createElement('tr');
-        tr.id = 'fila-' + id;
-        tr.innerHTML = `
-            <td>
-                <input type="hidden" name="productos[${id}][id]" value="${id}">
-                <div style="font-size:13.5px; font-weight:500;">${nombre}</div>
-                <div style="font-size:11px; color:#9ca3af;">Stock: ${stock}</div>
-            </td>
-            <td>
-                <input type="number" name="productos[${id}][cantidad]" value="1" min="1" max="${stock}"
-                       class="form-control form-control-sm cant-input" style="width:65px;"
-                       oninput="calcularFila('${id}')">
-            </td>
-            <td style="font-size:13.5px; font-weight:500;">${MONEDA} ${precio.toFixed(2)}</td>
-            <td>
-                <input type="number" name="productos[${id}][descuento]" value="0" min="0" step="0.01"
-                       class="form-control form-control-sm desc-input" style="width:80px;"
-                       oninput="calcularFila('${id}')">
-            </td>
-            <td id="sub-${id}" style="font-size:13.5px; font-weight:600; color:#1e1b4b;">
-                ${MONEDA} ${precio.toFixed(2)}
-            </td>
-            <td>
-                <button type="button" class="btn btn-sm"
-                        style="background:#fee2e2; color:#dc2626; border-radius:8px; padding:4px 8px;"
-                        onclick="quitarProducto('${id}')">
-                    <i class="fas fa-times fa-xs"></i>
-                </button>
-            </td>
-        `;
-        tbody.appendChild(tr);
-
-        if (datos.requiere_imei || datos.requiere_serial) {
-            const trExtra = document.createElement('tr');
-            trExtra.id = 'fila-extra-' + id;
-            trExtra.innerHTML = `
-                <td colspan="6" class="pt-0">
-                    <div class="row g-2">
-                        ${datos.requiere_imei ? `
-                        <div class="col-md-6">
-                            <input type="text" name="productos[${id}][imei]" class="form-control form-control-sm"
-                                   placeholder="IMEI (requerido para este producto)" required oninput="calcularTotales()">
-                        </div>` : ''}
-                        ${datos.requiere_serial ? `
-                        <div class="col-md-6">
-                            <input type="text" name="productos[${id}][serial]" class="form-control form-control-sm"
-                                   placeholder="Serial (requerido para este producto)" required oninput="calcularTotales()">
-                        </div>` : ''}
-                    </div>
-                </td>
-            `;
-            tbody.appendChild(trExtra);
-        }
+        agregarFilaProducto(id, 1, 0, null, null);
     }
 
     buscadorProducto.value = '';
@@ -460,15 +472,12 @@ function calcularFila(id) {
 
 function toggleCredito(esCredito) {
     const campoFecha  = document.getElementById('campoFechaVencimiento');
-    const campoAbono  = document.getElementById('campoAbonoInicial');
     const fechaInput  = document.getElementById('fechaVencimiento');
 
     campoFecha.classList.toggle('d-none', !esCredito);
-    campoAbono.classList.toggle('d-none', !esCredito);
     fechaInput.required = esCredito;
     if (!esCredito) {
         fechaInput.value = '';
-        document.getElementById('abonoInicial').value = 0;
     }
 }
 
@@ -530,5 +539,11 @@ function calcularTotales() {
     document.getElementById('btnVenta').disabled =
         (productos.length === 0 || !clienteIdInput.value || faltaCampoRequerido);
 }
+
+// Precargar productos ya vendidos en esta venta
+@foreach($venta->detalles as $d)
+agregarFilaProducto({{ $d->producto_id }}, {{ $d->cantidad }}, {{ $d->descuento }}, @json($d->imei_vendido), @json($d->serial_vendido));
+@endforeach
+calcularTotales();
 </script>
 @endpush

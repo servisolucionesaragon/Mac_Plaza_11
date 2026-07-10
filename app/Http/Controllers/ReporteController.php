@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Venta;
+use App\Models\Abono;
 use App\Models\Cliente;
 use App\Models\Producto;
 use App\Models\Reparacion;
@@ -29,6 +30,11 @@ class ReporteController extends Controller
         $ticketPromedio   = $cantidadVentas > 0 ? $totalVentas / $cantidadVentas : 0;
         $totalReparaciones = Reparacion::whereBetween('fecha_recepcion', [$desde, $hasta])->sum('costo_final');
         $clientesNuevos   = Cliente::whereBetween('created_at', [$desde, $hasta])->count();
+
+        // Dinero efectivamente cobrado en el período por abonos a ventas a crédito
+        // (la venta puede seguir en estado "pendiente" hasta saldar el 100%, pero el
+        // abono en sí ya es un ingreso real cobrado en este período).
+        $ingresosPorAbonos = Abono::whereBetween('fecha_abono', [$desde, $hasta])->sum('monto');
 
         // ── Ventas por día ────────────────────────────────────────────────
         $ventasPorDia = Venta::select(
@@ -96,12 +102,22 @@ class ReporteController extends Controller
             ->orderBy('stock')
             ->get();
 
+        // ── Cartera por cobrar (ventas a crédito con saldo pendiente) ──────
+        // No se filtra por rango de fechas: es deuda actual, no actividad del período.
+        $carteraPendiente = Venta::with('cliente')
+            ->where('es_credito', true)
+            ->where('saldo_pendiente', '>', 0)
+            ->orderBy('fecha_vencimiento')
+            ->get();
+        $totalCartera = $carteraPendiente->sum('saldo_pendiente');
+
         return view('reportes.index', compact(
             'totalVentas', 'cantidadVentas', 'ticketPromedio',
-            'totalReparaciones', 'clientesNuevos',
+            'totalReparaciones', 'clientesNuevos', 'ingresosPorAbonos',
             'ventasPorDia', 'ventasPorPago',
             'topProductos', 'topClientes',
             'repPorEstado', 'stockBajo',
+            'carteraPendiente', 'totalCartera',
             'desde', 'hasta'
         ));
     }

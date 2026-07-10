@@ -229,36 +229,64 @@
                         </div>
                     </div>
 
+                    <label class="form-label">Colores del Menú</label>
+                    <div class="row g-3 mb-4">
+                        <div class="col-6">
+                            <label class="form-label" style="font-size:12px;">Texto del menú</label>
+                            <input type="color" name="color_menu_texto" class="form-control form-control-color w-100 @error('color_menu_texto') is-invalid @enderror"
+                                   value="{{ old('color_menu_texto', $config->color_menu_texto) }}" title="Color del texto del menú">
+                            @error('color_menu_texto')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label" style="font-size:12px;">Menú seleccionado</label>
+                            <input type="color" name="color_menu_activo" class="form-control form-control-color w-100 @error('color_menu_activo') is-invalid @enderror"
+                                   value="{{ old('color_menu_activo', $config->color_menu_activo) }}" title="Color del menú seleccionado">
+                            @error('color_menu_activo')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                    </div>
+
+                    <label class="form-label">Colores de Botones</label>
+                    <div class="row g-3 mb-4">
+                        <div class="col-6">
+                            <label class="form-label" style="font-size:12px;">Texto de botones</label>
+                            <input type="color" name="color_boton_texto" class="form-control form-control-color w-100 @error('color_boton_texto') is-invalid @enderror"
+                                   value="{{ old('color_boton_texto', $config->color_boton_texto) }}" title="Color del texto de los botones">
+                            @error('color_boton_texto')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label" style="font-size:12px;">Fondo de botones</label>
+                            <input type="color" name="color_boton_fondo" class="form-control form-control-color w-100 @error('color_boton_fondo') is-invalid @enderror"
+                                   value="{{ old('color_boton_fondo', $config->color_boton_fondo) }}" title="Color de fondo de los botones">
+                            @error('color_boton_fondo')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                    </div>
+
+                    <label class="form-label">Colores de Gráficos (Dashboard y Reportes)</label>
+                    <div class="row g-3 mb-4">
+                        <div class="col-4">
+                            <label class="form-label" style="font-size:12px;">Color 1</label>
+                            <input type="color" name="color_grafico_1" class="form-control form-control-color w-100 @error('color_grafico_1') is-invalid @enderror"
+                                   value="{{ old('color_grafico_1', $config->color_grafico_1) }}" title="Color 1 de gráficos">
+                            @error('color_grafico_1')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label" style="font-size:12px;">Color 2</label>
+                            <input type="color" name="color_grafico_2" class="form-control form-control-color w-100 @error('color_grafico_2') is-invalid @enderror"
+                                   value="{{ old('color_grafico_2', $config->color_grafico_2) }}" title="Color 2 de gráficos">
+                            @error('color_grafico_2')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label" style="font-size:12px;">Color 3</label>
+                            <input type="color" name="color_grafico_3" class="form-control form-control-color w-100 @error('color_grafico_3') is-invalid @enderror"
+                                   value="{{ old('color_grafico_3', $config->color_grafico_3) }}" title="Color 3 de gráficos">
+                            @error('color_grafico_3')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                    </div>
+
                     <button type="submit" class="btn btn-primary w-100">
                         <i class="fas fa-save me-2"></i>Guardar Configuración
                     </button>
                 </form>
-            </div>
-        </div>
-
-        <!-- Estadísticas rápidas -->
-        <div class="card mb-4">
-            <div class="card-body p-4">
-                <h6 class="fw-bold mb-3">Estadísticas del Sistema</h6>
-                @php
-                    $stats = [
-                        ['icon'=>'users','color'=>'#a855f7','label'=>'Usuarios activos','value'=>\App\Models\User::where('activo',true)->count()],
-                        ['icon'=>'users','color'=>'#06b6d4','label'=>'Total clientes','value'=>\App\Models\Cliente::count()],
-                        ['icon'=>'box','color'=>'#10b981','label'=>'Productos en inventario','value'=>\App\Models\Producto::where('activo',true)->count()],
-                        ['icon'=>'shopping-cart','color'=>'#ec4899','label'=>'Ventas registradas','value'=>\App\Models\Venta::count()],
-                        ['icon'=>'tools','color'=>'#f59e0b','label'=>'Órdenes de reparación','value'=>\App\Models\Reparacion::count()],
-                    ];
-                @endphp
-                @foreach($stats as $s)
-                <div class="d-flex align-items-center gap-3 py-2" style="border-bottom:1px solid #f3f4f6; font-size:13px;">
-                    <div style="width:32px;height:32px;background:{{ $s['color'] }}18;border-radius:8px;
-                                display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                        <i class="fas fa-{{ $s['icon'] }}" style="color:{{ $s['color'] }};font-size:13px;"></i>
-                    </div>
-                    <span class="text-muted flex-grow-1">{{ $s['label'] }}</span>
-                    <strong>{{ $s['value'] }}</strong>
-                </div>
-                @endforeach
             </div>
         </div>
 
@@ -591,12 +619,14 @@
 
 @push('scripts')
 <script>
+const baseUsuariosUrl = '{{ url('/configuracion/usuarios') }}';
+
 function abrirModalEditar(id, nombre, email, rol, telefono) {
     document.getElementById('editNombre').value   = nombre;
     document.getElementById('editEmail').value    = email;
     document.getElementById('editRol').value      = rol;
     document.getElementById('editTelefono').value = telefono || '';
-    document.getElementById('formEditarUsuario').action = '/configuracion/usuarios/' + id;
+    document.getElementById('formEditarUsuario').action = baseUsuariosUrl + '/' + id;
     var modal = new bootstrap.Modal(document.getElementById('modalEditarUsuario'));
     modal.show();
 }
