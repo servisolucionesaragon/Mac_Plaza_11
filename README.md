@@ -222,9 +222,6 @@ botones "Volver"/"Enviar por WhatsApp" solo se muestran cuando `!($publico ?? fa
   necesario porque el `DROP TABLE IF EXISTS` de cada tabla queda pegado (sin `;` de por
   medio) al bloque de comentario que la antecede en el backup generado por
   `generarSQL()`.
-- **Nombres en español y pluralización automática:** ver nota en
-  [Estructura del proyecto](#estructura-del-proyecto) — mismo cuidado aplica a
-  cualquier tabla/ruta/recurso nuevo con nombre en español.
 - **Ventas a crédito y el campo `estado`:** una venta a crédito con saldo pendiente se
   crea con `estado = 'pendiente'` (no `'completada'`), y solo pasa a `'completada'`
   automáticamente cuando `VentaController::registrarAbono()` deja el
