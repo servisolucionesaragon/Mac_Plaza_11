@@ -18,6 +18,7 @@ con control de acceso por roles.
 - [Variables de entorno](#variables-de-entorno)
 - [Base de datos](#base-de-datos)
 - [Estructura del proyecto](#estructura-del-proyecto)
+- [WhatsApp e integraciones](#whatsapp-e-integraciones)
 - [Notas de despliegue](#notas-de-despliegue)
 - [Problemas conocidos y decisiones de diseño](#problemas-conocidos-y-decisiones-de-diseño)
 
@@ -27,11 +28,11 @@ con control de acceso por roles.
 
 | Módulo | Descripción |
 |---|---|
-| **Dashboard** | KPIs en tiempo real (ventas del día/mes, clientes nuevos, stock bajo, reparaciones pendientes, cartera pendiente por cobrar), gráfico de ventas de los últimos 7 días (Chart.js), top productos vendidos. Colores de los gráficos y de las tarjetas de ranking configurables desde Configuración. Campana de alertas en el topbar: stock bajo, créditos vencidos y créditos por vencer en ≤3 días. |
-| **Clientes** | Registro con DNI/RUC, tipo particular/empresa, historial de compras y reparaciones, búsqueda y filtros. |
+| **Dashboard** | KPIs en tiempo real (ventas del día/mes, clientes nuevos, stock bajo, reparaciones pendientes, cartera pendiente por cobrar), gráfico de ventas de los últimos 7 días (Chart.js), top productos vendidos. Colores de los gráficos y de las tarjetas de ranking configurables desde Configuración. Campana de alertas en el topbar: stock bajo, créditos vencidos, créditos por vencer en ≤3 días y clientes de cumpleaños en el mes. |
+| **Clientes** | Registro con DNI/RUC, tipo particular/empresa, historial de compras y reparaciones, búsqueda y filtros. Alerta/filtro/badge de **cumpleaños del mes**. Botones de WhatsApp en la ficha del cliente: contacto directo, cobro de cartera pendiente (mensaje distinto si el crédito ya está en mora) y felicitación de cumpleaños con oferta de descuento. Indicativo de país fijo `+57` (Colombia). |
 | **Inventario (Productos)** | Stock en tiempo real, alertas de stock mínimo, specs técnicas (IMEI/serial, RAM, almacenamiento), condición (nuevo/reacondicionado/usado), márgenes automáticos, exportar el inventario completo a Excel. |
-| **Ventas (POS)** | Búsqueda de productos en tiempo real, impuesto configurable, descuentos, métodos de pago editables, numeración automática (`VTA-000001`), filtro por tipo de venta (Contado/Crédito), recibo para hoja carta y tirilla térmica 80mm. **Ventas a crédito:** saldo pendiente, fecha de vencimiento, abono inicial opcional al crear, y registro de abonos parciales después (cada uno con su propio recibo imprimible hoja/tirilla) — la venta queda en estado "Pendiente" hasta saldar el 100% del crédito, momento en el que pasa a "Completada" automáticamente. **Edición y cancelación** (solo rol Administrador): editar cliente, productos/cantidades, método de pago, tipo de venta y notas de una venta ya registrada (revierte y reaplica el stock correctamente, recalcula el saldo pendiente si ya tiene abonos); cancelar restaura el stock. |
-| **Reparaciones** | Órdenes de servicio con 7 estados (recibido → diagnóstico → esperando repuesto → reparación → listo → entregado), prioridad (baja/media/alta/urgente), asignación de técnico, garantía (con fecha de vencimiento calculada), historial de cambios de estado. Recibo en una sola hoja: datos completos de la tienda (NIT, teléfono, dirección, correo/web), datos del equipo, y diagnóstico separado en 3 secciones (falla reportada por el cliente / diagnóstico técnico / solución aplicada). Se abre en la misma pantalla (no en pestaña nueva) desde un único botón "Recibo". |
+| **Ventas (POS)** | Búsqueda de productos en tiempo real, impuesto configurable, descuentos, métodos de pago editables, numeración automática (`VTA-000001`), filtro por tipo de venta (Contado/Crédito), recibo con toggle Hoja Carta / Tirilla térmica 80mm (con logo en la cabecera de la tirilla) y botón para enviarlo por WhatsApp mediante un enlace público firmado. **Ventas a crédito:** saldo pendiente, fecha de vencimiento, abono inicial opcional al crear, y registro de abonos parciales después (cada uno con su propio recibo hoja/tirilla, también enviable por WhatsApp) — la venta queda en estado "Pendiente" hasta saldar el 100% del crédito, momento en el que pasa a "Completada" automáticamente. **Edición y cancelación** (solo rol Administrador): editar cliente, productos/cantidades, método de pago, tipo de venta y notas de una venta ya registrada (revierte y reaplica el stock correctamente, recalcula el saldo pendiente si ya tiene abonos); cancelar restaura el stock. |
+| **Reparaciones** | Órdenes de servicio con 7 estados (recibido → diagnóstico → esperando repuesto → reparación → listo → entregado), prioridad (baja/media/alta/urgente), asignación de técnico, garantía (con fecha de vencimiento calculada), historial de cambios de estado. Recibo con toggle Hoja Carta / Tirilla térmica 80mm, enviable por WhatsApp mediante enlace público firmado. Botón de WhatsApp adicional cuando el estado pasa a "Listo para entrega", avisando al cliente. |
 | **Catálogos** | Gestión (crear/editar/activar-desactivar/eliminar) de categorías, marcas, condición, almacenamiento, RAM y métodos de pago — antes eran listas fijas hardcodeadas, ahora son catálogos dinámicos y protegidos contra borrado si tienen productos/ventas asociadas. |
 | **Reportes** | Filtro por fechas, ventas por día/método de pago, top 10 productos/clientes, reparaciones por estado, estadísticas del sistema (usuarios/clientes/productos/ventas/reparaciones), **Cartera por Cobrar** (ventas a crédito con saldo pendiente, con días de atraso si vencieron, sin depender del filtro de fechas), y **Abonos de Crédito Cobrados** en el período (dinero efectivamente recibido, aunque la venta siga "Pendiente"). |
 | **Mi Perfil** | Cualquier usuario autenticado (sin importar rol) puede editar su nombre, correo y teléfono, y cambiar su contraseña (requiere confirmar la contraseña actual). Accesible desde el dropdown de usuario en la esquina superior derecha. |
@@ -121,7 +122,7 @@ No commitear nunca un `.env` con credenciales reales — está excluido vía `.g
 | Tabla | Descripción |
 |---|---|
 | `users` | Usuarios del sistema (admin, vendedor, técnico) |
-| `clientes` | Cartera de clientes |
+| `clientes` | Cartera de clientes. `fecha_nacimiento` alimenta la alerta de cumpleaños del mes. |
 | `categorias`, `marcas`, `condiciones`, `almacenamientos`, `rams`, `metodos_pago` | Catálogos dinámicos |
 | `productos` | Inventario |
 | `ventas` / `detalle_ventas` | Cabecera y detalle de ventas. `ventas` incluye `es_credito`, `saldo_pendiente`, `fecha_vencimiento` para el crédito. |
@@ -148,6 +149,45 @@ routes/web.php           Rutas de la aplicación
 (ej. `reparaciones` → wildcard `reparacione`, `Condicion` → tabla `condicions`). Donde
 aplica, se usa `->parameters([...])` en las rutas o `protected $table` explícito en el
 modelo para evitarlo — revisar ese patrón antes de agregar recursos nuevos en español.
+
+## WhatsApp e integraciones
+
+La app arma enlaces de WhatsApp Click-to-Chat (`https://wa.me/...`) mediante el trait
+compartido `App\Traits\TieneWhatsapp` (usado por `Cliente` y `Configuracion`), que
+limpia el número (fuerza indicativo `57` de Colombia) y codifica el mensaje con
+`rawurlencode()`. Puntos donde se usa:
+
+| Origen | Mensaje |
+|---|---|
+| Ficha de cliente | Contacto directo, sin mensaje predefinido. |
+| Ficha de cliente (con saldo pendiente) | Gestión de cobro — texto distinto si el crédito está en mora (`Cliente::estaAtrasada()`). |
+| Ficha de cliente (cumpleaños del mes) | Felicitación con oferta de descuento (`Cliente::cumpleAnioEsteMes()` / scope `conCumpleanioEsteMes`). Sin emojis a propósito: WhatsApp Web no los renderiza bien al abrir el enlace desde navegador (verificado con la codificación UTF-8 correcta a nivel de bytes; es una limitación de esa plataforma, no de la app). |
+| Recibo de venta / abono / reparación | Botón "Enviar por WhatsApp" con el enlace **público firmado** del recibo (ver abajo). |
+| Reparación en estado "Listo" | Aviso al cliente de que puede recoger el equipo. |
+| Login | "¿Olvidaste tu contraseña?" abre WhatsApp al número configurado en Configuración del negocio. |
+
+Todos los mensajes incluyen el nombre de la tienda en **negrita** (`*Nombre*`, sintaxis
+de WhatsApp).
+
+### Recibos públicos con enlace firmado
+
+Un cliente sin cuenta en el sistema no puede abrir una ruta autenticada. Por eso los 3
+recibos (venta, abono, reparación) tienen una ruta pública separada protegida por el
+middleware `signed` de Laravel (`URL::signedRoute()`, sin expiración — el recibo debe
+poder verse indefinidamente):
+
+```php
+Route::middleware('signed')->group(function () {
+    Route::get('/r/venta/{venta}', [VentaController::class, 'reciboPublico'])->name('publico.venta.recibo');
+    Route::get('/r/reparacion/{reparacion}', [ReparacionController::class, 'reciboPublico'])->name('publico.reparacion.recibo');
+    Route::get('/r/abono/{venta}/{abono}', [VentaController::class, 'abonoReciboPublico'])->name('publico.abono.recibo');
+});
+```
+
+Cada controlador pasa `$layout = 'layouts.publico'` (layout mínimo, sin sidebar/topbar,
+que no depende de `Auth::user()`) y `$publico = true` a la misma vista Blade que usa la
+versión autenticada (`@extends($layout ?? 'layouts.app')`), evitando duplicar HTML. Los
+botones "Volver"/"Enviar por WhatsApp" solo se muestran cuando `!($publico ?? false)`.
 
 ## Notas de despliegue
 
@@ -196,3 +236,15 @@ modelo para evitarlo — revisar ese patrón antes de agregar recursos nuevos en
   en la tarjeta "Abonos de Crédito Cobrados" de Reportes (`Abono::whereBetween(...)`),
   no dentro de "Total Ventas". Tenerlo en cuenta antes de agregar un reporte nuevo que
   necesite el ingreso total real de un período.
+- **`@page { size: <longitud> auto; }` no funciona en Chrome:** el toggle Hoja
+  Carta/Tirilla de los recibos cambia dinámicamente la regla `@page` de un
+  `<style id="printPageStyle">`. Usar `size: 80mm auto;` para que el alto se ajuste
+  solo al contenido de la tirilla **no funciona** — Chrome descarta silenciosamente
+  cualquier `@page size` que mezcle una longitud con la palabra clave `auto` (verificado
+  inspeccionando el CSSOM: la propiedad `size` queda vacía), y el navegador cae al
+  tamaño de página por defecto (Carta). El fix real es medir en runtime el alto del
+  contenido de la tirilla (`getBoundingClientRect().height`, px → mm dividiendo por
+  `3.7795275591`) e inyectar `size: 80mm {altoMm}mm;` con dos longitudes concretas,
+  recalculado también en el evento `beforeprint`. Aplica a los 3 recibos (venta, abono,
+  reparación) y es un cuidado a tener en cuenta en cualquier otra vista de impresión con
+  ancho fijo/alto variable.
