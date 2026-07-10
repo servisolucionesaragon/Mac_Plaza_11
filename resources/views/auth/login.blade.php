@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión — CRM Tienda Celulares</title>
+    <title>Iniciar Sesión — CRM {{ (isset($config) ? $config->nombre_tienda : null) ?? 'Tienda Celulares' }}</title>
     @if(isset($config) && $config->logo)
         <link rel="icon" type="{{ \Illuminate\Support\Facades\Storage::disk('public')->mimeType($config->logo) ?? 'image/png' }}" href="{{ asset('storage/' . $config->logo) }}?v={{ $config->updated_at->timestamp }}">
     @endif
