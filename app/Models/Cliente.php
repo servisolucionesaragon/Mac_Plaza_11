@@ -39,4 +39,48 @@ class Cliente extends Model
     {
         return $this->ventas()->where('estado', 'completada')->sum('total');
     }
+
+    public function cumpleAnioEsteMes(): bool
+    {
+        return $this->fecha_nacimiento && $this->fecha_nacimiento->month === now()->month;
+    }
+
+    public function scopeConCumpleanioEsteMes($query)
+    {
+        return $query->whereNotNull('fecha_nacimiento')
+            ->whereMonth('fecha_nacimiento', now()->month);
+    }
+
+    /**
+     * Número limpio para WhatsApp (wa.me), con indicativo +57 (Colombia) por ahora.
+     * Prefiere celular sobre teléfono fijo.
+     */
+    public function numeroWhatsapp(): ?string
+    {
+        $numero = $this->celular ?: $this->telefono;
+        if (!$numero) {
+            return null;
+        }
+
+        $limpio = preg_replace('/\D+/', '', $numero);
+        if (!$limpio) {
+            return null;
+        }
+
+        if (!str_starts_with($limpio, '57') || strlen($limpio) === 10) {
+            $limpio = '57' . ltrim($limpio, '0');
+        }
+
+        return $limpio;
+    }
+
+    public function whatsappUrl(string $mensaje = ''): ?string
+    {
+        $numero = $this->numeroWhatsapp();
+        if (!$numero) {
+            return null;
+        }
+
+        return 'https://wa.me/' . $numero . ($mensaje !== '' ? '?text=' . urlencode($mensaje) : '');
+    }
 }

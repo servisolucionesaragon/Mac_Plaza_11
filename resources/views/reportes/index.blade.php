@@ -365,6 +365,7 @@
                                 <th class="text-end">Total</th>
                                 <th class="text-end">Saldo</th>
                                 <th class="text-center">Vencimiento</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -385,6 +386,21 @@
                                         </span>
                                     @else
                                         <span style="color:#6b7280; font-size:12px;">{{ optional($v->fecha_vencimiento)->format('d/m/Y') ?? '—' }}</span>
+                                    @endif
+                                </td>
+                                <td class="text-end">
+                                    @if($v->cliente && $v->cliente->numeroWhatsapp())
+                                    @php
+                                        $mensajeCobro = "Hola {$v->cliente->nombre}, te saludamos de " . ($config->nombre_tienda ?? 'la tienda')
+                                            . ". Te recordamos que tienes un saldo pendiente de {$config->simbolo_moneda} " . number_format($v->saldo_pendiente, 2)
+                                            . " por la compra {$v->numero_venta}"
+                                            . ($v->fecha_vencimiento ? (", con vencimiento el " . $v->fecha_vencimiento->format('d/m/Y')) : '')
+                                            . ". Quedamos atentos para coordinar el pago. ¡Gracias!";
+                                    @endphp
+                                    <a href="{{ $v->cliente->whatsappUrl($mensajeCobro) }}" target="_blank" rel="noopener"
+                                       class="btn btn-sm" style="background:#25D366; color:#fff; border-radius:8px; padding:5px 8px;" title="Gestionar cobro por WhatsApp">
+                                        <i class="fab fa-whatsapp"></i>
+                                    </a>
                                     @endif
                                 </td>
                             </tr>

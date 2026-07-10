@@ -161,6 +161,17 @@
                         </td>
                         <td class="text-end pe-4">
                             <div class="d-flex gap-1 justify-content-end">
+                                @if($rep->estado === 'listo' && $rep->cliente && $rep->cliente->numeroWhatsapp())
+                                @php
+                                    $mensajeListoIdx = "Hola {$rep->cliente->nombre}, te saludamos de " . ($config->nombre_tienda ?? 'la tienda')
+                                        . ". Tu equipo {$rep->dispositivo}" . ($rep->modelo ? " {$rep->modelo}" : '')
+                                        . " (orden {$rep->numero_orden}) ya está listo para recoger. ¡Te esperamos!";
+                                @endphp
+                                <a href="{{ $rep->cliente->whatsappUrl($mensajeListoIdx) }}" target="_blank" rel="noopener"
+                                   class="btn btn-sm" style="background:#25D366; color:#fff; border-radius:8px; padding:5px 10px;" title="Avisar que está listo por WhatsApp">
+                                    <i class="fab fa-whatsapp fa-sm"></i>
+                                </a>
+                                @endif
                                 <a href="{{ route('reparaciones.show', $rep) }}"
                                    class="btn btn-sm" style="background:#ede9fe; color:#7c3aed; border-radius:8px; padding:5px 10px;">
                                     <i class="fas fa-eye fa-sm"></i>

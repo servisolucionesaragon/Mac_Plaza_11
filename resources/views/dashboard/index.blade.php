@@ -277,11 +277,24 @@
                             {{ $rep->cliente->nombre_completo ?? '—' }} · {{ $rep->numero_orden }}
                         </div>
                     </div>
-                    <a href="{{ route('reparaciones.show', $rep) }}"
-                       class="btn btn-sm" style="font-size:11px; padding:3px 8px; border-radius:6px;
-                       background:#f3f4f6; color:#374151; text-decoration:none;">
-                        Ver
-                    </a>
+                    <div class="d-flex flex-column gap-1">
+                        @if($rep->estado === 'listo' && $rep->cliente && $rep->cliente->numeroWhatsapp())
+                        @php
+                            $mensajeListoDash = "Hola {$rep->cliente->nombre}, te saludamos de " . ($config->nombre_tienda ?? 'la tienda')
+                                . ". Tu equipo {$rep->dispositivo}" . ($rep->modelo ? " {$rep->modelo}" : '')
+                                . " (orden {$rep->numero_orden}) ya está listo para recoger. ¡Te esperamos!";
+                        @endphp
+                        <a href="{{ $rep->cliente->whatsappUrl($mensajeListoDash) }}" target="_blank" rel="noopener"
+                           class="btn btn-sm" style="font-size:11px; padding:3px 8px; border-radius:6px; background:#25D366; color:#fff; text-decoration:none;" title="Avisar por WhatsApp">
+                            <i class="fab fa-whatsapp"></i>
+                        </a>
+                        @endif
+                        <a href="{{ route('reparaciones.show', $rep) }}"
+                           class="btn btn-sm" style="font-size:11px; padding:3px 8px; border-radius:6px;
+                           background:#f3f4f6; color:#374151; text-decoration:none;">
+                            Ver
+                        </a>
+                    </div>
                 </div>
                 @empty
                 <div class="text-center text-muted py-4" style="font-size:13px;">

@@ -16,11 +16,27 @@
     </a>
 </div>
 
+@if($cumpleanioMesCount > 0)
+<a href="{{ route('clientes.index', ['cumpleanio' => 1]) }}" class="text-decoration-none">
+    <div class="mb-4 p-3 rounded-3 d-flex align-items-center gap-3" style="background:#fdf2f8; border:1px solid #fbcfe8;">
+        <div style="width:38px; height:38px; border-radius:50%; background:#ec4899; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <i class="fas fa-birthday-cake" style="color:#fff;"></i>
+        </div>
+        <div>
+            <div style="font-weight:600; font-size:13.5px; color:#9d174d;">
+                🎂 {{ $cumpleanioMesCount }} cliente(s) de cumpleaños este mes
+            </div>
+            <div style="font-size:12px; color:#be185d;">Ideal para ofrecer un descuento o promoción de fidelización — clic para verlos</div>
+        </div>
+    </div>
+</a>
+@endif
+
 {{-- Filtros --}}
 <div class="card mb-4">
     <div class="card-body p-3">
         <form method="GET" class="row g-2 align-items-end">
-            <div class="col-md-6">
+            <div class="col-md-5">
                 <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-search fa-sm"></i></span>
                     <input type="text" class="form-control" name="buscar"
@@ -35,7 +51,16 @@
                     <option value="empresa" {{ request('tipo')=='empresa'?'selected':'' }}>Empresa</option>
                 </select>
             </div>
-            <div class="col-md-3 d-flex gap-2">
+            <div class="col-md-2 d-flex align-items-center">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="cumpleanio" value="1" id="filtroCumpleanio"
+                           {{ request('cumpleanio') ? 'checked' : '' }} onchange="this.form.submit()">
+                    <label class="form-check-label" for="filtroCumpleanio" style="font-size:12.5px;">
+                        🎂 Cumpleaños este mes
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-2 d-flex gap-2">
                 <button type="submit" class="btn btn-primary flex-1">
                     <i class="fas fa-filter me-1"></i>Filtrar
                 </button>
@@ -77,7 +102,12 @@
                                     {{ strtoupper(substr($cliente->nombre, 0, 1)) }}
                                 </div>
                                 <div>
-                                    <div style="font-weight:500; font-size:13.5px;">{{ $cliente->nombre_completo }}</div>
+                                    <div style="font-weight:500; font-size:13.5px;">
+                                        {{ $cliente->nombre_completo }}
+                                        @if($cliente->cumpleAnioEsteMes())
+                                            <span title="Cumpleaños este mes ({{ $cliente->fecha_nacimiento->format('d/m') }})">🎂</span>
+                                        @endif
+                                    </div>
                                     <div style="font-size:11px; color:#9ca3af;">{{ $cliente->email ?? 'Sin email' }}</div>
                                 </div>
                             </div>
@@ -109,6 +139,17 @@
                         </td>
                         <td class="text-end pe-4">
                             <div class="d-flex gap-1 justify-content-end">
+                                @if($cliente->cumpleAnioEsteMes() && $cliente->numeroWhatsapp())
+                                @php
+                                    $mensajeCumple = "¡Feliz cumpleaños, {$cliente->nombre}! 🎉 De parte de "
+                                        . ($config->nombre_tienda ?? 'nuestra tienda')
+                                        . " queremos celebrar contigo con un descuento especial en tu próxima compra. ¡Te esperamos!";
+                                @endphp
+                                <a href="{{ $cliente->whatsappUrl($mensajeCumple) }}" target="_blank" rel="noopener"
+                                   class="btn btn-sm" style="background:#25D366; color:#fff; border-radius:8px; padding:5px 10px;" title="Enviar saludo de cumpleaños por WhatsApp">
+                                    <i class="fab fa-whatsapp fa-sm"></i>
+                                </a>
+                                @endif
                                 <a href="{{ route('clientes.show', $cliente) }}"
                                    class="btn btn-sm" style="background:#f3f4f6; color:#374151; border-radius:8px; padding:5px 10px;">
                                     <i class="fas fa-eye fa-sm"></i>

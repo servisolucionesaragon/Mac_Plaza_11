@@ -42,6 +42,10 @@
                             <span><i class="fas fa-user me-1" style="color:#a855f7;"></i><span id="clienteSeleccionadoTexto"></span></span>
                             <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="quitarClienteSeleccionado()">Cambiar</button>
                         </div>
+
+                        <div id="clienteCumpleanio" class="mt-2 p-2 rounded-3" style="background:#fdf2f8; border:1px solid #fbcfe8; font-size:12.5px; color:#9d174d; display:none;">
+                            🎂 Este cliente cumple años este mes — considera aplicar un descuento de fidelización.
+                        </div>
                     </div>
 
                     {{-- Buscador de productos --}}
@@ -292,6 +296,7 @@ function seleccionarCliente(id) {
     document.getElementById('clienteSeleccionadoTexto').textContent =
         `${c.nombre} — ${c.tipo_documento ? c.tipo_documento + ' ' : ''}${c.dni ?? ''}`;
     clienteSeleccionado.style.display = 'flex';
+    document.getElementById('clienteCumpleanio').style.display = c.cumple_mes ? 'block' : 'none';
     buscadorCliente.value = '';
     buscadorCliente.style.display = 'none';
     clienteResultados.style.display = 'none';
@@ -302,6 +307,7 @@ function seleccionarCliente(id) {
 function quitarClienteSeleccionado() {
     clienteIdInput.value = '';
     clienteSeleccionado.style.display = 'none';
+    document.getElementById('clienteCumpleanio').style.display = 'none';
     buscadorCliente.style.display = 'block';
     buscadorCliente.value = '';
     buscadorCliente.focus();

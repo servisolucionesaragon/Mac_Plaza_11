@@ -25,11 +25,17 @@ class ClienteController extends Controller
             $query->where('tipo', $request->tipo);
         }
 
+        if ($request->boolean('cumpleanio')) {
+            $query->conCumpleanioEsteMes();
+        }
+
         $clientes = $query->withCount(['ventas', 'reparaciones'])
             ->orderByDesc('created_at')
             ->paginate(15);
 
-        return view('clientes.index', compact('clientes'));
+        $cumpleanioMesCount = Cliente::where('activo', true)->conCumpleanioEsteMes()->count();
+
+        return view('clientes.index', compact('clientes', 'cumpleanioMesCount'));
     }
 
     public function create()

@@ -44,6 +44,13 @@
                         <span>{{ $cliente->celular }}</span>
                     </div>
                     @endif
+                    @if($cliente->numeroWhatsapp())
+                    <a href="{{ $cliente->whatsappUrl('Hola ' . $cliente->nombre . ', te saludamos de ' . ($config->nombre_tienda ?? 'la tienda') . '.') }}"
+                       target="_blank" rel="noopener"
+                       class="btn btn-sm w-100 mt-1" style="background:#25D366; color:#fff; border-radius:8px;">
+                        <i class="fab fa-whatsapp me-2"></i>Contactar por WhatsApp
+                    </a>
+                    @endif
                     @if($cliente->dni)
                     <div class="d-flex align-items-center gap-2 mb-2">
                         <i class="fas fa-id-card" style="color:#a855f7; width:16px;"></i>

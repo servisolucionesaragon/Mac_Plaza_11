@@ -33,6 +33,17 @@
         </p>
     </div>
     <div class="d-flex gap-2">
+        @if($reparacion->estado === 'listo' && $reparacion->cliente && $reparacion->cliente->numeroWhatsapp())
+        @php
+            $mensajeListo = "Hola {$reparacion->cliente->nombre}, te saludamos de " . ($config->nombre_tienda ?? 'la tienda')
+                . ". Tu equipo {$reparacion->dispositivo}" . ($reparacion->modelo ? " {$reparacion->modelo}" : '')
+                . " (orden {$reparacion->numero_orden}) ya está listo para recoger. ¡Te esperamos!";
+        @endphp
+        <a href="{{ $reparacion->cliente->whatsappUrl($mensajeListo) }}" target="_blank" rel="noopener"
+           class="btn px-4" style="background:#25D366; color:#fff;">
+            <i class="fab fa-whatsapp me-2"></i>Avisar por WhatsApp
+        </a>
+        @endif
         <a href="{{ route('reparaciones.recibo', $reparacion) }}" class="btn btn-outline-primary px-4">
             <i class="fas fa-receipt me-2"></i>Recibo
         </a>

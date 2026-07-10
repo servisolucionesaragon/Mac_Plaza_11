@@ -554,7 +554,11 @@
                     $creditosPorVencerCount = \App\Models\Venta::where('es_credito', true)->where('saldo_pendiente', '>', 0)
                         ->whereDate('fecha_vencimiento', '>=', now())->whereDate('fecha_vencimiento', '<=', now()->addDays(3))->count();
                 }
-                $totalAlertas = $stockBajoCount + $creditosVencidosCount + $creditosPorVencerCount;
+                $cumpleanioMesCount = 0;
+                if (Auth::user()->puedeAcceder('clientes')) {
+                    $cumpleanioMesCount = \App\Models\Cliente::where('activo', true)->conCumpleanioEsteMes()->count();
+                }
+                $totalAlertas = $stockBajoCount + $creditosVencidosCount + $creditosPorVencerCount + $cumpleanioMesCount;
             @endphp
             <div class="dropdown">
                 <button class="topbar-btn" data-bs-toggle="dropdown">
@@ -578,6 +582,11 @@
                         @if($creditosPorVencerCount > 0)
                         <li><a class="dropdown-item" href="{{ route('reportes.index') }}">
                             <i class="fas fa-clock text-warning me-2"></i>{{ $creditosPorVencerCount }} crédito(s) por vencer (≤3 días)
+                        </a></li>
+                        @endif
+                        @if($cumpleanioMesCount > 0)
+                        <li><a class="dropdown-item" href="{{ route('clientes.index', ['cumpleanio' => 1]) }}">
+                            <i class="fas fa-birthday-cake text-danger me-2"></i>{{ $cumpleanioMesCount }} cliente(s) de cumpleaños este mes
                         </a></li>
                         @endif
                     @endif

@@ -112,6 +112,7 @@ class VentaController extends Controller
                 'dni'            => $c->dni,
                 'tipo_documento' => $c->tipo_documento,
                 'telefono'       => $c->telefono,
+                'cumple_mes'     => $c->cumpleAnioEsteMes(),
             ];
         })->values();
 
