@@ -644,12 +644,24 @@
 
         @yield('content')
     </main>
+
+    <footer style="text-align:center; padding:16px 28px; font-size:11px; color:var(--text-muted);">
+        <p style="margin:0;">
+            &copy; <span id="year">{{ date('Y') }}</span> Todos los derechos reservados. Desarrollado por:
+            <a href="https://ssaragon.com" target="_blank" rel="noopener noreferrer" style="color:#E85D04; text-decoration:none;">Servisoluciones Aragón</a>
+        </p>
+    </footer>
 </div>
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+    var yearEl = document.getElementById('year');
+    if (yearEl) yearEl.textContent = new Date().getFullYear();
+</script>
 
 @stack('scripts')
 </body>

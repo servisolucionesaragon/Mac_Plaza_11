@@ -11,15 +11,33 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --accent1: {{ $config->color_primario ?? '#a855f7' }};
+            --accent2: {{ $config->color_secundario ?? '#ec4899' }};
+            --sidebar-bg: {{ $config->color_sidebar ?? '#1a0a3e' }};
+            --btn-bg: {{ $config->color_boton_fondo ?? '#a855f7' }};
+            --btn-text: {{ $config->color_boton_texto ?? '#ffffff' }};
+            --login-fondo: {{ $config->color_login_fondo ?? '#1a0a3e' }};
+            --login-tarjeta: {{ $config->color_login_tarjeta ?? '#a855f7' }};
+            --login-texto-modulos: {{ $config->color_login_texto_modulos ?? '#ffffff' }};
+        }
         * { box-sizing: border-box; }
         body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #1a0a3e 0%, #2d1b69 50%, #4c1d95 100%);
+            background: var(--login-fondo);
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 20px;
+        }
+
+        .page-footer {
+            text-align: center;
+            color: rgba(255,255,255,.6);
+            font-size: 11px;
+            margin-top: 20px;
         }
 
         .login-container {
@@ -35,7 +53,7 @@
         /* Panel izquierdo decorativo */
         .login-left {
             flex: 1;
-            background: linear-gradient(135deg, #a855f7, #ec4899);
+            background: var(--login-tarjeta);
             padding: 48px 40px;
             display: flex;
             flex-direction: column;
@@ -64,8 +82,10 @@
 
         .login-left .brand {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 14px;
+            text-align: center;
+            gap: 10px;
             position: relative; z-index: 1;
         }
 
@@ -78,20 +98,21 @@
         }
 
         .login-left .brand-text h1 {
-            color: #fff;
+            color: var(--login-texto-modulos);
             font-size: 20px;
             font-weight: 700;
             margin: 0;
         }
 
         .login-left .brand-text p {
-            color: rgba(255,255,255,.8);
+            color: color-mix(in srgb, var(--login-texto-modulos) 80%, transparent);
             font-size: 12px;
             margin: 0;
         }
 
         .login-left .features {
             position: relative; z-index: 1;
+            margin-top: 32px;
         }
 
         .login-left .feature-item {
@@ -106,19 +127,19 @@
             background: rgba(255,255,255,.2);
             border-radius: 10px;
             display: flex; align-items: center; justify-content: center;
-            color: #fff; font-size: 16px;
+            color: var(--login-texto-modulos); font-size: 16px;
             flex-shrink: 0;
         }
 
         .login-left .feature-text h6 {
-            color: #fff;
+            color: var(--login-texto-modulos);
             font-size: 13px;
             font-weight: 600;
             margin: 0;
         }
 
         .login-left .feature-text p {
-            color: rgba(255,255,255,.7);
+            color: color-mix(in srgb, var(--login-texto-modulos) 70%, transparent);
             font-size: 11px;
             margin: 0;
         }
@@ -162,8 +183,8 @@
         }
 
         .form-control:focus {
-            border-color: #a855f7;
-            box-shadow: 0 0 0 3px rgba(168,85,247,.15);
+            border-color: var(--accent1);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent1) 15%, transparent);
             outline: none;
         }
 
@@ -181,17 +202,17 @@
         }
 
         .input-group:focus-within .input-group-text {
-            border-color: #a855f7;
+            border-color: var(--accent1);
         }
 
         .btn-login {
-            background: linear-gradient(135deg, #a855f7, #ec4899);
+            background: var(--btn-bg);
             border: none;
             border-radius: 10px;
             padding: 11px;
             font-size: 14px;
             font-weight: 600;
-            color: #fff;
+            color: var(--btn-text);
             width: 100%;
             cursor: pointer;
             transition: opacity .2s, transform .2s;
@@ -216,18 +237,23 @@
         }
 
         .form-check-input:checked {
-            background-color: #a855f7;
-            border-color: #a855f7;
+            background-color: var(--accent1);
+            border-color: var(--accent1);
         }
 
-        .text-accent { color: #a855f7; }
-        .text-accent:hover { color: #9333ea; }
+        .text-accent { color: var(--accent1); }
+        .text-accent:hover { filter: brightness(.85); }
 
         .alert { border-radius: 10px; font-size: 13px; }
 
         @media (max-width: 640px) {
-            .login-left { display: none; }
-            .login-right { border-radius: 24px; }
+            .login-container { flex-direction: column; min-height: auto; }
+            .login-left {
+                flex: 0 0 auto;
+                padding: 28px 24px;
+            }
+            .login-left .features { display: none; }
+            .login-right { border-radius: 0 0 24px 24px; }
         }
     </style>
 </head>
@@ -251,6 +277,13 @@
 
             <div class="features">
                 <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-shopping-cart"></i></div>
+                    <div class="feature-text">
+                        <h6>Control de Ventas</h6>
+                        <p>Registra y monitorea cada venta</p>
+                    </div>
+                </div>
+                <div class="feature-item">
                     <div class="feature-icon"><i class="fas fa-users"></i></div>
                     <div class="feature-text">
                         <h6>Gestión de Clientes</h6>
@@ -258,10 +291,10 @@
                     </div>
                 </div>
                 <div class="feature-item">
-                    <div class="feature-icon"><i class="fas fa-shopping-cart"></i></div>
+                    <div class="feature-icon"><i class="fas fa-box"></i></div>
                     <div class="feature-text">
-                        <h6>Control de Ventas</h6>
-                        <p>Registra y monitorea cada venta</p>
+                        <h6>Inventario</h6>
+                        <p>Controla tu stock en tiempo real</p>
                     </div>
                 </div>
                 <div class="feature-item">
@@ -278,10 +311,20 @@
                         <p>Toma decisiones con datos reales</p>
                     </div>
                 </div>
-            </div>
-
-            <div style="color: rgba(255,255,255,.5); font-size: 11px; position:relative; z-index:1;">
-                © {{ date('Y') }} CRM Tienda Celulares
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-cog"></i></div>
+                    <div class="feature-text">
+                        <h6>Configuración de plataforma</h6>
+                        <p>Personaliza el sistema a tu medida</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-database"></i></div>
+                    <div class="feature-text">
+                        <h6>Respaldo de BD</h6>
+                        <p>Protege la información de tu negocio</p>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -332,7 +375,7 @@
                         $whatsappOlvidoClave = isset($config) ? $config->whatsappUrl($mensajeOlvidoClave) : null;
                     @endphp
                     @if($whatsappOlvidoClave)
-                    <a href="{{ $whatsappOlvidoClave }}" target="_blank" rel="noopener" class="text-accent text-decoration-none" style="font-size:13px;">
+                    <a href="{{ $whatsappOlvidoClave }}" target="_blank" rel="noopener" style="font-size:13px; color:#00B5C8; text-decoration:none;">
                         <i class="fab fa-whatsapp me-1"></i>¿Olvidaste tu contraseña?
                     </a>
                     @endif
@@ -345,6 +388,17 @@
         </div>
     </div>
 
+    <div class="page-footer">
+        <p style="margin:0;">
+            &copy; <span id="year">{{ date('Y') }}</span> Todos los derechos reservados. Desarrollado por:
+            <a href="https://ssaragon.com" target="_blank" rel="noopener noreferrer" style="color:#E85D04; text-decoration:none;">Servisoluciones Aragón</a>
+        </p>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        var yearEl = document.getElementById('year');
+        if (yearEl) yearEl.textContent = new Date().getFullYear();
+    </script>
 </body>
 </html>

@@ -283,6 +283,28 @@
                         </div>
                     </div>
 
+                    <label class="form-label">Colores de la Pantalla de Login</label>
+                    <div class="row g-3 mb-4">
+                        <div class="col-4">
+                            <label class="form-label" style="font-size:12px;">Fondo de la página</label>
+                            <input type="color" name="color_login_fondo" class="form-control form-control-color w-100 @error('color_login_fondo') is-invalid @enderror"
+                                   value="{{ old('color_login_fondo', $config->color_login_fondo) }}" title="Color de fondo del login">
+                            @error('color_login_fondo')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label" style="font-size:12px;">Tarjeta de módulos</label>
+                            <input type="color" name="color_login_tarjeta" class="form-control form-control-color w-100 @error('color_login_tarjeta') is-invalid @enderror"
+                                   value="{{ old('color_login_tarjeta', $config->color_login_tarjeta) }}" title="Color de la tarjeta de módulos del login">
+                            @error('color_login_tarjeta')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label" style="font-size:12px;">Texto de módulos</label>
+                            <input type="color" name="color_login_texto_modulos" class="form-control form-control-color w-100 @error('color_login_texto_modulos') is-invalid @enderror"
+                                   value="{{ old('color_login_texto_modulos', $config->color_login_texto_modulos) }}" title="Color del texto de los módulos del login">
+                            @error('color_login_texto_modulos')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                    </div>
+
                     <button type="submit" class="btn btn-primary w-100">
                         <i class="fas fa-save me-2"></i>Guardar Configuración
                     </button>
