@@ -28,7 +28,7 @@ con control de acceso por roles.
 
 | Módulo | Descripción |
 |---|---|
-| **Dashboard** | KPIs en tiempo real (ventas del día/mes, clientes nuevos, stock bajo, reparaciones pendientes, cartera pendiente por cobrar), gráfico de ventas de los últimos 7 días (Chart.js), top productos vendidos. Colores de los gráficos y de las tarjetas de ranking configurables desde Configuración. Campana de alertas en el topbar: stock bajo, créditos vencidos, créditos por vencer en ≤3 días y clientes de cumpleaños en el mes. **Toggle de tema claro/oscuro** (botón sol/luna en el topbar, claro por defecto, se recuerda en el navegador). |
+| **Dashboard** | KPIs en tiempo real (ventas del día/mes, clientes nuevos, stock bajo, reparaciones pendientes, cartera pendiente por cobrar), gráfico de ventas de los últimos 7 días (Chart.js), top productos vendidos. Colores de los gráficos y de las tarjetas de ranking configurables desde Configuración. Campana de alertas en el topbar: stock bajo, créditos vencidos, créditos por vencer en ≤3 días y clientes de cumpleaños en el mes. |
 | **Clientes** | Registro con DNI/RUC, tipo particular/empresa, historial de compras y reparaciones, búsqueda y filtros. Alerta/filtro/badge de **cumpleaños del mes**. Botones de WhatsApp en la ficha del cliente: contacto directo, cobro de cartera pendiente (mensaje distinto si el crédito ya está en mora) y felicitación de cumpleaños con oferta de descuento. Indicativo de país fijo `+57` (Colombia). |
 | **Inventario (Productos)** | Stock en tiempo real, alertas de stock mínimo, specs técnicas (IMEI/serial, RAM, almacenamiento), condición (nuevo/reacondicionado/usado), márgenes automáticos, exportar el inventario completo a Excel. |
 | **Ventas (POS)** | Búsqueda de productos en tiempo real, impuesto configurable, descuentos, métodos de pago editables, numeración automática (`VTA-000001`), filtro por tipo de venta (Contado/Crédito), recibo con toggle Hoja Carta / Tirilla térmica 80mm (con logo en la cabecera de la tirilla) y botón para enviarlo por WhatsApp mediante un enlace público firmado. **Ventas a crédito:** saldo pendiente, fecha de vencimiento, abono inicial opcional al crear, y registro de abonos parciales después (cada uno con su propio recibo hoja/tirilla, también enviable por WhatsApp) — la venta queda en estado "Pendiente" hasta saldar el 100% del crédito, momento en el que pasa a "Completada" automáticamente. **Edición y cancelación** (solo rol Administrador): editar cliente, productos/cantidades, método de pago, tipo de venta y notas de una venta ya registrada (revierte y reaplica el stock correctamente, recalcula el saldo pendiente si ya tiene abonos); cancelar restaura el stock. |
@@ -245,28 +245,3 @@ botones "Volver"/"Enviar por WhatsApp" solo se muestran cuando `!($publico ?? fa
   recalculado también en el evento `beforeprint`. Aplica a los 3 recibos (venta, abono,
   reparación) y es un cuidado a tener en cuenta en cualquier otra vista de impresión con
   ancho fijo/alto variable.
-- **Tema claro/oscuro — patrón de variables CSS:** `layouts/app.blade.php` define
-  colores como variables CSS en `:root` (algunas fijas, otras tomadas de
-  `Configuracion` para marca/menú/botones) con un segundo bloque
-  `html[data-theme="dark"] { --var: ...; }` que las sobreescribe. El atributo
-  `data-theme` se fija en `<html>` mediante un script inline al inicio de `<head>`
-  (antes de cualquier CSS) leyendo `localStorage` (clave `tema_crm`, default
-  `light`), para evitar parpadeo del tema incorrecto al cargar. El botón del topbar
-  dispara `toggleTheme()`, que además emite un evento `themechange` — los 3 gráficos
-  Chart.js (Dashboard/Reportes) lo escuchan para recolorear ejes/leyenda sin recargar
-  la página. **Al agregar cualquier color nuevo en una vista** (fondo o texto), usar
-  siempre las variables existentes (`var(--card-bg)`, `var(--text-dark)`,
-  `var(--text-muted)`, `var(--input-bg)`, etc.) en vez de un hex fijo — un color
-  hardcodeado no reacciona al toggle y puede quedar ilegible en el tema contrario
-  (se encontraron y corrigieron ~15 casos así en la primera implementación: texto
-  convertido a variable pero la caja que lo contenía seguía con fondo claro fijo,
-  o viceversa). Excepción deliberada: los "badges"/acentos de estado con su propio
-  par fondo-pastel + texto-saturado a juego (ej. `background:#d1fae5;
-  color:#065f46;`) se dejan siempre hardcodeados — son legibles como acento en
-  cualquier tema y no deben theming-arse. Para impresión, un `@media print` en
-  `layouts/app.blade.php` sobreescribe todas las variables de tema a sus valores
-  claros con `!important` — como eso gana sobre cualquier declaración normal sin
-  importar especificidad, cualquier `var(--text-dark)` usado en cualquier vista se
-  imprime en claro automáticamente sin tener que perseguir cada selector. Fuera de
-  alcance intencional: `auth/login.blade.php` y `layouts/publico.blade.php`
-  (recibos públicos) tienen su propio `<style>` separado y quedan siempre en claro.
