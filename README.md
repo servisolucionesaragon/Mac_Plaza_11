@@ -4,7 +4,8 @@ CRM/POS a medida para una tienda de venta y reparación de celulares: inventario
 punto de venta, clientes, órdenes de servicio técnico, reportes y configuración,
 con control de acceso por roles.
 
-- **Producción:** https://app.ssaragon.com/celulares
+- **Producción (demo/portal):** https://app.ssaragon.com/celulares
+- **Producción (cliente Mac Plaza 11):** https://app.macplaza11.com
 - **Stack:** Laravel 10 (PHP 8.1+) · Blade · Bootstrap 5.3 · Chart.js 4.x · Font Awesome 6.4 · MySQL/MariaDB
 
 ---
@@ -198,6 +199,14 @@ botones "Volver"/"Enviar por WhatsApp" solo se muestran cuando `!($publico ?? fa
   producto), no `Storage::url()`.
 - Backups de base de datos y código de referencia (no necesariamente la última
   versión) se conservan fuera del repositorio, en el NAS interno del equipo.
+- **Dos despliegues desde el mismo repo:** además de la demo del portal
+  (`/celulares`, subcarpeta), este código corre como instancia dedicada para el
+  cliente real Mac Plaza 11 en `app.macplaza11.com` (dominio propio, servidor
+  Nginx separado, sin subcarpeta), con su propia base de datos (`macplaza_crm`) y
+  su propio `APP_KEY` — nunca reutilizar el `.env`/`APP_KEY` de una instancia en
+  la otra. Un cambio de código debe desplegarse a **ambos** directorios del
+  servidor (`/var/www/celulares` y `/var/www/macplaza`) por separado; el repo
+  Git no despliega automáticamente a ninguno de los dos.
 
 ## Problemas conocidos y decisiones de diseño
 
