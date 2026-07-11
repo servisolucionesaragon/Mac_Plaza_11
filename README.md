@@ -37,7 +37,7 @@ con control de acceso por roles.
 | **Catálogos** | Gestión (crear/editar/activar-desactivar/eliminar) de categorías, marcas, condición, almacenamiento, RAM y métodos de pago — antes eran listas fijas hardcodeadas, ahora son catálogos dinámicos y protegidos contra borrado si tienen productos/ventas asociadas. |
 | **Reportes** | Filtro por fechas, ventas por día/método de pago, top 10 productos/clientes, reparaciones por estado, estadísticas del sistema (usuarios/clientes/productos/ventas/reparaciones), **Cartera por Cobrar** (ventas a crédito con saldo pendiente, con días de atraso si vencieron, sin depender del filtro de fechas), y **Abonos de Crédito Cobrados** en el período (dinero efectivamente recibido, aunque la venta siga "Pendiente"). |
 | **Mi Perfil** | Cualquier usuario autenticado (sin importar rol) puede editar su nombre, correo y teléfono, y cambiar su contraseña (requiere confirmar la contraseña actual). Accesible desde el dropdown de usuario en la esquina superior derecha. |
-| **Configuración** | Datos del negocio (nombre, NIT, teléfono, dirección, ciudad/departamento, correo, web), logo, zona horaria, moneda, % de impuesto configurable, gestión de usuarios y permisos por rol. **Colores configurables:** texto del menú, color sólido del ítem de menú seleccionado, texto/fondo de los botones, y 3 colores para los gráficos de Dashboard/Reportes. |
+| **Configuración** | Datos del negocio (nombre, NIT, teléfono, dirección, ciudad/departamento, correo, web), logo, zona horaria, moneda, % de impuesto configurable, gestión de usuarios y permisos por rol. **Colores configurables:** texto del menú, color sólido del ítem de menú seleccionado, texto/fondo de los botones, 3 colores para los gráficos de Dashboard/Reportes, y 3 colores propios de la **pantalla de login** (fondo de la página, tarjeta de módulos, texto de los módulos — independientes de los colores de marca del panel principal). |
 | **Backup & Restauración** | Exportar/importar la BD completa en SQL, restauración con backup automático previo, 3 niveles de reset. |
 
 ## Roles y permisos
@@ -204,9 +204,13 @@ botones "Volver"/"Enviar por WhatsApp" solo se muestran cuando `!($publico ?? fa
   cliente real Mac Plaza 11 en `app.macplaza11.com` (dominio propio, servidor
   Nginx separado, sin subcarpeta), con su propia base de datos (`macplaza_crm`) y
   su propio `APP_KEY` — nunca reutilizar el `.env`/`APP_KEY` de una instancia en
-  la otra. Un cambio de código debe desplegarse a **ambos** directorios del
-  servidor (`/var/www/celulares` y `/var/www/macplaza`) por separado; el repo
-  Git no despliega automáticamente a ninguno de los dos.
+  la otra. **Flujo de despliegue:** `/celulares` (staging) se sigue actualizando
+  a mano por SCP; `/var/www/macplaza` (producción del cliente) es un **clon git
+  real** — se actualiza con `git pull` una vez que el cambio ya se probó en
+  staging y se hizo push a GitHub (nunca por SCP directo a producción). Si una
+  migración cambia `composer.json`/`composer.lock`, correr `composer install
+  --no-dev --optimize-autoloader` después del `git pull` (producción no trackea
+  `vendor/`).
 
 ## Problemas conocidos y decisiones de diseño
 
@@ -254,3 +258,20 @@ botones "Volver"/"Enviar por WhatsApp" solo se muestran cuando `!($publico ?? fa
   recalculado también en el evento `beforeprint`. Aplica a los 3 recibos (venta, abono,
   reparación) y es un cuidado a tener en cuenta en cualquier otra vista de impresión con
   ancho fijo/alto variable.
+- **Eliminar un usuario con historial daba 500:** `ventas.user_id` y `abonos.user_id`
+  tienen `onDelete('restrict')` — MySQL bloqueaba el `DELETE` a nivel de base de datos
+  si el usuario tenía ventas/abonos registrados, y esa excepción no estaba capturada.
+  `ConfiguracionController::destroyUsuario()` ahora verifica
+  `ventas()`/`abonos()`/`reparaciones()` antes de borrar y muestra un mensaje sugiriendo
+  desactivar la cuenta en su lugar.
+- **MySQL puede backfillear mal una columna nueva en filas ya existentes:** al agregar
+  columnas con `->default(...)` a la tabla singleton `configuracion` (que ya tenía datos
+  reales), la fila existente quedó con valores de OTRAS columnas de color en vez del
+  default declarado en la migración — un bug/limitación de "instant DDL" de MySQL 8 al
+  apilar varias rondas de columnas nuevas sobre una tabla con filas preexistentes. El
+  `DESCRIBE` de la tabla mostraba el default correcto, pero la fila real no lo tenía.
+  Se reprodujo en la BD de staging, no en la de producción (clonada más recientemente).
+  **Después de cualquier migración que agregue columnas a una tabla con datos reales,
+  verificar con un `SELECT` explícito** — no asumir que el backfill del default
+  funcionó solo porque la migración no lanzó error. Si sale mal, corregir con un
+  `UPDATE` explícito (un `ALTER TABLE ... FORCE` solo lo arregló parcialmente).
