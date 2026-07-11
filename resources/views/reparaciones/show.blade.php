@@ -89,14 +89,14 @@
                 <h6 class="fw-bold mb-3"><i class="fas fa-stethoscope me-2" style="color:#a855f7;"></i>Diagnóstico</h6>
                 <div class="mb-3">
                     <div style="font-size:11px; color:var(--text-muted-2); margin-bottom:4px;">FALLA REPORTADA POR EL CLIENTE</div>
-                    <div class="p-3 rounded-3" style="background:#fef3c7; font-size:13.5px;">
+                    <div class="p-3 rounded-3" style="background:#fef3c7; font-size:13.5px; color:#92400e;">
                         {{ $reparacion->falla_reportada }}
                     </div>
                 </div>
                 @if($reparacion->diagnostico)
                 <div class="mb-3">
                     <div style="font-size:11px; color:var(--text-muted-2); margin-bottom:4px;">DIAGNÓSTICO TÉCNICO</div>
-                    <div class="p-3 rounded-3" style="background:#e0f2fe; font-size:13.5px;">
+                    <div class="p-3 rounded-3" style="background:#e0f2fe; font-size:13.5px; color:#0369a1;">
                         {{ $reparacion->diagnostico }}
                     </div>
                 </div>
@@ -104,13 +104,13 @@
                 @if($reparacion->solucion)
                 <div>
                     <div style="font-size:11px; color:var(--text-muted-2); margin-bottom:4px;">SOLUCIÓN APLICADA</div>
-                    <div class="p-3 rounded-3" style="background:#d1fae5; font-size:13.5px;">
+                    <div class="p-3 rounded-3" style="background:#d1fae5; font-size:13.5px; color:#065f46;">
                         {{ $reparacion->solucion }}
                     </div>
                 </div>
                 @endif
                 @if($reparacion->notas)
-                <div class="mt-3 p-3 rounded-3" style="background:#f9fafb; font-size:13px; color:var(--text-muted);">
+                <div class="mt-3 p-3 rounded-3" style="background:var(--input-bg); font-size:13px; color:var(--text-muted);">
                     <i class="fas fa-sticky-note me-1"></i>{{ $reparacion->notas }}
                 </div>
                 @endif
@@ -123,7 +123,7 @@
                 <h6 class="fw-bold mb-3"><i class="fas fa-dollar-sign me-2" style="color:#a855f7;"></i>Costos</h6>
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <div class="p-3 rounded-3" style="background:#f8f5ff; text-align:center;">
+                        <div class="p-3 rounded-3" style="background:var(--table-head-bg); text-align:center;">
                             <div style="font-size:11px; color:var(--text-muted-2); margin-bottom:4px;">PRESUPUESTO</div>
                             <div style="font-size:24px; font-weight:700; color:#7c3aed;">
                                 {{ $config->simbolo_moneda }} {{ number_format($reparacion->presupuesto, 2) }}
@@ -178,7 +178,7 @@
                             </div>
                             <div class="text-muted" style="font-size:11.5px;">{{ $h->usuario->name ?? 'Usuario eliminado' }}</div>
                             @if($h->nota)
-                                <div class="mt-1 p-2 rounded-3" style="background:#f9fafb; color:#4b5563;">{{ $h->nota }}</div>
+                                <div class="mt-1 p-2 rounded-3" style="background:var(--input-bg); color:var(--text-dark);">{{ $h->nota }}</div>
                             @endif
                         </div>
                     </div>

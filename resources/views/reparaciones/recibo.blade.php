@@ -18,7 +18,7 @@
     .page-content { padding: 0 !important; }
     .recibo { box-shadow: none !important; border: none !important; }
 }
-.recibo-box { background:#f9fafb; border-radius:10px; padding:10px 14px; }
+.recibo-box { background:var(--input-bg); color:var(--text-dark); border-radius:10px; padding:10px 14px; }
 .recibo-label { font-size:10.5px; color:var(--text-muted-2); text-transform:uppercase; letter-spacing:.3px; margin-bottom:2px; }
 .recibo-value { font-size:13.5px; font-weight:600; color:var(--text-dark); }
 
@@ -170,15 +170,15 @@
                     <div class="recibo-box p-0" style="overflow:hidden;">
                         <div class="px-3 py-2" style="border-bottom:1px solid #e5e7eb;">
                             <div class="recibo-label mb-1">Falla Reportada por el Cliente</div>
-                            <div style="font-size:13px; color:#374151;">{{ $reparacion->falla_reportada ?: '—' }}</div>
+                            <div style="font-size:13px; color:var(--text-dark);">{{ $reparacion->falla_reportada ?: '—' }}</div>
                         </div>
                         <div class="px-3 py-2" style="border-bottom:1px solid #e5e7eb;">
                             <div class="recibo-label mb-1">Diagnóstico Técnico</div>
-                            <div style="font-size:13px; color:#374151;">{{ $reparacion->diagnostico ?: 'Pendiente de diagnóstico.' }}</div>
+                            <div style="font-size:13px; color:var(--text-dark);">{{ $reparacion->diagnostico ?: 'Pendiente de diagnóstico.' }}</div>
                         </div>
                         <div class="px-3 py-2">
                             <div class="recibo-label mb-1">Solución Aplicada</div>
-                            <div style="font-size:13px; color:#374151;">{{ $reparacion->solucion ?: '—' }}</div>
+                            <div style="font-size:13px; color:var(--text-dark);">{{ $reparacion->solucion ?: '—' }}</div>
                         </div>
                     </div>
                 </div>

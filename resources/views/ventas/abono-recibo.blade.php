@@ -18,7 +18,7 @@
     .page-content { padding: 0 !important; }
     .recibo { box-shadow: none !important; border: none !important; }
 }
-.recibo-box { background:#f9fafb; border-radius:10px; padding:10px 14px; }
+.recibo-box { background:var(--input-bg); color:var(--text-dark); border-radius:10px; padding:10px 14px; }
 .recibo-label { font-size:10.5px; color:var(--text-muted-2); text-transform:uppercase; letter-spacing:.3px; margin-bottom:2px; }
 .recibo-value { font-size:13.5px; font-weight:600; color:var(--text-dark); }
 
@@ -135,7 +135,7 @@
                 </div>
 
                 @if($abono->notas)
-                <div class="mb-3 p-3 rounded-3" style="background:#f9fafb; font-size:12.5px; color:var(--text-muted);">
+                <div class="mb-3 p-3 rounded-3" style="background:var(--input-bg); font-size:12.5px; color:var(--text-muted);">
                     <i class="fas fa-sticky-note me-1"></i><strong>Notas:</strong> {{ $abono->notas }}
                 </div>
                 @endif

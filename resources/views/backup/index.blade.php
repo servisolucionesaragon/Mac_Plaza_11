@@ -70,17 +70,17 @@
 
     /* ── Upload drop zone ─────────────────────────────────── */
     .drop-zone {
-        border: 2px dashed #d1d5db;
+        border: 2px dashed var(--border-color);
         border-radius: 14px;
         padding: 32px 24px;
         text-align: center;
         cursor: pointer;
         transition: all .3s;
-        background: #fafbff;
+        background: var(--input-bg);
     }
     .drop-zone:hover, .drop-zone.dragover {
         border-color: #a855f7;
-        background: #fdf4ff;
+        background: var(--table-hover-bg);
     }
     .drop-zone input[type=file] { display: none; }
     .drop-zone .dz-icon { font-size: 40px; color: #d1d5db; margin-bottom: 12px; transition: color .3s; }
@@ -93,12 +93,12 @@
         gap: 14px;
         padding: 12px 16px;
         border-radius: 12px;
-        border: 1px solid #f3f4f6;
+        border: 1px solid var(--border-color);
         margin-bottom: 8px;
         transition: all .2s;
-        background: #fff;
+        background: var(--card-bg);
     }
-    .backup-item:hover { border-color: #e9d5ff; background: #fdf4ff; }
+    .backup-item:hover { border-color: #e9d5ff; background: var(--table-hover-bg); }
     .backup-item .bi-icon {
         width: 40px; height: 40px;
         border-radius: 10px;
@@ -225,10 +225,10 @@
                     </div>
                 </div>
 
-                <div class="rounded-3 p-3 mb-4" style="background:#f8f5ff;border:1px solid #e9d5ff;font-size:12px;color:var(--text-muted);">
+                <div class="rounded-3 p-3 mb-4" style="background:var(--table-head-bg);border:1px solid #e9d5ff;font-size:12px;color:var(--text-muted);">
                     <div class="d-flex align-items-center gap-2 mb-1">
                         <i class="fas fa-info-circle" style="color:#a855f7;"></i>
-                        <strong style="color:#374151;">¿Qué incluye?</strong>
+                        <strong style="color:var(--text-dark);">¿Qué incluye?</strong>
                     </div>
                     <ul class="mb-0 ps-4" style="line-height:1.9;">
                         <li>Estructura completa de tablas</li>
@@ -275,7 +275,7 @@
                             <i class="fas fa-file-code"></i>
                         </div>
                         <div class="flex-grow-1" style="min-width:0;">
-                            <div style="font-size:12px;font-weight:600;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="{{ $bk['nombre'] }}">
+                            <div style="font-size:12px;font-weight:600;color:var(--text-dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="{{ $bk['nombre'] }}">
                                 {{ Str::limit($bk['nombre'], 28) }}
                             </div>
                             <div style="font-size:11px;color:var(--text-muted-2);">
@@ -337,7 +337,7 @@
                     <div class="drop-zone mb-3" id="dropZone" onclick="document.getElementById('archivoSql').click()">
                         <input type="file" name="archivo_sql" id="archivoSql" accept=".sql,.txt">
                         <div class="dz-icon"><i class="fas fa-cloud-upload-alt"></i></div>
-                        <div id="dzText" style="font-size:13px;font-weight:600;color:#374151;">
+                        <div id="dzText" style="font-size:13px;font-weight:600;color:var(--text-dark);">
                             Arrastra tu archivo .sql aquí
                         </div>
                         <div style="font-size:11px;color:var(--text-muted-2);margin-top:4px;">o haz clic para seleccionar · Máx. 100 MB</div>
@@ -384,7 +384,7 @@
                             🧹
                         </div>
                         <div>
-                            <div style="font-weight:600;font-size:13.5px;color:#374151;margin-bottom:4px;">
+                            <div style="font-weight:600;font-size:13.5px;color:var(--text-dark);margin-bottom:4px;">
                                 Reset Ventas
                                 <span class="reset-badge ms-1" style="background:#fef3c7;color:#92400e;">Moderado</span>
                             </div>
@@ -403,7 +403,7 @@
                             🗂️
                         </div>
                         <div>
-                            <div style="font-weight:600;font-size:13.5px;color:#374151;margin-bottom:4px;">
+                            <div style="font-weight:600;font-size:13.5px;color:var(--text-dark);margin-bottom:4px;">
                                 Reset Datos
                                 <span class="reset-badge ms-1" style="background:#fee2e2;color:#991b1b;">Alto</span>
                             </div>
@@ -422,7 +422,7 @@
                             🏭
                         </div>
                         <div>
-                            <div style="font-weight:600;font-size:13.5px;color:#374151;margin-bottom:4px;">
+                            <div style="font-weight:600;font-size:13.5px;color:var(--text-dark);margin-bottom:4px;">
                                 Reset Total
                                 <span class="reset-badge ms-1" style="background:#fecaca;color:#7f1d1d;">Crítico</span>
                             </div>
@@ -443,7 +443,7 @@
         <div class="confirm-box" id="confirmBox" style="display:none;">
             <div class="row align-items-center g-3">
                 <div class="col-md-6">
-                    <label style="font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">
+                    <label style="font-size:13px;font-weight:600;color:var(--text-dark);margin-bottom:6px;">
                         <i class="fas fa-keyboard me-1" style="color:#ef4444;"></i>
                         Escribe <strong style="color:#ef4444;">RESETEAR</strong> para confirmar
                     </label>

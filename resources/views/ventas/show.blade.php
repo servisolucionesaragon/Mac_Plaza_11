@@ -79,7 +79,7 @@
                 {{-- Datos del cliente --}}
                 <div class="row g-3 mb-4">
                     <div class="col-md-6">
-                        <div class="p-3 rounded-3" style="background:#f8f5ff;">
+                        <div class="p-3 rounded-3" style="background:var(--table-head-bg);">
                             <div style="font-size:11px; color:var(--text-muted-2); margin-bottom:4px;">CLIENTE</div>
                             <div style="font-weight:600;">{{ $venta->cliente->nombre_completo ?? '—' }}</div>
                             <div style="font-size:12px; color:var(--text-muted);">{{ $venta->cliente->telefono ?? '' }}</div>
@@ -89,7 +89,7 @@
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="p-3 rounded-3" style="background:#f8f5ff;">
+                        <div class="p-3 rounded-3" style="background:var(--table-head-bg);">
                             <div style="font-size:11px; color:var(--text-muted-2); margin-bottom:4px;">PAGO</div>
                             <div style="font-weight:600;">{{ $venta->metodoPago->nombre ?? '—' }}</div>
                             <div style="font-size:12px; color:var(--text-muted);">Vendedor: {{ $venta->vendedor->name ?? '—' }}</div>
@@ -171,7 +171,7 @@
                 </div>
 
                 @if($venta->notas)
-                <div class="mt-3 p-3 rounded-3" style="background:#f9fafb; font-size:13px; color:var(--text-muted);">
+                <div class="mt-3 p-3 rounded-3" style="background:var(--input-bg); font-size:13px; color:var(--text-muted);">
                     <i class="fas fa-sticky-note me-1"></i><strong>Notas:</strong> {{ $venta->notas }}
                 </div>
                 @endif
@@ -250,7 +250,7 @@
 
                 <div class="row g-3 mb-4">
                     <div class="col-md-4">
-                        <div class="recibo-box p-3 rounded-3" style="background:#f8f5ff;">
+                        <div class="recibo-box p-3 rounded-3" style="background:var(--table-head-bg);">
                             <div style="font-size:11px; color:var(--text-muted-2);">SALDO PENDIENTE</div>
                             <div style="font-size:18px; font-weight:700; color:var(--text-dark);">
                                 {{ $config->simbolo_moneda }} {{ number_format($venta->saldo_pendiente, 2) }}
@@ -258,7 +258,7 @@
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="p-3 rounded-3" style="background:#f8f5ff;">
+                        <div class="p-3 rounded-3" style="background:var(--table-head-bg);">
                             <div style="font-size:11px; color:var(--text-muted-2);">FECHA DE VENCIMIENTO</div>
                             <div style="font-size:18px; font-weight:700; color:var(--text-dark);">
                                 {{ optional($venta->fecha_vencimiento)->format('d/m/Y') ?? '—' }}
@@ -266,7 +266,7 @@
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="p-3 rounded-3" style="background:#f8f5ff;">
+                        <div class="p-3 rounded-3" style="background:var(--table-head-bg);">
                             <div style="font-size:11px; color:var(--text-muted-2);">TOTAL ABONADO</div>
                             <div style="font-size:18px; font-weight:700; color:var(--text-dark);">
                                 {{ $config->simbolo_moneda }} {{ number_format($venta->total - $venta->saldo_pendiente, 2) }}
