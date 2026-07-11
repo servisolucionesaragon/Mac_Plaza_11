@@ -142,6 +142,9 @@ class ConfiguracionController extends Controller
         if ($usuario->id === auth()->id()) {
             return back()->with('error', 'No puedes eliminar tu propia cuenta.');
         }
+        if ($usuario->ventas()->exists() || $usuario->abonos()->exists() || $usuario->reparaciones()->exists()) {
+            return back()->with('error', 'No se puede eliminar: el usuario tiene ventas, abonos o reparaciones asociadas. Desactívalo en su lugar.');
+        }
         $usuario->delete();
         return back()->with('success', 'Usuario eliminado correctamente.');
     }

@@ -35,6 +35,11 @@ class User extends Authenticatable
         return $this->hasMany(Reparacion::class, 'tecnico_id');
     }
 
+    public function abonos()
+    {
+        return $this->hasMany(Abono::class, 'user_id');
+    }
+
     public function esAdmin(): bool
     {
         return $this->rol === 'admin';
