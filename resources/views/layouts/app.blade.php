@@ -257,7 +257,7 @@
             width: 38px; height: 38px;
             border-radius: 50%;
             border: none;
-            background: var(--input-bg);
+            background: #f3f4f6;
             color: var(--text-muted);
             display: flex; align-items: center; justify-content: center;
             cursor: pointer;
@@ -437,7 +437,6 @@
 
         /* ── DARK MODE: utilidades Bootstrap ────────────────────── */
         .text-muted { color: var(--text-muted) !important; }
-        .text-dark { color: var(--text-dark) !important; }
         .breadcrumb-item.active { color: var(--text-muted); }
 
         /* ── ALERTS ──────────────────────────────────────────────── */

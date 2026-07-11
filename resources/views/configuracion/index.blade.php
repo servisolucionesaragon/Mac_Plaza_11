@@ -341,7 +341,7 @@
                     @endphp
                     <div class="col-12">
                         <div class="p-3 rounded-3 d-flex align-items-center gap-3"
-                             style="background:var(--input-bg);border:1px solid #f3f4f6;transition:all .2s;"
+                             style="background:#f9fafb;border:1px solid #f3f4f6;transition:all .2s;"
                              onmouseenter="this.style.borderColor='#e9d5ff'"
                              onmouseleave="this.style.borderColor='#f3f4f6'">
 

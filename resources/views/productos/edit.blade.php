@@ -124,7 +124,7 @@
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Margen</label>
-                                    <div class="form-control" style="background:var(--input-bg);">
+                                    <div class="form-control" style="background:#f9fafb;">
                                         <span id="margenValor" style="font-weight:600; color:#10b981;">
                                             {{ number_format($producto->margen, 1) }}%
                                         </span>

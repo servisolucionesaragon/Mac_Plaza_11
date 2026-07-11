@@ -145,7 +145,7 @@
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Margen de Ganancia</label>
-                                    <div class="form-control d-flex align-items-center" style="background:var(--input-bg);">
+                                    <div class="form-control d-flex align-items-center" style="background:#f9fafb;">
                                         <span id="margenValor" style="font-weight:600; color:#10b981;">0.0%</span>
                                         <span id="margenMonto" class="ms-2 text-muted" style="font-size:12px;"></span>
                                     </div>
@@ -191,7 +191,7 @@
                             @enderror
 
                             {{-- Resumen precio --}}
-                            <div class="mt-4 p-3 rounded-3" style="background:var(--table-head-bg);">
+                            <div class="mt-4 p-3 rounded-3" style="background:#f8f5ff;">
                                 <h6 style="font-size:13px; font-weight:600; margin-bottom:12px;">Resumen de Precio</h6>
                                 <div class="d-flex justify-content-between mb-2" style="font-size:13px;">
                                     <span class="text-muted">Precio compra</span>

@@ -93,7 +93,7 @@
                     <span class="text-muted">Ganancia unitaria</span>
                     <span style="color:#10b981;">{{ $config->simbolo_moneda }} {{ number_format($producto->precio_venta - $producto->precio_compra, 2) }}</span>
                 </div>
-                <div class="mt-3 p-2 rounded-3 text-center" style="background:var(--table-head-bg); font-size:12px; color:var(--text-muted);">
+                <div class="mt-3 p-2 rounded-3 text-center" style="background:#f8f5ff; font-size:12px; color:var(--text-muted);">
                     Valor en stock: <strong style="color:#7c3aed;">{{ $config->simbolo_moneda }} {{ number_format($producto->stock * $producto->precio_venta, 2) }}</strong>
                 </div>
             </div>
@@ -138,7 +138,7 @@
                     @if($producto->descripcion)
                     <div class="col-12">
                         <span class="text-muted d-block" style="font-size:11px;">DESCRIPCIÓN</span>
-                        <p style="margin:0; color:var(--text-dark);">{{ $producto->descripcion }}</p>
+                        <p style="margin:0; color:#374151;">{{ $producto->descripcion }}</p>
                     </div>
                     @endif
                 </div>

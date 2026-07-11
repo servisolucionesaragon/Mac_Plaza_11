@@ -78,7 +78,7 @@
                 </div>
 
                 @if($cliente->notas)
-                <div class="mt-3 p-3 rounded-3 text-start" style="background:var(--table-head-bg); font-size:13px; color:var(--text-muted);">
+                <div class="mt-3 p-3 rounded-3 text-start" style="background:#f8f5ff; font-size:13px; color:var(--text-muted);">
                     <i class="fas fa-sticky-note text-muted me-1"></i>{{ $cliente->notas }}
                 </div>
                 @endif

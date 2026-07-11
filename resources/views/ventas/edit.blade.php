@@ -40,7 +40,7 @@
                              style="z-index:1000; max-height:260px; overflow-y:auto; display:none;"></div>
 
                         <div id="clienteSeleccionado" class="mt-2 p-2 rounded-3 d-flex align-items-center justify-content-between"
-                             style="background:var(--table-head-bg); font-size:13px; display:none;">
+                             style="background:#f8f5ff; font-size:13px; display:none;">
                             <span><i class="fas fa-user me-1" style="color:#a855f7;"></i><span id="clienteSeleccionadoTexto"></span></span>
                             <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="quitarClienteSeleccionado()">Cambiar</button>
                         </div>
@@ -168,7 +168,7 @@
                         </div>
                         @if($venta->es_credito)
                         <div class="col-md-6">
-                            <div class="p-2 rounded-3" style="background:var(--table-head-bg); font-size:12.5px;">
+                            <div class="p-2 rounded-3" style="background:#f8f5ff; font-size:12.5px;">
                                 <div class="text-muted">Ya abonado</div>
                                 <div class="fw-bold">{{ $config->simbolo_moneda }} {{ number_format($venta->abonos()->sum('monto'), 2) }}</div>
                             </div>
@@ -232,7 +232,7 @@
                     <span id="resTotal" style="font-size:22px; font-weight:700; color:#a855f7;">{{ $config->simbolo_moneda }} 0.00</span>
                 </div>
 
-                <div class="mb-3 p-3 rounded-3" style="background:var(--table-head-bg); font-size:13px;">
+                <div class="mb-3 p-3 rounded-3" style="background:#f8f5ff; font-size:13px;">
                     <div class="d-flex justify-content-between mb-1">
                         <span class="text-muted">Productos</span>
                         <span id="resCantProductos" class="fw-500">0</span>
