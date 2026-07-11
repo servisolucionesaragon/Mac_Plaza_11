@@ -19,8 +19,8 @@
     .recibo { box-shadow: none !important; border: none !important; }
 }
 .recibo-box { background:#f9fafb; border-radius:10px; padding:10px 14px; }
-.recibo-label { font-size:10.5px; color:#9ca3af; text-transform:uppercase; letter-spacing:.3px; margin-bottom:2px; }
-.recibo-value { font-size:13.5px; font-weight:600; color:#1e1b4b; }
+.recibo-label { font-size:10.5px; color:var(--text-muted-2); text-transform:uppercase; letter-spacing:.3px; margin-bottom:2px; }
+.recibo-value { font-size:13.5px; font-weight:600; color:var(--text-dark); }
 
 .formato-toggle .btn.active { background:#a855f7; color:#fff; border-color:#a855f7; }
 
@@ -90,8 +90,8 @@
                         </div>
                         <div>
                             <div style="font-weight:700; font-size:17px;">{{ $config->nombre_tienda ?? 'CRM Celulares' }}</div>
-                            <div style="font-size:12px; color:#9ca3af;">Comprobante de Venta</div>
-                            <div style="font-size:11px; color:#6b7280; line-height:1.5;">
+                            <div style="font-size:12px; color:var(--text-muted-2);">Comprobante de Venta</div>
+                            <div style="font-size:11px; color:var(--text-muted); line-height:1.5;">
                                 @if($config->ruc) NIT: {{ $config->ruc }} @endif
                                 @if($config->telefono) · Tel: {{ $config->telefono }} @endif
                                 @if($config->direccion || $config->ciudad) <br>{{ $config->direccion }}{{ $config->direccion && $config->ciudad ? ', ' : '' }}{{ $config->ciudad }}{{ $config->departamento ? ' - '.$config->departamento : '' }} @endif
@@ -101,7 +101,7 @@
                     </div>
                     <div class="text-end">
                         <div style="font-size:20px; font-weight:700; color:#a855f7;">{{ $venta->numero_venta }}</div>
-                        <div style="font-size:12px; color:#9ca3af;">{{ $venta->fecha_venta->format('d/m/Y H:i') }}</div>
+                        <div style="font-size:12px; color:var(--text-muted-2);">{{ $venta->fecha_venta->format('d/m/Y H:i') }}</div>
                         @php $cfg=['completada'=>['#d1fae5','#065f46'],'cancelada'=>['#fee2e2','#991b1b'],'pendiente'=>['#fef3c7','#92400e'],'devuelta'=>['#f3f4f6','#374151']]; $c=$cfg[$venta->estado]??['#f3f4f6','#374151']; @endphp
                         <span style="background:{{ $c[0] }}; color:{{ $c[1] }}; border-radius:20px; padding:4px 12px; font-size:12px; font-weight:600; display:inline-block; margin-top:4px;">
                             {{ ucfirst($venta->estado) }}
@@ -115,7 +115,7 @@
                         <div class="recibo-box">
                             <div class="recibo-label">Cliente</div>
                             <div class="recibo-value">{{ $venta->cliente->nombre_completo ?? '—' }}</div>
-                            <div style="font-size:12px; color:#6b7280;">
+                            <div style="font-size:12px; color:var(--text-muted);">
                                 {{ $venta->cliente->telefono ?? '—' }}
                                 @if($venta->cliente->direccion ?? null) · {{ $venta->cliente->direccion }} @endif
                             </div>
@@ -125,7 +125,7 @@
                         <div class="recibo-box">
                             <div class="recibo-label">Método de Pago</div>
                             <div class="recibo-value">{{ $venta->metodoPago->nombre ?? '—' }}</div>
-                            <div style="font-size:11px; color:#6b7280;">Vendedor: {{ $venta->vendedor->name ?? '—' }}</div>
+                            <div style="font-size:11px; color:var(--text-muted);">Vendedor: {{ $venta->vendedor->name ?? '—' }}</div>
                         </div>
                     </div>
                 </div>
@@ -136,11 +136,11 @@
                     <table class="table mb-0" style="font-size:13px;">
                         <thead>
                             <tr style="border-bottom:2px solid #e9d5ff;">
-                                <th style="padding:8px 0; color:#6b7280; font-size:11px; text-transform:uppercase;">Producto</th>
-                                <th style="padding:8px 0; color:#6b7280; font-size:11px; text-transform:uppercase; text-align:center;">Cant.</th>
-                                <th style="padding:8px 0; color:#6b7280; font-size:11px; text-transform:uppercase; text-align:right;">P. Unit.</th>
-                                <th style="padding:8px 0; color:#6b7280; font-size:11px; text-transform:uppercase; text-align:right;">Descto.</th>
-                                <th style="padding:8px 0; color:#6b7280; font-size:11px; text-transform:uppercase; text-align:right;">Subtotal</th>
+                                <th style="padding:8px 0; color:var(--text-muted); font-size:11px; text-transform:uppercase;">Producto</th>
+                                <th style="padding:8px 0; color:var(--text-muted); font-size:11px; text-transform:uppercase; text-align:center;">Cant.</th>
+                                <th style="padding:8px 0; color:var(--text-muted); font-size:11px; text-transform:uppercase; text-align:right;">P. Unit.</th>
+                                <th style="padding:8px 0; color:var(--text-muted); font-size:11px; text-transform:uppercase; text-align:right;">Descto.</th>
+                                <th style="padding:8px 0; color:var(--text-muted); font-size:11px; text-transform:uppercase; text-align:right;">Subtotal</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -149,10 +149,10 @@
                                 <td style="padding:8px 0;">
                                     <div style="font-weight:500;">{{ $det->producto->nombre ?? '—' }}</div>
                                     @if($det->producto && $det->producto->marca)
-                                        <div style="font-size:10.5px; color:#9ca3af;">{{ $det->producto->marca->nombre }}</div>
+                                        <div style="font-size:10.5px; color:var(--text-muted-2);">{{ $det->producto->marca->nombre }}</div>
                                     @endif
                                     @if($det->imei_vendido)
-                                        <div style="font-size:10.5px; color:#9ca3af;">IMEI: {{ $det->imei_vendido }}</div>
+                                        <div style="font-size:10.5px; color:var(--text-muted-2);">IMEI: {{ $det->imei_vendido }}</div>
                                     @endif
                                 </td>
                                 <td style="padding:8px 0; text-align:center;">{{ $det->cantidad }}</td>
@@ -207,7 +207,7 @@
                 </div>
 
                 @if($venta->notas)
-                <div class="mb-3 p-3 rounded-3" style="background:#f9fafb; font-size:12.5px; color:#6b7280;">
+                <div class="mb-3 p-3 rounded-3" style="background:#f9fafb; font-size:12.5px; color:var(--text-muted);">
                     <i class="fas fa-sticky-note me-1"></i><strong>Notas:</strong> {{ $venta->notas }}
                 </div>
                 @endif

@@ -78,7 +78,7 @@
                 </div>
 
                 @if($cliente->notas)
-                <div class="mt-3 p-3 rounded-3 text-start" style="background:#f8f5ff; font-size:13px; color:#6b7280;">
+                <div class="mt-3 p-3 rounded-3 text-start" style="background:#f8f5ff; font-size:13px; color:var(--text-muted);">
                     <i class="fas fa-sticky-note text-muted me-1"></i>{{ $cliente->notas }}
                 </div>
                 @endif
@@ -107,7 +107,7 @@
                             <div style="font-size:22px; font-weight:700; color:#7c3aed;">
                                 {{ $cliente->ventas->count() }}
                             </div>
-                            <div style="font-size:11px; color:#9ca3af;">Compras</div>
+                            <div style="font-size:11px; color:var(--text-muted-2);">Compras</div>
                         </div>
                     </div>
                     <div class="col-6">
@@ -115,7 +115,7 @@
                             <div style="font-size:22px; font-weight:700; color:#059669;">
                                 {{ $config->simbolo_moneda }} {{ number_format($cliente->totalCompras(), 0) }}
                             </div>
-                            <div style="font-size:11px; color:#9ca3af;">Total gastado</div>
+                            <div style="font-size:11px; color:var(--text-muted-2);">Total gastado</div>
                         </div>
                     </div>
                     <div class="col-6">
@@ -123,7 +123,7 @@
                             <div style="font-size:22px; font-weight:700; color:#d97706;">
                                 {{ $cliente->reparaciones->count() }}
                             </div>
-                            <div style="font-size:11px; color:#9ca3af;">Reparaciones</div>
+                            <div style="font-size:11px; color:var(--text-muted-2);">Reparaciones</div>
                         </div>
                     </div>
                     <div class="col-6">
@@ -131,7 +131,7 @@
                             <div style="font-size:14px; font-weight:700; color:#0369a1;">
                                 {{ $cliente->created_at->format('M Y') }}
                             </div>
-                            <div style="font-size:11px; color:#9ca3af;">Desde</div>
+                            <div style="font-size:11px; color:var(--text-muted-2);">Desde</div>
                         </div>
                     </div>
                 </div>
@@ -204,7 +204,7 @@
                             @foreach($cliente->reparaciones->sortByDesc('fecha_recepcion') as $r)
                             <tr>
                                 <td style="color:#a855f7; font-weight:600;">{{ $r->numero_orden }}</td>
-                                <td>{{ $r->dispositivo }}<div style="font-size:11px;color:#9ca3af;">{{ $r->marca }} {{ $r->modelo }}</div></td>
+                                <td>{{ $r->dispositivo }}<div style="font-size:11px;color:var(--text-muted-2);">{{ $r->marca }} {{ $r->modelo }}</div></td>
                                 <td style="max-width:180px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ $r->falla_reportada }}</td>
                                 <td>
                                     @php $label=str_replace('_',' ',ucfirst($r->estado)); @endphp

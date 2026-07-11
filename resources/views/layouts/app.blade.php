@@ -2,6 +2,12 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <script>
+        (function () {
+            var tema = localStorage.getItem('tema_crm') || 'light';
+            document.documentElement.setAttribute('data-theme', tema);
+        })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'CRM') — {{ (isset($config) ? $config->nombre_tienda : null) ?? 'Tienda Celulares' }}</title>
@@ -28,12 +34,40 @@
             --page-bg:       #f4f0fb;
             --text-dark:     #1e1b4b;
             --text-muted:    #6b7280;
+            --text-muted-2:  #9ca3af;
             --sidebar-text:  {{ $config->color_menu_texto ?? '#c9c3d9' }};
             --sidebar-active:#ffffff;
             --menu-active-bg:{{ $config->color_menu_activo ?? '#a855f7' }};
             --nav-hover-bg:  rgba(168,85,247,0.2);
             --btn-bg:        {{ $config->color_boton_fondo ?? '#a855f7' }};
             --btn-text:      {{ $config->color_boton_texto ?? '#ffffff' }};
+            --topbar-bg:     #ffffff;
+            --border-color:  #e5e7eb;
+            --input-bg:      #f9fafb;
+            --table-head-bg: #f8f5ff;
+            --table-head-border: #e9d5ff;
+            --table-hover-bg: #fdf4ff;
+            --dropdown-bg:   #ffffff;
+            --scrollbar-thumb: #d1d5db;
+            --shadow-color:  rgba(0,0,0,.06);
+        }
+
+        html[data-theme="dark"] {
+            --sidebar-bg:    #0f0c1a;
+            --card-bg:       #1e1b2e;
+            --page-bg:       #121018;
+            --text-dark:     #e8e6f5;
+            --text-muted:    #9691ac;
+            --text-muted-2:  #7d7693;
+            --topbar-bg:     #1a1726;
+            --border-color:  #322c47;
+            --input-bg:      #24202f;
+            --table-head-bg: #201c30;
+            --table-head-border: #3a3255;
+            --table-hover-bg: #241f36;
+            --dropdown-bg:   #1e1b2e;
+            --scrollbar-thumb: #423a5c;
+            --shadow-color:  rgba(0,0,0,.35);
         }
 
         * { box-sizing: border-box; }
@@ -44,6 +78,7 @@
             color: var(--text-dark);
             margin: 0;
             overflow-x: hidden;
+            transition: background .2s ease, color .2s ease;
         }
 
         /* ── SIDEBAR ───────────────────────────────────────────────── */
@@ -172,15 +207,16 @@
 
         /* ── TOPBAR ──────────────────────────────────────────────── */
         .topbar {
-            background: #fff;
+            background: var(--topbar-bg);
             padding: 14px 28px;
             display: flex;
             align-items: center;
             gap: 16px;
-            box-shadow: 0 1px 3px rgba(0,0,0,.06);
+            box-shadow: 0 1px 3px var(--shadow-color);
             position: sticky;
             top: 0;
             z-index: 100;
+            transition: background .2s ease;
         }
 
         .topbar .search-box {
@@ -192,18 +228,19 @@
         .topbar .search-box input {
             width: 100%;
             padding: 8px 16px 8px 40px;
-            border: 1.5px solid #e5e7eb;
+            border: 1.5px solid var(--border-color);
             border-radius: 24px;
             font-size: 13px;
             font-family: inherit;
-            background: #f9fafb;
-            transition: border-color .2s;
+            background: var(--input-bg);
+            color: var(--text-dark);
+            transition: border-color .2s, background .2s ease;
             outline: none;
         }
 
         .topbar .search-box input:focus {
             border-color: var(--accent1);
-            background: #fff;
+            background: var(--card-bg);
         }
 
         .topbar .search-box .search-icon {
@@ -252,9 +289,35 @@
 
         /* ── CARDS ───────────────────────────────────────────────── */
         .card {
+            background: var(--card-bg);
             border: none;
             border-radius: 16px;
-            box-shadow: 0 2px 10px rgba(0,0,0,.06);
+            box-shadow: 0 2px 10px var(--shadow-color);
+        }
+
+        .dropdown-menu {
+            background: var(--dropdown-bg);
+            color: var(--text-dark);
+        }
+
+        .dropdown-item {
+            color: var(--text-dark);
+        }
+
+        .dropdown-item:hover, .dropdown-item:focus {
+            background: var(--table-hover-bg);
+            color: var(--text-dark);
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            color: var(--text-dark);
+        }
+
+        .list-group-item {
+            background: var(--card-bg);
+            color: var(--text-dark);
+            border-color: var(--border-color);
         }
 
         .kpi-card {
@@ -313,18 +376,19 @@
         .bg-grad-orange { background: linear-gradient(135deg, #f59e0b, #d97706); }
 
         /* ── TABLE STYLES ────────────────────────────────────────── */
-        .table { font-size: 13.5px; }
+        .table { font-size: 13.5px; color: var(--text-dark); }
         .table thead th {
-            background: #f8f5ff;
+            background: var(--table-head-bg);
             font-weight: 600;
             color: var(--text-dark);
-            border-bottom: 2px solid #e9d5ff;
+            border-bottom: 2px solid var(--table-head-border);
             font-size: 12px;
             text-transform: uppercase;
             letter-spacing: .5px;
         }
 
-        .table tbody tr:hover { background: #fdf4ff; }
+        .table tbody tr:hover { background: var(--table-hover-bg); }
+        .table > :not(caption) > * > * { background: transparent; border-color: var(--border-color); }
 
         /* ── BADGES ──────────────────────────────────────────────── */
         .badge-estado {
@@ -355,16 +419,25 @@
 
         /* ── FORMS ───────────────────────────────────────────────── */
         .form-control, .form-select {
+            background: var(--input-bg);
+            color: var(--text-dark);
             border-radius: 8px;
-            border-color: #e5e7eb;
+            border-color: var(--border-color);
             font-size: 13.5px;
         }
+        .form-control::placeholder { color: var(--text-muted); }
         .form-control:focus, .form-select:focus {
+            background: var(--card-bg);
+            color: var(--text-dark);
             border-color: var(--accent1);
             box-shadow: 0 0 0 3px rgba(168,85,247,.15);
         }
 
         .form-label { font-size: 13px; font-weight: 500; color: var(--text-dark); }
+
+        /* ── DARK MODE: utilidades Bootstrap ────────────────────── */
+        .text-muted { color: var(--text-muted) !important; }
+        .breadcrumb-item.active { color: var(--text-muted); }
 
         /* ── ALERTS ──────────────────────────────────────────────── */
         .alert { border-radius: 10px; font-size: 13.5px; }
@@ -390,7 +463,32 @@
         /* ── SCROLLBAR ───────────────────────────────────────────── */
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+
+        /* ── IMPRESIÓN: siempre en claro, sin importar el tema ──── */
+        @media print {
+            :root {
+                --card-bg:       #ffffff !important;
+                --page-bg:       #ffffff !important;
+                --text-dark:     #1e1b4b !important;
+                --text-muted:    #6b7280 !important;
+                --text-muted-2:  #9ca3af !important;
+                --topbar-bg:     #ffffff !important;
+                --border-color:  #e5e7eb !important;
+                --input-bg:      #ffffff !important;
+                --table-head-bg: #f8f5ff !important;
+                --table-head-border: #e9d5ff !important;
+                --table-hover-bg: transparent !important;
+                --dropdown-bg:   #ffffff !important;
+            }
+            body { background:#fff !important; color:#1e1b4b !important; }
+            .card, .modal-content, .list-group-item, .dropdown-menu {
+                background:#fff !important;
+                color:#1e1b4b !important;
+            }
+            .table thead th { background:#f8f5ff !important; border-bottom-color:#e9d5ff !important; }
+            .table tbody tr:hover { background:transparent !important; }
+        }
     </style>
 
     @stack('styles')
@@ -538,6 +636,10 @@
         </div>
 
         <div class="topbar-actions">
+            <button class="topbar-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Cambiar tema" type="button">
+                <i class="fas fa-moon" id="themeIcon"></i>
+            </button>
+
             @if(Auth::user()->puedeAcceder('ventas'))
             <a href="{{ route('ventas.create') }}" class="btn btn-sm btn-primary px-3" style="border-radius:20px;">
                 <i class="fas fa-plus me-1"></i> Nueva Venta
@@ -650,6 +752,26 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+function toggleTheme() {
+    var html = document.documentElement;
+    var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('tema_crm', next);
+    actualizarIconoTema(next);
+    document.dispatchEvent(new CustomEvent('themechange', { detail: { theme: next } }));
+}
+function actualizarIconoTema(tema) {
+    var icon = document.getElementById('themeIcon');
+    if (!icon) return;
+    icon.classList.remove('fa-sun', 'fa-moon');
+    icon.classList.add(tema === 'dark' ? 'fa-sun' : 'fa-moon');
+}
+document.addEventListener('DOMContentLoaded', function () {
+    actualizarIconoTema(document.documentElement.getAttribute('data-theme') || 'light');
+});
+</script>
 
 @stack('scripts')
 </body>

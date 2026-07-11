@@ -170,7 +170,7 @@
                                  style="border:2px dashed #d1d5db; border-radius:12px; padding:20px;
                                         text-align:center; cursor:pointer; background:#fafafa;">
                                 <i class="fas fa-camera text-muted mb-2 d-block"></i>
-                                <span style="font-size:12px; color:#6b7280;">
+                                <span style="font-size:12px; color:var(--text-muted);">
                                     {{ $producto->imagen ? 'Cambiar imagen' : 'Subir imagen' }}
                                 </span>
                             </div>

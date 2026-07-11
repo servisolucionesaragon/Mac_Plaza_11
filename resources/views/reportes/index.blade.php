@@ -174,10 +174,10 @@
                                 </td>
                                 <td>
                                     <div style="font-weight:500;">{{ $p->nombre }}</div>
-                                    <div style="font-size:11px; color:#9ca3af;">{{ $p->codigo }}</div>
+                                    <div style="font-size:11px; color:var(--text-muted-2);">{{ $p->codigo }}</div>
                                 </td>
                                 <td class="text-center">{{ $p->unidades }}</td>
-                                <td class="text-end fw-bold" style="color:#1e1b4b;">{{ $config->simbolo_moneda }} {{ number_format($p->ingresos, 2) }}</td>
+                                <td class="text-end fw-bold" style="color:var(--text-dark);">{{ $config->simbolo_moneda }} {{ number_format($p->ingresos, 2) }}</td>
                             </tr>
                             @endforeach
                         </tbody>
@@ -217,7 +217,7 @@
                                 </td>
                                 <td style="font-weight:500;">{{ $c->nombre }}</td>
                                 <td class="text-center">{{ $c->compras }}</td>
-                                <td class="text-end fw-bold" style="color:#1e1b4b;">{{ $config->simbolo_moneda }} {{ number_format($c->total, 2) }}</td>
+                                <td class="text-end fw-bold" style="color:var(--text-dark);">{{ $config->simbolo_moneda }} {{ number_format($c->total, 2) }}</td>
                             </tr>
                             @endforeach
                         </tbody>
@@ -259,15 +259,15 @@
                             <tr>
                                 <td>
                                     <div style="font-weight:500;">{{ $p->nombre }}</div>
-                                    <div style="font-size:11px; color:#9ca3af;">{{ $p->marca->nombre ?? '' }}</div>
+                                    <div style="font-size:11px; color:var(--text-muted-2);">{{ $p->marca->nombre ?? '' }}</div>
                                 </td>
-                                <td style="color:#6b7280;">{{ $p->categoria->nombre ?? '—' }}</td>
+                                <td style="color:var(--text-muted);">{{ $p->categoria->nombre ?? '—' }}</td>
                                 <td class="text-center">
                                     <span style="background:{{ $p->stock<=0?'#fee2e2':'#fef3c7' }}; color:{{ $p->stock<=0?'#dc2626':'#d97706' }}; border-radius:20px; padding:3px 10px; font-size:12px; font-weight:700;">
                                         {{ $p->stock }}
                                     </span>
                                 </td>
-                                <td class="text-center" style="color:#9ca3af;">{{ $p->stock_minimo }}</td>
+                                <td class="text-center" style="color:var(--text-muted-2);">{{ $p->stock_minimo }}</td>
                                 <td class="text-end">
                                     <a href="{{ route('productos.edit', $p) }}"
                                        style="color:#a855f7; font-size:12px; text-decoration:none;">
@@ -372,10 +372,10 @@
                             @foreach($carteraPendiente as $v)
                             <tr>
                                 <td>
-                                    <a href="{{ route('ventas.show', $v) }}" style="color:#1e1b4b; text-decoration:none; font-weight:500;">
+                                    <a href="{{ route('ventas.show', $v) }}" style="color:var(--text-dark); text-decoration:none; font-weight:500;">
                                         {{ $v->cliente->nombre_completo ?? '—' }}
                                     </a>
-                                    <div style="font-size:11px; color:#9ca3af;">{{ $v->numero_venta }}</div>
+                                    <div style="font-size:11px; color:var(--text-muted-2);">{{ $v->numero_venta }}</div>
                                 </td>
                                 <td class="text-end">{{ $config->simbolo_moneda }} {{ number_format($v->total, 2) }}</td>
                                 <td class="text-end fw-bold" style="color:#dc2626;">{{ $config->simbolo_moneda }} {{ number_format($v->saldo_pendiente, 2) }}</td>
@@ -385,7 +385,7 @@
                                             {{ optional($v->fecha_vencimiento)->format('d/m/Y') }} ({{ (int) now()->diffInDays($v->fecha_vencimiento) }}d atraso)
                                         </span>
                                     @else
-                                        <span style="color:#6b7280; font-size:12px;">{{ optional($v->fecha_vencimiento)->format('d/m/Y') ?? '—' }}</span>
+                                        <span style="color:var(--text-muted); font-size:12px;">{{ optional($v->fecha_vencimiento)->format('d/m/Y') ?? '—' }}</span>
                                     @endif
                                 </td>
                                 <td class="text-end">
@@ -452,7 +452,11 @@ const grad = ctxDias.createLinearGradient(0, 0, 0, 220);
 grad.addColorStop(0, hexToRgba(colorGrafico1, 0.3));
 grad.addColorStop(1, hexToRgba(colorGrafico1, 0.02));
 
-new Chart(ctxDias, {
+const temaOscuroActivo = document.documentElement.getAttribute('data-theme') === 'dark';
+const chartTickColor = temaOscuroActivo ? '#9691ac' : '#9ca3af';
+const chartGridColor = temaOscuroActivo ? 'rgba(255,255,255,.06)' : '#f3f4f6';
+
+const chartVentasDias = new Chart(ctxDias, {
     type: 'bar',
     data: {
         labels: diasLabels,
@@ -472,8 +476,8 @@ new Chart(ctxDias, {
             tooltip: { callbacks: { label: c => ' ' + MONEDA + ' ' + c.parsed.y.toLocaleString('es-PE', {minimumFractionDigits:2}) } }
         },
         scales: {
-            x: { grid: { display: false }, ticks: { font: { family: 'Poppins', size: 11 }, color: '#9ca3af' } },
-            y: { grid: { color: '#f3f4f6' }, ticks: { font: { family: 'Poppins', size: 11 }, color: '#9ca3af', callback: v => MONEDA+' '+v.toLocaleString('es-PE') } }
+            x: { grid: { display: false }, ticks: { font: { family: 'Poppins', size: 11 }, color: chartTickColor } },
+            y: { grid: { color: chartGridColor }, ticks: { font: { family: 'Poppins', size: 11 }, color: chartTickColor, callback: v => MONEDA+' '+v.toLocaleString('es-PE') } }
         }
     }
 });
@@ -483,7 +487,7 @@ const pagoLabels = @json($ventasPorPago->pluck('metodoPago.nombre'));
 const pagoMontos = @json($ventasPorPago->pluck('monto'));
 const pagoColores = @json(collect(range(0, max($ventasPorPago->count() - 1, 0)))->map(fn($i) => $paletaGraficos[$i % count($paletaGraficos)])->values());
 
-new Chart(document.getElementById('chartPago'), {
+const chartPago = new Chart(document.getElementById('chartPago'), {
     type: 'doughnut',
     data: {
         labels: pagoLabels,
@@ -498,10 +502,22 @@ new Chart(document.getElementById('chartPago'), {
         responsive: true,
         cutout: '65%',
         plugins: {
-            legend: { position: 'bottom', labels: { font: { family: 'Poppins', size: 11 }, padding: 12 } },
+            legend: { position: 'bottom', labels: { font: { family: 'Poppins', size: 11 }, padding: 12, color: chartTickColor } },
             tooltip: { callbacks: { label: c => ' ' + MONEDA + ' ' + c.parsed.toLocaleString('es-PE', {minimumFractionDigits:2}) } }
         }
     }
+});
+
+document.addEventListener('themechange', function (e) {
+    const dark = e.detail.theme === 'dark';
+    const tick = dark ? '#9691ac' : '#9ca3af';
+    const grid = dark ? 'rgba(255,255,255,.06)' : '#f3f4f6';
+    chartVentasDias.options.scales.x.ticks.color = tick;
+    chartVentasDias.options.scales.y.ticks.color = tick;
+    chartVentasDias.options.scales.y.grid.color = grid;
+    chartVentasDias.update();
+    chartPago.options.plugins.legend.labels.color = tick;
+    chartPago.update();
 });
 </script>
 @endpush

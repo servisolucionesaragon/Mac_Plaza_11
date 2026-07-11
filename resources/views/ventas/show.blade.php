@@ -62,13 +62,13 @@
                             </div>
                             <div>
                                 <div style="font-weight:700; font-size:16px;">CRM Tienda Celulares</div>
-                                <div style="font-size:12px; color:#9ca3af;">Comprobante de Venta</div>
+                                <div style="font-size:12px; color:var(--text-muted-2);">Comprobante de Venta</div>
                             </div>
                         </div>
                     </div>
                     <div class="text-end">
                         <div style="font-size:20px; font-weight:700; color:#a855f7;">{{ $venta->numero_venta }}</div>
-                        <div style="font-size:12px; color:#9ca3af;">{{ $venta->fecha_venta->format('d/m/Y H:i') }}</div>
+                        <div style="font-size:12px; color:var(--text-muted-2);">{{ $venta->fecha_venta->format('d/m/Y H:i') }}</div>
                         @php $cfg=['completada'=>['#d1fae5','#065f46'],'cancelada'=>['#fee2e2','#991b1b'],'pendiente'=>['#fef3c7','#92400e'],'devuelta'=>['#f3f4f6','#374151']]; $c=$cfg[$venta->estado]??['#f3f4f6','#374151']; @endphp
                         <span style="background:{{ $c[0] }}; color:{{ $c[1] }}; border-radius:20px; padding:4px 12px; font-size:12px; font-weight:600; display:inline-block; margin-top:4px;">
                             {{ ucfirst($venta->estado) }}
@@ -80,19 +80,19 @@
                 <div class="row g-3 mb-4">
                     <div class="col-md-6">
                         <div class="p-3 rounded-3" style="background:#f8f5ff;">
-                            <div style="font-size:11px; color:#9ca3af; margin-bottom:4px;">CLIENTE</div>
+                            <div style="font-size:11px; color:var(--text-muted-2); margin-bottom:4px;">CLIENTE</div>
                             <div style="font-weight:600;">{{ $venta->cliente->nombre_completo ?? '—' }}</div>
-                            <div style="font-size:12px; color:#6b7280;">{{ $venta->cliente->telefono ?? '' }}</div>
+                            <div style="font-size:12px; color:var(--text-muted);">{{ $venta->cliente->telefono ?? '' }}</div>
                             @if($venta->cliente->email)
-                                <div style="font-size:12px; color:#6b7280;">{{ $venta->cliente->email }}</div>
+                                <div style="font-size:12px; color:var(--text-muted);">{{ $venta->cliente->email }}</div>
                             @endif
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="p-3 rounded-3" style="background:#f8f5ff;">
-                            <div style="font-size:11px; color:#9ca3af; margin-bottom:4px;">PAGO</div>
+                            <div style="font-size:11px; color:var(--text-muted-2); margin-bottom:4px;">PAGO</div>
                             <div style="font-weight:600;">{{ $venta->metodoPago->nombre ?? '—' }}</div>
-                            <div style="font-size:12px; color:#6b7280;">Vendedor: {{ $venta->vendedor->name ?? '—' }}</div>
+                            <div style="font-size:12px; color:var(--text-muted);">Vendedor: {{ $venta->vendedor->name ?? '—' }}</div>
                         </div>
                     </div>
                 </div>
@@ -102,11 +102,11 @@
                     <table class="table mb-0" style="font-size:13.5px;">
                         <thead>
                             <tr style="border-bottom:2px solid #e9d5ff;">
-                                <th style="padding:8px 0; color:#6b7280; font-size:12px; text-transform:uppercase;">Producto</th>
-                                <th style="padding:8px 0; color:#6b7280; font-size:12px; text-transform:uppercase; text-align:center;">Cant.</th>
-                                <th style="padding:8px 0; color:#6b7280; font-size:12px; text-transform:uppercase; text-align:right;">P. Unit.</th>
-                                <th style="padding:8px 0; color:#6b7280; font-size:12px; text-transform:uppercase; text-align:right;">Descto.</th>
-                                <th style="padding:8px 0; color:#6b7280; font-size:12px; text-transform:uppercase; text-align:right;">Subtotal</th>
+                                <th style="padding:8px 0; color:var(--text-muted); font-size:12px; text-transform:uppercase;">Producto</th>
+                                <th style="padding:8px 0; color:var(--text-muted); font-size:12px; text-transform:uppercase; text-align:center;">Cant.</th>
+                                <th style="padding:8px 0; color:var(--text-muted); font-size:12px; text-transform:uppercase; text-align:right;">P. Unit.</th>
+                                <th style="padding:8px 0; color:var(--text-muted); font-size:12px; text-transform:uppercase; text-align:right;">Descto.</th>
+                                <th style="padding:8px 0; color:var(--text-muted); font-size:12px; text-transform:uppercase; text-align:right;">Subtotal</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -115,10 +115,10 @@
                                 <td style="padding:10px 0;">
                                     <div style="font-weight:500;">{{ $det->producto->nombre ?? '—' }}</div>
                                     @if($det->producto && $det->producto->marca)
-                                        <div style="font-size:11px; color:#9ca3af;">{{ $det->producto->marca->nombre }}</div>
+                                        <div style="font-size:11px; color:var(--text-muted-2);">{{ $det->producto->marca->nombre }}</div>
                                     @endif
                                     @if($det->imei_vendido)
-                                        <div style="font-size:11px; color:#9ca3af;">IMEI: {{ $det->imei_vendido }}</div>
+                                        <div style="font-size:11px; color:var(--text-muted-2);">IMEI: {{ $det->imei_vendido }}</div>
                                     @endif
                                 </td>
                                 <td style="padding:10px 0; text-align:center;">{{ $det->cantidad }}</td>
@@ -152,7 +152,7 @@
                             <span>{{ $config->simbolo_moneda }} {{ number_format($venta->impuesto, 2) }}</span>
                         </div>
                         @endif
-                        <div class="text-end mb-2" style="font-size:11px; color:#9ca3af;">
+                        <div class="text-end mb-2" style="font-size:11px; color:var(--text-muted-2);">
                             @php
                                 $modoPrecioLabel = [
                                     'incluido'          => 'Precios con impuesto incluido',
@@ -171,7 +171,7 @@
                 </div>
 
                 @if($venta->notas)
-                <div class="mt-3 p-3 rounded-3" style="background:#f9fafb; font-size:13px; color:#6b7280;">
+                <div class="mt-3 p-3 rounded-3" style="background:#f9fafb; font-size:13px; color:var(--text-muted);">
                     <i class="fas fa-sticky-note me-1"></i><strong>Notas:</strong> {{ $venta->notas }}
                 </div>
                 @endif
@@ -251,24 +251,24 @@
                 <div class="row g-3 mb-4">
                     <div class="col-md-4">
                         <div class="recibo-box p-3 rounded-3" style="background:#f8f5ff;">
-                            <div style="font-size:11px; color:#9ca3af;">SALDO PENDIENTE</div>
-                            <div style="font-size:18px; font-weight:700; color:#1e1b4b;">
+                            <div style="font-size:11px; color:var(--text-muted-2);">SALDO PENDIENTE</div>
+                            <div style="font-size:18px; font-weight:700; color:var(--text-dark);">
                                 {{ $config->simbolo_moneda }} {{ number_format($venta->saldo_pendiente, 2) }}
                             </div>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="p-3 rounded-3" style="background:#f8f5ff;">
-                            <div style="font-size:11px; color:#9ca3af;">FECHA DE VENCIMIENTO</div>
-                            <div style="font-size:18px; font-weight:700; color:#1e1b4b;">
+                            <div style="font-size:11px; color:var(--text-muted-2);">FECHA DE VENCIMIENTO</div>
+                            <div style="font-size:18px; font-weight:700; color:var(--text-dark);">
                                 {{ optional($venta->fecha_vencimiento)->format('d/m/Y') ?? '—' }}
                             </div>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="p-3 rounded-3" style="background:#f8f5ff;">
-                            <div style="font-size:11px; color:#9ca3af;">TOTAL ABONADO</div>
-                            <div style="font-size:18px; font-weight:700; color:#1e1b4b;">
+                            <div style="font-size:11px; color:var(--text-muted-2);">TOTAL ABONADO</div>
+                            <div style="font-size:18px; font-weight:700; color:var(--text-dark);">
                                 {{ $config->simbolo_moneda }} {{ number_format($venta->total - $venta->saldo_pendiente, 2) }}
                             </div>
                         </div>
@@ -281,10 +281,10 @@
                     <table class="table mb-0" style="font-size:13px;">
                         <thead>
                             <tr style="border-bottom:2px solid #e9d5ff;">
-                                <th style="padding:8px 0; color:#6b7280; font-size:11px; text-transform:uppercase;">Fecha</th>
-                                <th style="padding:8px 0; color:#6b7280; font-size:11px; text-transform:uppercase;">Método de Pago</th>
-                                <th style="padding:8px 0; color:#6b7280; font-size:11px; text-transform:uppercase;">Registrado por</th>
-                                <th style="padding:8px 0; color:#6b7280; font-size:11px; text-transform:uppercase; text-align:right;">Monto</th>
+                                <th style="padding:8px 0; color:var(--text-muted); font-size:11px; text-transform:uppercase;">Fecha</th>
+                                <th style="padding:8px 0; color:var(--text-muted); font-size:11px; text-transform:uppercase;">Método de Pago</th>
+                                <th style="padding:8px 0; color:var(--text-muted); font-size:11px; text-transform:uppercase;">Registrado por</th>
+                                <th style="padding:8px 0; color:var(--text-muted); font-size:11px; text-transform:uppercase; text-align:right;">Monto</th>
                                 <th style="padding:8px 0;"></th>
                             </tr>
                         </thead>

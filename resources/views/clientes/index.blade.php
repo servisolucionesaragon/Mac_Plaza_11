@@ -92,7 +92,7 @@
                 <tbody>
                     @forelse($clientes as $cliente)
                     <tr>
-                        <td class="ps-4" style="color:#9ca3af; font-size:12px;">{{ $cliente->id }}</td>
+                        <td class="ps-4" style="color:var(--text-muted-2); font-size:12px;">{{ $cliente->id }}</td>
                         <td>
                             <div class="d-flex align-items-center gap-3">
                                 <div style="width:38px; height:38px; border-radius:50%;
@@ -108,14 +108,14 @@
                                             <span title="Cumpleaños este mes ({{ $cliente->fecha_nacimiento->format('d/m') }})">🎂</span>
                                         @endif
                                     </div>
-                                    <div style="font-size:11px; color:#9ca3af;">{{ $cliente->email ?? 'Sin email' }}</div>
+                                    <div style="font-size:11px; color:var(--text-muted-2);">{{ $cliente->email ?? 'Sin email' }}</div>
                                 </div>
                             </div>
                         </td>
                         <td style="font-size:13px;">
                             <div>{{ $cliente->telefono }}</div>
                             @if($cliente->dni)
-                                <div style="font-size:11px; color:#9ca3af;">{{ $cliente->tipo_documento ?? 'Documento' }}: {{ $cliente->dni }}</div>
+                                <div style="font-size:11px; color:var(--text-muted-2);">{{ $cliente->tipo_documento ?? 'Documento' }}: {{ $cliente->dni }}</div>
                             @endif
                         </td>
                         <td>
@@ -134,7 +134,7 @@
                                 {{ $cliente->reparaciones_count }}
                             </span>
                         </td>
-                        <td style="font-size:12px; color:#9ca3af;">
+                        <td style="font-size:12px; color:var(--text-muted-2);">
                             {{ $cliente->created_at->format('d/m/Y') }}
                         </td>
                         <td class="text-end pe-4">

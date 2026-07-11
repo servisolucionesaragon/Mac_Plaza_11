@@ -20,7 +20,7 @@
 <!-- ── Header ── -->
 <div class="d-flex align-items-center justify-content-between mb-4">
     <div>
-        <h4 class="fw-bold mb-1" style="color:#1e1b4b;">Catálogos</h4>
+        <h4 class="fw-bold mb-1" style="color:var(--text-dark);">Catálogos</h4>
         <p class="text-muted mb-0" style="font-size:13px;">Gestión de categorías, marcas, condición, almacenamiento y RAM usados en el inventario</p>
     </div>
 </div>
