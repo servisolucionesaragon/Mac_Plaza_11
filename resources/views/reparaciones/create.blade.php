@@ -28,7 +28,7 @@
                     <div class="row g-4">
                         {{-- Cliente y Técnico --}}
                         <div class="col-12">
-                            <h6 class="fw-600 mb-3" style="font-weight:600; color:var(--text-dark);">
+                            <h6 class="fw-600 mb-3" style="font-weight:600; color:#1e1b4b;">
                                 <i class="fas fa-users me-2" style="color:#a855f7;"></i>Asignación
                             </h6>
                             <div class="row g-3">
@@ -71,7 +71,7 @@
 
                         {{-- Equipo --}}
                         <div class="col-12">
-                            <h6 class="fw-600 mb-3" style="font-weight:600; color:var(--text-dark);">
+                            <h6 class="fw-600 mb-3" style="font-weight:600; color:#1e1b4b;">
                                 <i class="fas fa-mobile-alt me-2" style="color:#a855f7;"></i>Datos del Equipo
                             </h6>
                             <div class="row g-3">
@@ -112,7 +112,7 @@
 
                         {{-- Falla y Presupuesto --}}
                         <div class="col-12">
-                            <h6 class="fw-600 mb-3" style="font-weight:600; color:var(--text-dark);">
+                            <h6 class="fw-600 mb-3" style="font-weight:600; color:#1e1b4b;">
                                 <i class="fas fa-exclamation-triangle me-2" style="color:#a855f7;"></i>Falla y Presupuesto
                             </h6>
                             <div class="row g-3">
@@ -127,7 +127,7 @@
                                     <label class="form-label">Presupuesto Estimado ({{ $config->simbolo_moneda }})</label>
                                     <input type="number" class="form-control" name="presupuesto"
                                            value="{{ old('presupuesto', 0) }}" min="0" step="0.01">
-                                    <div style="font-size:12px; color:var(--text-muted-2); margin-top:4px;">
+                                    <div style="font-size:12px; color:#9ca3af; margin-top:4px;">
                                         Dejar en 0 si aún no se determinó
                                     </div>
 

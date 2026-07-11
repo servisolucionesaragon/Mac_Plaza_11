@@ -84,19 +84,19 @@
                         </td>
                         <td style="font-size:13px;">
                             <div>{{ $venta->cliente->nombre_completo ?? '—' }}</div>
-                            <div style="font-size:11px; color:var(--text-muted-2);">{{ $venta->cliente->telefono ?? '' }}</div>
+                            <div style="font-size:11px; color:#9ca3af;">{{ $venta->cliente->telefono ?? '' }}</div>
                         </td>
-                        <td style="font-size:13px; color:var(--text-muted);">{{ $venta->vendedor->name ?? '—' }}</td>
+                        <td style="font-size:13px; color:#6b7280;">{{ $venta->vendedor->name ?? '—' }}</td>
                         <td style="font-size:12px;">
                             <div>{{ $venta->fecha_venta->format('d/m/Y') }}</div>
-                            <div style="color:var(--text-muted-2);">{{ $venta->fecha_venta->format('H:i') }}</div>
+                            <div style="color:#9ca3af;">{{ $venta->fecha_venta->format('H:i') }}</div>
                         </td>
                         <td>
                             <span style="font-size:12px;">
                                 {{ $venta->metodoPago->nombre ?? '—' }}
                             </span>
                         </td>
-                        <td style="font-weight:700; color:var(--text-dark);">
+                        <td style="font-weight:700; color:#1e1b4b;">
                             {{ $config->simbolo_moneda }} {{ number_format($venta->total, 2) }}
                         </td>
                         <td>

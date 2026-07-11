@@ -118,21 +118,21 @@
                                 @endif
                                 <div>
                                     <div style="font-weight:500; font-size:13.5px;">{{ $producto->nombre }}</div>
-                                    <div style="font-size:11px; color:var(--text-muted-2);">{{ $producto->codigo }}</div>
+                                    <div style="font-size:11px; color:#9ca3af;">{{ $producto->codigo }}</div>
                                 </div>
                             </div>
                         </td>
                         <td style="font-size:13px;">
                             <div>{{ $producto->categoria->nombre ?? '—' }}</div>
-                            <div style="font-size:11px; color:var(--text-muted-2);">{{ $producto->marca->nombre ?? '—' }}</div>
+                            <div style="font-size:11px; color:#9ca3af;">{{ $producto->marca->nombre ?? '—' }}</div>
                         </td>
-                        <td style="font-size:12px; color:var(--text-muted);">
+                        <td style="font-size:12px; color:#6b7280;">
                             @if($producto->almacenamiento) <span class="badge bg-light text-dark me-1">{{ $producto->almacenamiento->nombre }}</span> @endif
                             @if($producto->ram) <span class="badge bg-light text-dark">{{ $producto->ram->nombre }}</span> @endif
                             @if($producto->color) <div class="mt-1">{{ $producto->color }}</div> @endif
                         </td>
-                        <td style="font-size:13px; color:var(--text-muted);">{{ $config->simbolo_moneda }} {{ number_format($producto->precio_compra, 2) }}</td>
-                        <td style="font-size:13px; font-weight:600; color:var(--text-dark);">
+                        <td style="font-size:13px; color:#6b7280;">{{ $config->simbolo_moneda }} {{ number_format($producto->precio_compra, 2) }}</td>
+                        <td style="font-size:13px; font-weight:600; color:#1e1b4b;">
                             {{ $config->simbolo_moneda }} {{ number_format($producto->precio_venta, 2) }}
                             <div style="font-size:11px; color:#10b981; font-weight:400;">
                                 +{{ number_format($producto->margen, 1) }}% margen

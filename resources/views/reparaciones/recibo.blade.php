@@ -19,8 +19,8 @@
     .recibo { box-shadow: none !important; border: none !important; }
 }
 .recibo-box { background:#f9fafb; border-radius:10px; padding:10px 14px; }
-.recibo-label { font-size:10.5px; color:var(--text-muted-2); text-transform:uppercase; letter-spacing:.3px; margin-bottom:2px; }
-.recibo-value { font-size:13.5px; font-weight:600; color:var(--text-dark); }
+.recibo-label { font-size:10.5px; color:#9ca3af; text-transform:uppercase; letter-spacing:.3px; margin-bottom:2px; }
+.recibo-value { font-size:13.5px; font-weight:600; color:#1e1b4b; }
 
 .formato-toggle .btn.active { background:#a855f7; color:#fff; border-color:#a855f7; }
 
@@ -89,8 +89,8 @@
                         </div>
                         <div>
                             <div style="font-weight:700; font-size:17px;">{{ $config->nombre_tienda ?? 'CRM Celulares' }}</div>
-                            <div style="font-size:12px; color:var(--text-muted-2);">Recibo de Orden de Reparación</div>
-                            <div style="font-size:11px; color:var(--text-muted); line-height:1.5;">
+                            <div style="font-size:12px; color:#9ca3af;">Recibo de Orden de Reparación</div>
+                            <div style="font-size:11px; color:#6b7280; line-height:1.5;">
                                 @if($config->ruc) NIT: {{ $config->ruc }} @endif
                                 @if($config->telefono) · Tel: {{ $config->telefono }} @endif
                                 @if($config->direccion || $config->ciudad) <br>{{ $config->direccion }}{{ $config->direccion && $config->ciudad ? ', ' : '' }}{{ $config->ciudad }}{{ $config->departamento ? ' - '.$config->departamento : '' }} @endif
@@ -100,7 +100,7 @@
                     </div>
                     <div class="text-end">
                         <div style="font-size:20px; font-weight:700; color:#a855f7;">{{ $reparacion->numero_orden }}</div>
-                        <div style="font-size:12px; color:var(--text-muted-2);">Impreso: {{ now()->format('d/m/Y H:i') }}</div>
+                        <div style="font-size:12px; color:#9ca3af;">Impreso: {{ now()->format('d/m/Y H:i') }}</div>
                     </div>
                 </div>
 
@@ -110,7 +110,7 @@
                         <div class="recibo-box">
                             <div class="recibo-label">Cliente</div>
                             <div class="recibo-value">{{ $reparacion->cliente->nombre_completo ?? '—' }}</div>
-                            <div style="font-size:12px; color:var(--text-muted);">
+                            <div style="font-size:12px; color:#6b7280;">
                                 {{ $reparacion->cliente->telefono ?? '—' }}
                                 @if($reparacion->cliente->direccion ?? null) · {{ $reparacion->cliente->direccion }} @endif
                             </div>
@@ -211,7 +211,7 @@
                 {{-- Firma de recibido --}}
                 <div class="row g-3 mt-3 pt-2" style="border-top:1px solid #e5e7eb;">
                     <div class="col-6 offset-6">
-                        <div style="border-top:1px solid #374151; margin-top:30px; padding-top:6px; text-align:center; font-size:12px; color:var(--text-muted);">
+                        <div style="border-top:1px solid #374151; margin-top:30px; padding-top:6px; text-align:center; font-size:12px; color:#6b7280;">
                             Firma de conformidad de recibido
                         </div>
                     </div>

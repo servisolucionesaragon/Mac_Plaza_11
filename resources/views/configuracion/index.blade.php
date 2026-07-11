@@ -10,7 +10,7 @@
 <!-- ── Header ── -->
 <div class="d-flex align-items-center justify-content-between mb-4">
     <div>
-        <h4 class="fw-bold mb-1" style="color:var(--text-dark);">Configuración del Sistema</h4>
+        <h4 class="fw-bold mb-1" style="color:#1e1b4b;">Configuración del Sistema</h4>
         <p class="text-muted mb-0" style="font-size:13px;">Gestión de usuarios y parámetros generales</p>
     </div>
     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevoUsuario">
@@ -371,7 +371,7 @@
                                         </span>
                                     @endif
                                 </div>
-                                <div style="font-size:12px;color:var(--text-muted-2);margin-top:2px;">
+                                <div style="font-size:12px;color:#9ca3af;margin-top:2px;">
                                     <i class="fas fa-envelope me-1"></i>{{ $usuario->email }}
                                     @if($usuario->telefono)
                                         &nbsp;·&nbsp;<i class="fas fa-phone me-1"></i>{{ $usuario->telefono }}

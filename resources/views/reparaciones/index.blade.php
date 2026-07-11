@@ -36,7 +36,7 @@
                 </div>
                 <div>
                     <div style="font-size:22px; font-weight:700; color:{{ $e['color'] }};">{{ $e['value'] }}</div>
-                    <div style="font-size:12px; color:var(--text-muted-2);">{{ $e['label'] }}</div>
+                    <div style="font-size:12px; color:#9ca3af;">{{ $e['label'] }}</div>
                 </div>
             </div>
         </div>
@@ -111,12 +111,12 @@
                         </td>
                         <td style="font-size:13px;">
                             <div style="font-weight:500;">{{ $rep->dispositivo }}</div>
-                            <div style="font-size:11px; color:var(--text-muted-2);">
+                            <div style="font-size:11px; color:#9ca3af;">
                                 {{ $rep->marca }} {{ $rep->modelo }}
                             </div>
                         </td>
                         <td style="font-size:13px;">{{ $rep->cliente->nombre_completo ?? '—' }}</td>
-                        <td style="font-size:13px; color:var(--text-muted);">{{ $rep->tecnico->name ?? '—' }}</td>
+                        <td style="font-size:13px; color:#6b7280;">{{ $rep->tecnico->name ?? '—' }}</td>
                         <td>
                             @php
                                 $priCol = ['urgente'=>['🔴','#fee2e2','#991b1b'],'alta'=>['🟠','#ffedd5','#9a3412'],'media'=>['🟡','#fef9c3','#713f12'],'baja'=>['🟢','#d1fae5','#065f46']];
@@ -154,7 +154,7 @@
                         <td style="font-size:12px;">
                             <div>{{ optional($rep->fecha_recepcion)->format('d/m/Y') ?? '—' }}</div>
                             @if($rep->fecha_estimada)
-                                <div style="color:var(--text-muted-2); font-size:11px;">
+                                <div style="color:#9ca3af; font-size:11px;">
                                     Est: {{ $rep->fecha_estimada->format('d/m') }}
                                 </div>
                             @endif

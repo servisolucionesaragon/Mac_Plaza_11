@@ -138,9 +138,9 @@
                             <div style="font-size:13px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                                 {{ $prod->nombre }}
                             </div>
-                            <div style="font-size:11px; color:var(--text-muted-2);">{{ $prod->total_vendido }} unidades</div>
+                            <div style="font-size:11px; color:#9ca3af;">{{ $prod->total_vendido }} unidades</div>
                         </div>
-                        <div style="font-size:13px; font-weight:600; color:var(--text-dark); white-space:nowrap;">
+                        <div style="font-size:13px; font-weight:600; color:#1e1b4b; white-space:nowrap;">
                             {{ $config->simbolo_moneda }} {{ number_format($prod->ingresos, 0) }}
                         </div>
                     </div>
@@ -186,7 +186,7 @@
                                        style="color:#a855f7; font-weight:500; font-size:13px; text-decoration:none;">
                                         {{ $venta->numero_venta }}
                                     </a>
-                                    <div style="font-size:11px; color:var(--text-muted-2);">
+                                    <div style="font-size:11px; color:#9ca3af;">
                                         {{ $venta->fecha_venta->diffForHumans() }}
                                     </div>
                                 </td>
@@ -266,14 +266,14 @@
                     @endphp
                     <div style="width:36px; height:36px; border-radius:10px; background:{{ $bg }};
                                 display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                        <i class="fas {{ $ic }}" style="font-size:14px; color:var(--text-muted);"></i>
+                        <i class="fas {{ $ic }}" style="font-size:14px; color:#6b7280;"></i>
                     </div>
                     <div class="flex-1" style="min-width:0;">
                         <div style="font-size:13px; font-weight:500;">
                             {{ $rep->dispositivo }}
-                            @if($rep->marca) <span style="color:var(--text-muted-2);">— {{ $rep->marca }}</span> @endif
+                            @if($rep->marca) <span style="color:#9ca3af;">— {{ $rep->marca }}</span> @endif
                         </div>
-                        <div style="font-size:11px; color:var(--text-muted-2);">
+                        <div style="font-size:11px; color:#9ca3af;">
                             {{ $rep->cliente->nombre_completo ?? '—' }} · {{ $rep->numero_orden }}
                         </div>
                     </div>
@@ -332,11 +332,7 @@ const gradientFill = ctxDias.createLinearGradient(0, 0, 0, 200);
 gradientFill.addColorStop(0, hexToRgba(colorGrafico1, 0.3));
 gradientFill.addColorStop(1, hexToRgba(colorGrafico1, 0.03));
 
-const temaOscuroActivo = document.documentElement.getAttribute('data-theme') === 'dark';
-const chartTickColor = temaOscuroActivo ? '#9691ac' : '#9ca3af';
-const chartGridColor = temaOscuroActivo ? 'rgba(255,255,255,.06)' : '#f3f4f6';
-
-const chartVentasDias = new Chart(ctxDias, {
+new Chart(ctxDias, {
     type: 'line',
     data: {
         labels: diasLabels,
@@ -371,26 +367,18 @@ const chartVentasDias = new Chart(ctxDias, {
         scales: {
             x: {
                 grid: { display: false },
-                ticks: { font: { family: 'Poppins', size: 11 }, color: chartTickColor }
+                ticks: { font: { family: 'Poppins', size: 11 }, color: '#9ca3af' }
             },
             y: {
-                grid: { color: chartGridColor },
+                grid: { color: '#f3f4f6' },
                 ticks: {
                     font: { family: 'Poppins', size: 11 },
-                    color: chartTickColor,
+                    color: '#9ca3af',
                     callback: v => MONEDA + ' ' + v.toLocaleString('es-PE')
                 }
             }
         }
     }
-});
-
-document.addEventListener('themechange', function (e) {
-    const dark = e.detail.theme === 'dark';
-    chartVentasDias.options.scales.x.ticks.color = dark ? '#9691ac' : '#9ca3af';
-    chartVentasDias.options.scales.y.ticks.color = dark ? '#9691ac' : '#9ca3af';
-    chartVentasDias.options.scales.y.grid.color = dark ? 'rgba(255,255,255,.06)' : '#f3f4f6';
-    chartVentasDias.update();
 });
 </script>
 @endpush

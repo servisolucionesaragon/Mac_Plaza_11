@@ -9,7 +9,7 @@
 
 <div class="d-flex align-items-center justify-content-between mb-4">
     <div>
-        <h4 class="fw-bold mb-1" style="color:var(--text-dark);">Mi Perfil</h4>
+        <h4 class="fw-bold mb-1" style="color:#1e1b4b;">Mi Perfil</h4>
         <p class="text-muted mb-0" style="font-size:13px;">Edita tus datos básicos y tu contraseña</p>
     </div>
 </div>

@@ -28,7 +28,7 @@
                     <div class="row g-4">
                         {{-- Columna izquierda --}}
                         <div class="col-lg-8">
-                            <h6 class="fw-600 mb-3" style="font-weight:600; color:var(--text-dark);">Información General</h6>
+                            <h6 class="fw-600 mb-3" style="font-weight:600; color:#1e1b4b;">Información General</h6>
                             <div class="row g-3">
                                 <div class="col-md-4">
                                     <label class="form-label">Código SKU <span class="text-danger">*</span></label>
@@ -127,7 +127,7 @@
                             </div>
 
                             <hr class="my-4">
-                            <h6 class="fw-600 mb-3" style="font-weight:600; color:var(--text-dark);">Precios y Stock</h6>
+                            <h6 class="fw-600 mb-3" style="font-weight:600; color:#1e1b4b;">Precios y Stock</h6>
                             <div class="row g-3">
                                 <div class="col-md-4">
                                     <label class="form-label">Precio de Compra ({{ $config->simbolo_moneda }}) <span class="text-danger">*</span></label>
@@ -168,7 +168,7 @@
 
                         {{-- Columna derecha - imagen --}}
                         <div class="col-lg-4">
-                            <h6 class="fw-600 mb-3" style="font-weight:600; color:var(--text-dark);">Imagen del Producto</h6>
+                            <h6 class="fw-600 mb-3" style="font-weight:600; color:#1e1b4b;">Imagen del Producto</h6>
                             <div id="dropZone" onclick="document.getElementById('imagenInput').click()"
                                  style="border:2px dashed #d1d5db; border-radius:16px; padding:32px 20px;
                                         text-align:center; cursor:pointer; background:#fafafa; transition:.2s;"
@@ -177,8 +177,8 @@
                                  ondrop="handleDrop(event)">
                                 <div id="dropContent">
                                     <i class="fas fa-cloud-upload-alt fa-3x mb-3" style="color:#d1d5db;"></i>
-                                    <p class="mb-1" style="font-size:13px; color:var(--text-muted);">Arrastra la imagen aquí</p>
-                                    <p class="mb-0" style="font-size:12px; color:var(--text-muted-2);">o haz clic para seleccionar</p>
+                                    <p class="mb-1" style="font-size:13px; color:#6b7280;">Arrastra la imagen aquí</p>
+                                    <p class="mb-0" style="font-size:12px; color:#9ca3af;">o haz clic para seleccionar</p>
                                     <p class="mb-0 mt-2" style="font-size:11px; color:#d1d5db;">JPG, PNG, WebP · Máx 2MB</p>
                                 </div>
                                 <img id="previewImg" src="" style="display:none; width:100%; border-radius:10px; max-height:200px; object-fit:cover;">

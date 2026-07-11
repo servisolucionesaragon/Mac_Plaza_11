@@ -88,14 +88,14 @@
             <div class="card-body p-4">
                 <h6 class="fw-bold mb-3"><i class="fas fa-stethoscope me-2" style="color:#a855f7;"></i>Diagnóstico</h6>
                 <div class="mb-3">
-                    <div style="font-size:11px; color:var(--text-muted-2); margin-bottom:4px;">FALLA REPORTADA POR EL CLIENTE</div>
+                    <div style="font-size:11px; color:#9ca3af; margin-bottom:4px;">FALLA REPORTADA POR EL CLIENTE</div>
                     <div class="p-3 rounded-3" style="background:#fef3c7; font-size:13.5px;">
                         {{ $reparacion->falla_reportada }}
                     </div>
                 </div>
                 @if($reparacion->diagnostico)
                 <div class="mb-3">
-                    <div style="font-size:11px; color:var(--text-muted-2); margin-bottom:4px;">DIAGNÓSTICO TÉCNICO</div>
+                    <div style="font-size:11px; color:#9ca3af; margin-bottom:4px;">DIAGNÓSTICO TÉCNICO</div>
                     <div class="p-3 rounded-3" style="background:#e0f2fe; font-size:13.5px;">
                         {{ $reparacion->diagnostico }}
                     </div>
@@ -103,14 +103,14 @@
                 @endif
                 @if($reparacion->solucion)
                 <div>
-                    <div style="font-size:11px; color:var(--text-muted-2); margin-bottom:4px;">SOLUCIÓN APLICADA</div>
+                    <div style="font-size:11px; color:#9ca3af; margin-bottom:4px;">SOLUCIÓN APLICADA</div>
                     <div class="p-3 rounded-3" style="background:#d1fae5; font-size:13.5px;">
                         {{ $reparacion->solucion }}
                     </div>
                 </div>
                 @endif
                 @if($reparacion->notas)
-                <div class="mt-3 p-3 rounded-3" style="background:#f9fafb; font-size:13px; color:var(--text-muted);">
+                <div class="mt-3 p-3 rounded-3" style="background:#f9fafb; font-size:13px; color:#6b7280;">
                     <i class="fas fa-sticky-note me-1"></i>{{ $reparacion->notas }}
                 </div>
                 @endif
@@ -124,7 +124,7 @@
                 <div class="row g-3">
                     <div class="col-md-6">
                         <div class="p-3 rounded-3" style="background:#f8f5ff; text-align:center;">
-                            <div style="font-size:11px; color:var(--text-muted-2); margin-bottom:4px;">PRESUPUESTO</div>
+                            <div style="font-size:11px; color:#9ca3af; margin-bottom:4px;">PRESUPUESTO</div>
                             <div style="font-size:24px; font-weight:700; color:#7c3aed;">
                                 {{ $config->simbolo_moneda }} {{ number_format($reparacion->presupuesto, 2) }}
                             </div>
@@ -233,9 +233,9 @@
                 <hr>
                 <h6 class="fw-bold mb-2" style="font-size:13px;">Cliente</h6>
                 <div style="font-weight:600; font-size:13.5px;">{{ $reparacion->cliente->nombre_completo ?? '—' }}</div>
-                <div style="font-size:12px; color:var(--text-muted-2);">{{ $reparacion->cliente->telefono ?? '' }}</div>
+                <div style="font-size:12px; color:#9ca3af;">{{ $reparacion->cliente->telefono ?? '' }}</div>
                 @if($reparacion->cliente->email)
-                    <div style="font-size:12px; color:var(--text-muted-2);">{{ $reparacion->cliente->email }}</div>
+                    <div style="font-size:12px; color:#9ca3af;">{{ $reparacion->cliente->email }}</div>
                 @endif
 
                 <div class="mt-3 d-grid gap-2">

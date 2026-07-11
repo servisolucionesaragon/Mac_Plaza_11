@@ -19,8 +19,8 @@
     .recibo { box-shadow: none !important; border: none !important; }
 }
 .recibo-box { background:#f9fafb; border-radius:10px; padding:10px 14px; }
-.recibo-label { font-size:10.5px; color:var(--text-muted-2); text-transform:uppercase; letter-spacing:.3px; margin-bottom:2px; }
-.recibo-value { font-size:13.5px; font-weight:600; color:var(--text-dark); }
+.recibo-label { font-size:10.5px; color:#9ca3af; text-transform:uppercase; letter-spacing:.3px; margin-bottom:2px; }
+.recibo-value { font-size:13.5px; font-weight:600; color:#1e1b4b; }
 
 .formato-toggle .btn.active { background:#a855f7; color:#fff; border-color:#a855f7; }
 
@@ -89,8 +89,8 @@
                         </div>
                         <div>
                             <div style="font-weight:700; font-size:17px;">{{ $config->nombre_tienda ?? 'CRM Celulares' }}</div>
-                            <div style="font-size:12px; color:var(--text-muted-2);">Recibo de Abono a Crédito</div>
-                            <div style="font-size:11px; color:var(--text-muted); line-height:1.5;">
+                            <div style="font-size:12px; color:#9ca3af;">Recibo de Abono a Crédito</div>
+                            <div style="font-size:11px; color:#6b7280; line-height:1.5;">
                                 @if($config->ruc) NIT: {{ $config->ruc }} @endif
                                 @if($config->telefono) · Tel: {{ $config->telefono }} @endif
                                 @if($config->direccion || $config->ciudad) <br>{{ $config->direccion }}{{ $config->direccion && $config->ciudad ? ', ' : '' }}{{ $config->ciudad }}{{ $config->departamento ? ' - '.$config->departamento : '' }} @endif
@@ -99,7 +99,7 @@
                     </div>
                     <div class="text-end">
                         <div style="font-size:20px; font-weight:700; color:#a855f7;">Abono #{{ $abono->id }}</div>
-                        <div style="font-size:12px; color:var(--text-muted-2);">{{ $abono->fecha_abono->format('d/m/Y H:i') }}</div>
+                        <div style="font-size:12px; color:#9ca3af;">{{ $abono->fecha_abono->format('d/m/Y H:i') }}</div>
                     </div>
                 </div>
 
@@ -135,7 +135,7 @@
                 </div>
 
                 @if($abono->notas)
-                <div class="mb-3 p-3 rounded-3" style="background:#f9fafb; font-size:12.5px; color:var(--text-muted);">
+                <div class="mb-3 p-3 rounded-3" style="background:#f9fafb; font-size:12.5px; color:#6b7280;">
                     <i class="fas fa-sticky-note me-1"></i><strong>Notas:</strong> {{ $abono->notas }}
                 </div>
                 @endif

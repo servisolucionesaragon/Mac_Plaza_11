@@ -225,7 +225,7 @@
                     </div>
                 </div>
 
-                <div class="rounded-3 p-3 mb-4" style="background:#f8f5ff;border:1px solid #e9d5ff;font-size:12px;color:var(--text-muted);">
+                <div class="rounded-3 p-3 mb-4" style="background:#f8f5ff;border:1px solid #e9d5ff;font-size:12px;color:#6b7280;">
                     <div class="d-flex align-items-center gap-2 mb-1">
                         <i class="fas fa-info-circle" style="color:#a855f7;"></i>
                         <strong style="color:#374151;">¿Qué incluye?</strong>
@@ -245,7 +245,7 @@
                     </button>
                 </form>
 
-                <div class="mt-3 text-center" style="font-size:11px;color:var(--text-muted-2);">
+                <div class="mt-3 text-center" style="font-size:11px;color:#9ca3af;">
                     <i class="fas fa-lock me-1"></i>El archivo se guarda en el servidor de forma segura
                 </div>
             </div>
@@ -278,7 +278,7 @@
                             <div style="font-size:12px;font-weight:600;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="{{ $bk['nombre'] }}">
                                 {{ Str::limit($bk['nombre'], 28) }}
                             </div>
-                            <div style="font-size:11px;color:var(--text-muted-2);">
+                            <div style="font-size:11px;color:#9ca3af;">
                                 {{ $bk['fecha']->format('d/m/Y H:i') }} ·
                                 @php
                                     $b = $bk['tamanio'];
@@ -301,7 +301,7 @@
                         </div>
                     </div>
                     @empty
-                    <div class="text-center py-5" style="color:var(--text-muted-2);">
+                    <div class="text-center py-5" style="color:#9ca3af;">
                         <i class="fas fa-inbox fa-3x mb-3 d-block opacity-40"></i>
                         <div style="font-size:13px;">No hay backups guardados</div>
                         <div style="font-size:12px;">Crea tu primer backup ahora</div>
@@ -340,7 +340,7 @@
                         <div id="dzText" style="font-size:13px;font-weight:600;color:#374151;">
                             Arrastra tu archivo .sql aquí
                         </div>
-                        <div style="font-size:11px;color:var(--text-muted-2);margin-top:4px;">o haz clic para seleccionar · Máx. 100 MB</div>
+                        <div style="font-size:11px;color:#9ca3af;margin-top:4px;">o haz clic para seleccionar · Máx. 100 MB</div>
                     </div>
 
                     @error('archivo_sql')
@@ -388,7 +388,7 @@
                                 Reset Ventas
                                 <span class="reset-badge ms-1" style="background:#fef3c7;color:#92400e;">Moderado</span>
                             </div>
-                            <div style="font-size:12px;color:var(--text-muted);line-height:1.5;">
+                            <div style="font-size:12px;color:#6b7280;line-height:1.5;">
                                 Elimina ventas y reparaciones. Conserva clientes, productos y usuarios.
                             </div>
                         </div>
@@ -407,7 +407,7 @@
                                 Reset Datos
                                 <span class="reset-badge ms-1" style="background:#fee2e2;color:#991b1b;">Alto</span>
                             </div>
-                            <div style="font-size:12px;color:var(--text-muted);line-height:1.5;">
+                            <div style="font-size:12px;color:#6b7280;line-height:1.5;">
                                 Elimina ventas, reparaciones, clientes y productos. Conserva usuarios.
                             </div>
                         </div>
@@ -426,7 +426,7 @@
                                 Reset Total
                                 <span class="reset-badge ms-1" style="background:#fecaca;color:#7f1d1d;">Crítico</span>
                             </div>
-                            <div style="font-size:12px;color:var(--text-muted);line-height:1.5;">
+                            <div style="font-size:12px;color:#6b7280;line-height:1.5;">
                                 Borra todo el sistema. Solo conserva el usuario administrador.
                             </div>
                         </div>

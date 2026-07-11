@@ -38,7 +38,7 @@
                     <div class="row g-4">
                         {{-- Estado y prioridad --}}
                         <div class="col-12">
-                            <h6 class="fw-600 mb-3" style="font-weight:600; color:var(--text-dark);">
+                            <h6 class="fw-600 mb-3" style="font-weight:600; color:#1e1b4b;">
                                 <i class="fas fa-tasks me-2" style="color:#a855f7;"></i>Estado de la Orden
                             </h6>
                             <div class="row g-3">
@@ -83,7 +83,7 @@
 
                         {{-- Equipo --}}
                         <div class="col-12">
-                            <h6 class="fw-600 mb-3" style="font-weight:600; color:var(--text-dark);">
+                            <h6 class="fw-600 mb-3" style="font-weight:600; color:#1e1b4b;">
                                 <i class="fas fa-mobile-alt me-2" style="color:#a855f7;"></i>Equipo
                             </h6>
                             <div class="row g-3">
@@ -122,7 +122,7 @@
 
                         {{-- Diagnóstico --}}
                         <div class="col-12">
-                            <h6 class="fw-600 mb-3" style="font-weight:600; color:var(--text-dark);">
+                            <h6 class="fw-600 mb-3" style="font-weight:600; color:#1e1b4b;">
                                 <i class="fas fa-stethoscope me-2" style="color:#a855f7;"></i>Diagnóstico Técnico
                             </h6>
                             <div class="row g-3">
@@ -145,7 +145,7 @@
 
                         {{-- Costos y garantía --}}
                         <div class="col-12">
-                            <h6 class="fw-600 mb-3" style="font-weight:600; color:var(--text-dark);">
+                            <h6 class="fw-600 mb-3" style="font-weight:600; color:#1e1b4b;">
                                 <i class="fas fa-dollar-sign me-2" style="color:#a855f7;"></i>Costos y Garantía
                             </h6>
                             <div class="row g-3">

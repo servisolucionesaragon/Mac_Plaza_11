@@ -287,7 +287,7 @@ function filtrarClientes() {
         clienteResultados.innerHTML = coincidencias.map(c => `
             <button type="button" class="list-group-item list-group-item-action" style="font-size:13px;" onclick="seleccionarCliente(${c.id})">
                 <div style="font-weight:500;">${c.nombre}</div>
-                <div style="font-size:11px; color:var(--text-muted-2);">${c.tipo_documento ? c.tipo_documento + ': ' : 'Doc: '}${c.dni ?? '—'} · ${c.telefono ?? ''}</div>
+                <div style="font-size:11px; color:#9ca3af;">${c.tipo_documento ? c.tipo_documento + ': ' : 'Doc: '}${c.dni ?? '—'} · ${c.telefono ?? ''}</div>
             </button>
         `).join('');
     }
@@ -360,13 +360,13 @@ function filtrarProductos() {
             <button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" style="font-size:13px;" onclick="agregarProducto(${p.id})">
                 <span>
                     <div style="font-weight:500;">${p.nombre}</div>
-                    <div style="font-size:11px; color:var(--text-muted-2);">
+                    <div style="font-size:11px; color:#9ca3af;">
                         ${p.codigo ?? ''}${p.marca_nombre ? ' · ' + p.marca_nombre : ''}${p.color ? ' · ' + p.color : ''}${p.almacenamiento_nombre ? ' · ' + p.almacenamiento_nombre : ''}${p.ram_nombre ? ' · ' + p.ram_nombre : ''}
                     </div>
                 </span>
                 <span class="text-end">
                     <div style="font-weight:600;">${MONEDA} ${p.precio_venta.toFixed(2)}</div>
-                    <div style="font-size:11px; color:var(--text-muted-2);">Stock: ${p.stock}</div>
+                    <div style="font-size:11px; color:#9ca3af;">Stock: ${p.stock}</div>
                 </span>
             </button>
         `).join('');
@@ -395,7 +395,7 @@ function agregarFilaProducto(id, cantidadInicial, descuentoInicial, imeiInicial,
         <td>
             <input type="hidden" name="productos[${id}][id]" value="${id}">
             <div style="font-size:13.5px; font-weight:500;">${nombre}</div>
-            <div style="font-size:11px; color:var(--text-muted-2);">Stock: ${stock}</div>
+            <div style="font-size:11px; color:#9ca3af;">Stock: ${stock}</div>
         </td>
         <td>
             <input type="number" name="productos[${id}][cantidad]" value="${cantidadInicial}" min="1" max="${stock}"
@@ -408,7 +408,7 @@ function agregarFilaProducto(id, cantidadInicial, descuentoInicial, imeiInicial,
                    class="form-control form-control-sm desc-input" style="width:80px;"
                    oninput="calcularFila('${id}')">
         </td>
-        <td id="sub-${id}" style="font-size:13.5px; font-weight:600; color:var(--text-dark);">
+        <td id="sub-${id}" style="font-size:13.5px; font-weight:600; color:#1e1b4b;">
             ${MONEDA} ${precio.toFixed(2)}
         </td>
         <td>
