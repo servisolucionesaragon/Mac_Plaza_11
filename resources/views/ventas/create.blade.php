@@ -46,6 +46,11 @@
                         <div id="clienteCumpleanio" class="mt-2 p-2 rounded-3" style="background:#fdf2f8; border:1px solid #fbcfe8; font-size:12.5px; color:#9d174d; display:none;">
                             🎂 Este cliente cumple años este mes — considera aplicar un descuento de fidelización.
                         </div>
+
+                        <div id="clienteDistribuidor" class="mt-2 p-2 rounded-3" style="background:#f5f3ff; border:1px solid #ddd6fe; font-size:12.5px; color:#5b21b6; display:none;">
+                            <i class="fas fa-percentage me-1"></i>Cliente distribuidor — se aplicará automáticamente un
+                            <span id="clienteDistribuidorPct"></span>% de descuento sobre el subtotal.
+                        </div>
                     </div>
 
                     {{-- Buscador de productos --}}
@@ -255,7 +260,9 @@
 <script>
 const MONEDA = "{{ $config->simbolo_moneda }}";
 const IGV_PORCENTAJE = {{ $config->igv }};
+const DESCUENTO_DISTRIBUIDOR = {{ $config->descuento_distribuidor }};
 let productosSeleccionados = {};
+let clienteEsDistribuidor = false;
 let contador = 0;
 
 const clientesData = @json($clientesJson);
@@ -297,6 +304,9 @@ function seleccionarCliente(id) {
         `${c.nombre} — ${c.tipo_documento ? c.tipo_documento + ' ' : ''}${c.dni ?? ''}`;
     clienteSeleccionado.style.display = 'flex';
     document.getElementById('clienteCumpleanio').style.display = c.cumple_mes ? 'block' : 'none';
+    clienteEsDistribuidor = !!c.es_distribuidor;
+    document.getElementById('clienteDistribuidorPct').textContent = DESCUENTO_DISTRIBUIDOR;
+    document.getElementById('clienteDistribuidor').style.display = clienteEsDistribuidor ? 'block' : 'none';
     buscadorCliente.value = '';
     buscadorCliente.style.display = 'none';
     clienteResultados.style.display = 'none';
@@ -308,6 +318,8 @@ function quitarClienteSeleccionado() {
     clienteIdInput.value = '';
     clienteSeleccionado.style.display = 'none';
     document.getElementById('clienteCumpleanio').style.display = 'none';
+    clienteEsDistribuidor = false;
+    document.getElementById('clienteDistribuidor').style.display = 'none';
     buscadorCliente.style.display = 'block';
     buscadorCliente.value = '';
     buscadorCliente.focus();
@@ -504,8 +516,10 @@ function calcularTotales() {
     });
 
     const descGen          = parseFloat(document.getElementById('descuentoGeneral').value) || 0;
+    const descDistribuidor = clienteEsDistribuidor ? subtotal * (DESCUENTO_DISTRIBUIDOR / 100) : 0;
+    const descuentoTotal   = descGen + descDistribuidor;
     const modoPrecio       = document.querySelector('input[name="modo_precio"]:checked').value;
-    const baseConDescuento = Math.max(subtotal - descGen, 0);
+    const baseConDescuento = Math.max(subtotal - descuentoTotal, 0);
 
     let subtotalNeto, impuesto, total;
     if (modoPrecio === 'incluido') {
@@ -523,7 +537,7 @@ function calcularTotales() {
     }
 
     document.getElementById('resSubtotal').textContent    = MONEDA + ' ' + subtotalNeto.toFixed(2);
-    document.getElementById('resDescuento').textContent   = '— ' + MONEDA + ' ' + descGen.toFixed(2);
+    document.getElementById('resDescuento').textContent   = '— ' + MONEDA + ' ' + descuentoTotal.toFixed(2);
     document.getElementById('resImpuestoRow').style.display = (modoPrecio === 'sin_impuesto') ? 'none' : 'flex';
     document.getElementById('resImpuesto').textContent    = MONEDA + ' ' + impuesto.toFixed(2);
     document.getElementById('resTotal').textContent       = MONEDA + ' ' + total.toFixed(2);

@@ -14,11 +14,13 @@ class Cliente extends Model
         'nombre', 'apellido', 'email', 'telefono', 'celular', 'dni',
         'tipo_documento', 'direccion', 'departamento', 'ciudad',
         'fecha_nacimiento', 'tipo', 'empresa', 'ruc', 'notas', 'activo',
+        'es_distribuidor',
     ];
 
     protected $casts = [
         'fecha_nacimiento' => 'date',
         'activo' => 'boolean',
+        'es_distribuidor' => 'boolean',
     ];
 
     public function getNombreCompletoAttribute(): string

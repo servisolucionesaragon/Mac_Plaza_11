@@ -123,6 +123,12 @@
                                   style="border-radius:20px; font-size:11px; padding:4px 10px;">
                                 {{ ucfirst($cliente->tipo) }}
                             </span>
+                            @if($cliente->es_distribuidor)
+                                <span class="badge" style="background:#a855f7; border-radius:20px; font-size:11px; padding:4px 10px;"
+                                      title="Descuento automático del {{ $config->descuento_distribuidor }}% en sus compras">
+                                    <i class="fas fa-percentage fa-xs"></i> Distribuidor
+                                </span>
+                            @endif
                         </td>
                         <td style="font-size:13px;">
                             <span class="badge bg-light text-dark" style="border-radius:20px; font-size:12px; padding:4px 10px;">

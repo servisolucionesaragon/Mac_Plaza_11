@@ -52,6 +52,20 @@
                         </div>
                     </div>
 
+                    {{-- Cliente distribuidor --}}
+                    <div class="mb-4 p-3 rounded-3" style="background:#f8f5ff; border:1px solid #e9d8fd;">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="es_distribuidor" value="1" id="esDistribuidor"
+                                   {{ old('es_distribuidor') ? 'checked' : '' }} style="accent-color:#a855f7;">
+                            <label class="form-check-label" for="esDistribuidor" style="font-size:13.5px; font-weight:500;">
+                                <i class="fas fa-percentage me-1" style="color:#a855f7;"></i>Cliente Distribuidor
+                            </label>
+                            <div style="font-size:12px; color:#9ca3af; margin-left:24px;">
+                                Aplica automáticamente un {{ $config->descuento_distribuidor }}% de descuento en el total de sus compras (configurable en Configuración → Parámetro de Cliente).
+                            </div>
+                        </div>
+                    </div>
+
                     {{-- Datos personales --}}
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">

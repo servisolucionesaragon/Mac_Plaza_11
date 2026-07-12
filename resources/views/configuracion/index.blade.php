@@ -69,6 +69,11 @@
                                 <i class="fas fa-coins me-2"></i>Moneda &amp; Impuestos
                             </button>
                         </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="tab-parametro-cliente-btn" data-bs-toggle="tab" data-bs-target="#tab-parametro-cliente" type="button" role="tab" aria-controls="tab-parametro-cliente">
+                                <i class="fas fa-user-tag me-2"></i>Parámetro de Cliente
+                            </button>
+                        </li>
                     </ul>
 
                     <div class="tab-content pt-2">
@@ -330,6 +335,21 @@
                                     <span class="input-group-text">%</span>
                                 </div>
                                 @error('igv')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                            </div>
+                        </div>
+
+                        {{-- ═══ PARÁMETRO DE CLIENTE ═══ --}}
+                        <div class="tab-pane fade" id="tab-parametro-cliente" role="tabpanel">
+                            <label class="form-label">Descuento para Clientes Distribuidores</label>
+                            <div class="input-group" style="max-width:220px;">
+                                <input type="number" name="descuento_distribuidor" class="form-control @error('descuento_distribuidor') is-invalid @enderror"
+                                       value="{{ old('descuento_distribuidor', $config->descuento_distribuidor) }}" min="0" max="100" step="0.01" required>
+                                <span class="input-group-text">%</span>
+                            </div>
+                            @error('descuento_distribuidor')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                            <div style="font-size:12px; color:#9ca3af; margin-top:6px;">
+                                Se aplica automáticamente sobre el total de la compra a todo cliente marcado como
+                                "Distribuidor" en su ficha (Clientes → Nuevo/Editar Cliente). Por defecto 20%.
                             </div>
                         </div>
 

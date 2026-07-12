@@ -63,6 +63,8 @@ class ClienteController extends Controller
             'notas'           => 'nullable|string',
         ]);
 
+        $validated['es_distribuidor'] = $request->boolean('es_distribuidor');
+
         Cliente::create($validated);
 
         return redirect()->route('clientes.index')
@@ -100,6 +102,8 @@ class ClienteController extends Controller
             'notas'           => 'nullable|string',
             'activo'          => 'boolean',
         ]);
+
+        $validated['es_distribuidor'] = $request->boolean('es_distribuidor');
 
         $cliente->update($validated);
 

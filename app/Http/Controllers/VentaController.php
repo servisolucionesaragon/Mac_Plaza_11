@@ -113,6 +113,7 @@ class VentaController extends Controller
                 'tipo_documento' => $c->tipo_documento,
                 'telefono'       => $c->telefono,
                 'cumple_mes'     => $c->cumpleAnioEsteMes(),
+                'es_distribuidor' => (bool) $c->es_distribuidor,
             ];
         })->values();
 
@@ -214,6 +215,17 @@ class VentaController extends Controller
         return [$subtotalNeto, $impuesto, $total];
     }
 
+    /** % de descuento configurado, aplicado sobre el subtotal si el cliente es distribuidor. */
+    private function descuentoDistribuidor(float $subtotal, int $clienteId): float
+    {
+        $esDistribuidor = Cliente::where('id', $clienteId)->value('es_distribuidor');
+        if (!$esDistribuidor) {
+            return 0;
+        }
+        $porcentaje = \App\Models\Configuracion::actual()->descuento_distribuidor;
+        return round($subtotal * ((float)$porcentaje / 100), 2);
+    }
+
     private function reglasValidacion(): array
     {
         return [
@@ -240,7 +252,8 @@ class VentaController extends Controller
         try {
             [$detalles, $subtotal] = $this->procesarProductos($request->productos);
 
-            $descuento   = (float)($request->descuento_general ?? 0);
+            $descuento   = (float)($request->descuento_general ?? 0)
+                + $this->descuentoDistribuidor($subtotal, $request->cliente_id);
             $igvConfig   = \App\Models\Configuracion::actual()->igv;
             $modoPrecio  = $request->input('modo_precio', 'subtotal_impuesto');
             [$subtotalNeto, $impuesto, $total] = $this->calcularMontos($subtotal, $descuento, $modoPrecio, $igvConfig);
@@ -328,7 +341,8 @@ class VentaController extends Controller
 
             [$detalles, $subtotal] = $this->procesarProductos($request->productos);
 
-            $descuento   = (float)($request->descuento_general ?? 0);
+            $descuento   = (float)($request->descuento_general ?? 0)
+                + $this->descuentoDistribuidor($subtotal, $request->cliente_id);
             $igvConfig   = \App\Models\Configuracion::actual()->igv;
             $modoPrecio  = $request->input('modo_precio', 'subtotal_impuesto');
             [$subtotalNeto, $impuesto, $total] = $this->calcularMontos($subtotal, $descuento, $modoPrecio, $igvConfig);
