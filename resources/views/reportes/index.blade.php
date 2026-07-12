@@ -42,7 +42,7 @@
                     @endphp
                     @foreach($periodos as $key => [$label, $d, $h])
                         <a href="{{ route('reportes.index', ['desde'=>$d, 'hasta'=>$h]) }}"
-                           class="btn btn-sm {{ request('desde')==$d && request('hasta')==$h ? 'btn-primary' : 'btn-outline-secondary' }}"
+                           class="btn btn-sm {{ $desde->format('Y-m-d')==$d && $hasta->format('Y-m-d')==$h ? 'btn-primary' : 'btn-outline-secondary' }}"
                            style="font-size:12px; border-radius:20px;">
                             {{ $label }}
                         </a>
@@ -108,6 +108,14 @@
             <div class="kpi-value">{{ $config->simbolo_moneda }} {{ number_format($ingresosPorAbonos, 0) }}</div>
             <div class="kpi-label">Abonos de Crédito Cobrados</div>
             <span class="kpi-badge"><i class="fas fa-coins fa-xs"></i> En el período</span>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="kpi-card bg-grad-red">
+            <div class="kpi-icon"><i class="fas fa-arrow-circle-down"></i></div>
+            <div class="kpi-value">{{ $config->simbolo_moneda }} {{ number_format($totalGastos, 0) }}</div>
+            <div class="kpi-label">Gastos Realizados</div>
+            <span class="kpi-badge"><i class="fas fa-receipt fa-xs"></i> {{ $cantidadGastos }} registros</span>
         </div>
     </div>
 </div>
@@ -225,6 +233,75 @@
                 </div>
                 @else
                 <div class="text-center py-4 text-muted" style="font-size:13px;">Sin ventas en el período</div>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Ventas por Usuario (para comisiones) --}}
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center justify-content-between mb-1">
+                    <h6 class="fw-bold mb-0">Ventas por Usuario</h6>
+                    <span style="background:#ede9fe; color:#7c3aed; border-radius:20px; padding:3px 12px; font-size:12px;">
+                        {{ $ventasPorUsuario->count() }} usuario(s)
+                    </span>
+                </div>
+                <p class="text-muted mb-3" style="font-size:12px;">Ventas completadas en el período por cada usuario — útil para calcular comisiones</p>
+                @php
+                    $rolLabels  = ['admin' => 'Administrador', 'vendedor' => 'Vendedor', 'tecnico' => 'Técnico'];
+                    $rolBadgeBg = ['admin' => '#ede9fe', 'vendedor' => '#e0f2fe', 'tecnico' => '#fef3c7'];
+                    $rolBadgeTx = ['admin' => '#7c3aed', 'vendedor' => '#0369a1', 'tecnico' => '#92400e'];
+                @endphp
+                @if($ventasPorUsuario->count())
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0" style="font-size:13px;">
+                        <thead>
+                            <tr>
+                                <th style="width:30px;">#</th>
+                                <th>Usuario</th>
+                                <th>Rol</th>
+                                <th class="text-center">Ventas</th>
+                                <th class="text-end">Ticket Promedio</th>
+                                <th class="text-end">Total Vendido</th>
+                                <th class="text-end">Detalle</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($ventasPorUsuario as $i => $v)
+                            <tr>
+                                <td>
+                                    <div style="width:24px; height:24px; border-radius:6px; font-size:11px; font-weight:700; color:#fff; display:flex; align-items:center; justify-content:center;
+                                        background:{{ $paletaGraficos[$i % count($paletaGraficos)] }};">
+                                        {{ $i+1 }}
+                                    </div>
+                                </td>
+                                <td style="font-weight:500;">{{ $v->name }}</td>
+                                <td>
+                                    <span style="background:{{ $rolBadgeBg[$v->rol] ?? '#f3f4f6' }}; color:{{ $rolBadgeTx[$v->rol] ?? '#374151' }};
+                                                 border-radius:20px; padding:2px 10px; font-size:11px;">
+                                        {{ $rolLabels[$v->rol] ?? ucfirst($v->rol) }}
+                                    </span>
+                                </td>
+                                <td class="text-center">{{ $v->cantidad }}</td>
+                                <td class="text-end" style="color:#6b7280;">{{ $config->simbolo_moneda }} {{ number_format($v->ticket_promedio, 2) }}</td>
+                                <td class="text-end fw-bold" style="color:#1e1b4b;">{{ $config->simbolo_moneda }} {{ number_format($v->total, 2) }}</td>
+                                <td class="text-end">
+                                    <a href="{{ route('ventas.index', ['vendedor_id' => $v->id, 'fecha_desde' => $desde->format('Y-m-d'), 'fecha_hasta' => $hasta->format('Y-m-d'), 'estado' => 'completada']) }}"
+                                       class="btn btn-sm btn-outline-secondary" style="border-radius:8px;padding:4px 10px;" title="Ver ventas de {{ $v->name }} en este período">
+                                        <i class="fas fa-eye fa-xs"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                @else
+                <div class="text-center py-4 text-muted" style="font-size:13px;">Sin ventas registradas en el período</div>
                 @endif
             </div>
         </div>

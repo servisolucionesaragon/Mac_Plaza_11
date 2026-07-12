@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Venta;
 use App\Models\Abono;
 use App\Models\Cliente;
+use App\Models\Gasto;
 use App\Models\Producto;
 use App\Models\Reparacion;
 use App\Models\DetalleVenta;
@@ -18,7 +19,7 @@ class ReporteController extends Controller
     {
         $desde = $request->filled('desde')
             ? Carbon::parse($request->desde)->startOfDay()
-            : Carbon::now()->startOfMonth();
+            : Carbon::now()->startOfDay();
 
         $hasta = $request->filled('hasta')
             ? Carbon::parse($request->hasta)->endOfDay()
@@ -35,6 +36,9 @@ class ReporteController extends Controller
         // (la venta puede seguir en estado "pendiente" hasta saldar el 100%, pero el
         // abono en sí ya es un ingreso real cobrado en este período).
         $ingresosPorAbonos = Abono::whereBetween('fecha_abono', [$desde, $hasta])->sum('monto');
+
+        $totalGastos    = Gasto::whereBetween('fecha_gasto', [$desde, $hasta])->sum('monto');
+        $cantidadGastos = Gasto::whereBetween('fecha_gasto', [$desde, $hasta])->count();
 
         // ── Ventas por día ────────────────────────────────────────────────
         $ventasPorDia = Venta::select(
@@ -71,6 +75,24 @@ class ReporteController extends Controller
             ->groupBy('productos.id', 'productos.nombre', 'productos.codigo')
             ->orderByDesc('ingresos')
             ->limit(10)
+            ->get();
+
+        // ── Ventas por usuario (para calcular comisiones) ─────────────────
+        // Incluye cualquier usuario que haya registrado ventas, sin importar el rol.
+        $ventasPorUsuario = DB::table('ventas')
+            ->join('users', 'ventas.user_id', '=', 'users.id')
+            ->where('ventas.estado', 'completada')
+            ->whereBetween('ventas.fecha_venta', [$desde, $hasta])
+            ->select(
+                'users.id',
+                'users.name',
+                'users.rol',
+                DB::raw('COUNT(ventas.id) as cantidad'),
+                DB::raw('SUM(ventas.total) as total'),
+                DB::raw('AVG(ventas.total) as ticket_promedio')
+            )
+            ->groupBy('users.id', 'users.name', 'users.rol')
+            ->orderByDesc('total')
             ->get();
 
         // ── Top 10 clientes ───────────────────────────────────────────────
@@ -114,7 +136,8 @@ class ReporteController extends Controller
         return view('reportes.index', compact(
             'totalVentas', 'cantidadVentas', 'ticketPromedio',
             'totalReparaciones', 'clientesNuevos', 'ingresosPorAbonos',
-            'ventasPorDia', 'ventasPorPago',
+            'totalGastos', 'cantidadGastos',
+            'ventasPorDia', 'ventasPorPago', 'ventasPorUsuario',
             'topProductos', 'topClientes',
             'repPorEstado', 'stockBajo',
             'carteraPendiente', 'totalCartera',
