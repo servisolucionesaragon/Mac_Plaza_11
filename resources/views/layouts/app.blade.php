@@ -493,21 +493,27 @@
         </a>
         @endif
 
-        @if(Auth::user()->esAdmin())
+        @if(Auth::user()->puedeAcceder('usuarios') || Auth::user()->puedeAcceder('configuracion') || Auth::user()->puedeAcceder('backup'))
         <div class="nav-section-title">Sistema</div>
+        @endif
 
+        @if(Auth::user()->puedeAcceder('usuarios'))
         <a href="{{ route('usuarios.index') }}"
            class="nav-link {{ request()->routeIs('usuarios.*') ? 'active' : '' }}">
             <span class="nav-icon"><i class="fas fa-user-cog"></i></span>
             Usuarios
         </a>
+        @endif
 
+        @if(Auth::user()->puedeAcceder('configuracion'))
         <a href="{{ route('configuracion.index') }}"
            class="nav-link {{ request()->routeIs('configuracion.*') ? 'active' : '' }}">
             <span class="nav-icon"><i class="fas fa-cog"></i></span>
             Configuración
         </a>
+        @endif
 
+        @if(Auth::user()->puedeAcceder('backup'))
         <a href="{{ route('backup.index') }}"
            class="nav-link {{ request()->routeIs('backup.*') ? 'active' : '' }}">
             <span class="nav-icon"><i class="fas fa-database"></i></span>

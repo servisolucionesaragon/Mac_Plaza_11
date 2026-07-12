@@ -148,6 +148,9 @@
                             'ventas'       => 'Ventas',
                             'reparaciones' => 'Reparaciones',
                             'reportes'     => 'Reportes',
+                            'usuarios'     => 'Usuarios',
+                            'configuracion' => 'Configuración',
+                            'backup'       => 'Backup & Restauración',
                         ] as $modulo => $label)
                         <tr>
                             <td style="font-size:13.5px;font-weight:500;">{{ $label }}</td>
