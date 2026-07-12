@@ -54,6 +54,8 @@ Route::middleware(['auth', 'nocache'])->group(function () {
     Route::get('/productos/exportar/excel', [ProductoController::class, 'exportarExcel'])
         ->name('productos.exportar')->middleware('permiso:productos');
     Route::resource('productos', ProductoController::class)->middleware('permiso:productos');
+    Route::post('/productos/{producto}/lotes', [ProductoController::class, 'agregarLote'])
+        ->name('productos.lotes.store')->middleware('permiso:productos');
 
     // Catálogos (categorías, marcas, condición, almacenamiento, ram)
     Route::prefix('catalogos')->name('catalogos.')->middleware('permiso:catalogos')->group(function () {

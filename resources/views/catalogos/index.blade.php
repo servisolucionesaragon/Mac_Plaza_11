@@ -48,6 +48,16 @@
     ])->all();
 
     $tabs = array_merge($tabsFijos, $tabsDinamicos);
+
+    $iconosDisponibles = [
+        'fa-list' => 'Lista', 'fa-tags' => 'Etiquetas', 'fa-tag' => 'Etiqueta', 'fa-boxes' => 'Cajas',
+        'fa-truck' => 'Camión/Proveedor', 'fa-store' => 'Tienda', 'fa-warehouse' => 'Almacén',
+        'fa-building' => 'Edificio/Sucursal', 'fa-map-marker-alt' => 'Ubicación', 'fa-globe' => 'Global',
+        'fa-users' => 'Personas', 'fa-handshake' => 'Acuerdo', 'fa-clipboard-list' => 'Lista de control',
+        'fa-layer-group' => 'Capas', 'fa-shield-alt' => 'Garantía', 'fa-star' => 'Destacado',
+        'fa-gift' => 'Promoción', 'fa-wrench' => 'Servicio técnico', 'fa-folder' => 'Carpeta',
+        'fa-database' => 'Base de datos',
+    ];
 @endphp
 
 <div class="card">
@@ -277,11 +287,16 @@
                     <label class="form-label">Descripción (opcional)</label>
                     <input type="text" name="descripcion" class="form-control mb-3" maxlength="255">
                     <label class="form-label">Ícono</label>
-                    <select name="icono" class="form-select">
-                        @foreach(['fa-list'=>'Lista','fa-tags'=>'Etiquetas','fa-tag'=>'Etiqueta','fa-boxes'=>'Cajas','fa-truck'=>'Camión/Proveedor','fa-store'=>'Tienda','fa-warehouse'=>'Almacén','fa-building'=>'Edificio/Sucursal','fa-map-marker-alt'=>'Ubicación','fa-globe'=>'Global','fa-users'=>'Personas','fa-handshake'=>'Acuerdo','fa-clipboard-list'=>'Lista de control','fa-layer-group'=>'Capas','fa-shield-alt'=>'Garantía','fa-star'=>'Destacado','fa-gift'=>'Promoción','fa-wrench'=>'Servicio técnico','fa-folder'=>'Carpeta','fa-database'=>'Base de datos'] as $val => $label)
-                            <option value="{{ $val }}">{{ $label }} ({{ $val }})</option>
+                    <input type="hidden" name="icono" id="iconoNuevoTipo" value="fa-list">
+                    <div class="d-flex flex-wrap gap-2" id="iconoPickerNuevoTipo">
+                        @foreach($iconosDisponibles as $val => $label)
+                            <button type="button" class="btn btn-outline-secondary icono-opcion {{ $val === 'fa-list' ? 'active' : '' }}"
+                                    data-valor="{{ $val }}" title="{{ $label }}"
+                                    onclick="seleccionarIcono('iconoNuevoTipo', 'iconoPickerNuevoTipo', this)">
+                                <i class="fas {{ $val }}"></i>
+                            </button>
                         @endforeach
-                    </select>
+                    </div>
                 </div>
                 <div class="modal-footer" style="border-top:1px solid #f3f4f6;padding:16px 24px;">
                     <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Cancelar</button>
@@ -310,11 +325,16 @@
                     <label class="form-label">Descripción (opcional)</label>
                     <input type="text" name="descripcion" id="editarTipoDescripcion" class="form-control mb-3" maxlength="255">
                     <label class="form-label">Ícono</label>
-                    <select name="icono" id="editarTipoIcono" class="form-select">
-                        @foreach(['fa-list'=>'Lista','fa-tags'=>'Etiquetas','fa-tag'=>'Etiqueta','fa-boxes'=>'Cajas','fa-truck'=>'Camión/Proveedor','fa-store'=>'Tienda','fa-warehouse'=>'Almacén','fa-building'=>'Edificio/Sucursal','fa-map-marker-alt'=>'Ubicación','fa-globe'=>'Global','fa-users'=>'Personas','fa-handshake'=>'Acuerdo','fa-clipboard-list'=>'Lista de control','fa-layer-group'=>'Capas','fa-shield-alt'=>'Garantía','fa-star'=>'Destacado','fa-gift'=>'Promoción','fa-wrench'=>'Servicio técnico','fa-folder'=>'Carpeta','fa-database'=>'Base de datos'] as $val => $label)
-                            <option value="{{ $val }}">{{ $label }} ({{ $val }})</option>
+                    <input type="hidden" name="icono" id="editarTipoIcono" value="fa-list">
+                    <div class="d-flex flex-wrap gap-2" id="iconoPickerEditarTipo">
+                        @foreach($iconosDisponibles as $val => $label)
+                            <button type="button" class="btn btn-outline-secondary icono-opcion"
+                                    data-valor="{{ $val }}" title="{{ $label }}"
+                                    onclick="seleccionarIcono('editarTipoIcono', 'iconoPickerEditarTipo', this)">
+                                <i class="fas {{ $val }}"></i>
+                            </button>
                         @endforeach
-                    </select>
+                    </div>
                 </div>
                 <div class="modal-footer" style="border-top:1px solid #f3f4f6;padding:16px 24px;">
                     <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Cancelar</button>
@@ -364,9 +384,31 @@ function abrirModalEditarValor(id, nombre, tipoNombre) {
     modal.show();
 }
 
+// Selector visual de íconos (con botones que muestran el ícono real, no el nombre en texto)
+function seleccionarIcono(hiddenInputId, pickerId, boton) {
+    document.getElementById(hiddenInputId).value = boton.dataset.valor;
+    document.querySelectorAll('#' + pickerId + ' .icono-opcion').forEach(function (b) {
+        b.classList.remove('active', 'btn-primary');
+        b.classList.add('btn-outline-secondary');
+    });
+    boton.classList.remove('btn-outline-secondary');
+    boton.classList.add('btn-primary', 'active');
+}
+
+function marcarIconoActivo(pickerId, valor) {
+    document.querySelectorAll('#' + pickerId + ' .icono-opcion').forEach(function (b) {
+        const activo = b.dataset.valor === valor;
+        b.classList.toggle('btn-primary', activo);
+        b.classList.toggle('active', activo);
+        b.classList.toggle('btn-outline-secondary', !activo);
+    });
+}
+
 // Tipos de catálogo (modales nuevos)
 function abrirModalNuevoTipo() {
     document.getElementById('formNuevoTipo').reset();
+    document.getElementById('iconoNuevoTipo').value = 'fa-list';
+    marcarIconoActivo('iconoPickerNuevoTipo', 'fa-list');
     var modal = new bootstrap.Modal(document.getElementById('modalNuevoTipo'));
     modal.show();
 }
@@ -376,7 +418,8 @@ function abrirModalEditarTipo(id, nombre, descripcion, icono) {
     form.action = '{{ url('catalogos/tipos') }}/' + id;
     document.getElementById('editarTipoNombre').value = nombre;
     document.getElementById('editarTipoDescripcion').value = descripcion;
-    document.getElementById('editarTipoIcono').value = icono;
+    document.getElementById('editarTipoIcono').value = icono || 'fa-list';
+    marcarIconoActivo('iconoPickerEditarTipo', icono || 'fa-list');
     var modal = new bootstrap.Modal(document.getElementById('modalEditarTipo'));
     modal.show();
 }

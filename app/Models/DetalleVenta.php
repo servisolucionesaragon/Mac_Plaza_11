@@ -29,4 +29,9 @@ class DetalleVenta extends Model
     {
         return $this->belongsTo(Producto::class);
     }
+
+    public function lotes()
+    {
+        return $this->hasMany(DetalleVentaLote::class);
+    }
 }

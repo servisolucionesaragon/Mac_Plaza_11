@@ -111,10 +111,16 @@
                                     </div>
                                 </div>
                                 <div class="col-md-4">
-                                    <label class="form-label">Precio Compra ({{ $config->simbolo_moneda }})</label>
-                                    <input type="number" class="form-control" name="precio_compra"
-                                           value="{{ old('precio_compra', $producto->precio_compra) }}"
-                                           min="0" step="0.01" oninput="calcularMargen()">
+                                    <label class="form-label">
+                                        Precio Compra ({{ $config->simbolo_moneda }})
+                                        <i class="fas fa-info-circle text-muted fa-xs" title="Gestionado por lotes de inventario — ver ficha del producto"></i>
+                                    </label>
+                                    <div class="form-control" style="background:#f9fafb;" data-precio-compra="{{ $producto->precio_compra }}">
+                                        {{ $config->simbolo_moneda }} {{ number_format($producto->precio_compra, 2) }}
+                                    </div>
+                                    <div style="font-size:11px; color:#9ca3af; margin-top:2px;">
+                                        Costo del lote vigente (FIFO). <a href="{{ route('productos.show', $producto) }}">Gestionar lotes</a>
+                                    </div>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Precio Venta ({{ $config->simbolo_moneda }})</label>
@@ -131,9 +137,13 @@
                                     </div>
                                 </div>
                                 <div class="col-md-4">
-                                    <label class="form-label">Stock Actual</label>
-                                    <input type="number" class="form-control" name="stock"
-                                           value="{{ old('stock', $producto->stock) }}" min="0">
+                                    <label class="form-label">
+                                        Stock Actual
+                                        <i class="fas fa-info-circle text-muted fa-xs" title="Gestionado por lotes de inventario — ver ficha del producto"></i>
+                                    </label>
+                                    <div class="form-control" style="background:#f9fafb;">
+                                        {{ $producto->stock }} unidades
+                                    </div>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Stock Mínimo</label>
@@ -152,6 +162,31 @@
                                     <textarea class="form-control" name="descripcion" rows="3">{{ old('descripcion', $producto->descripcion) }}</textarea>
                                 </div>
                             </div>
+
+                            @if($catalogoTipos->isNotEmpty())
+                            <hr class="my-4">
+                            <h6 class="fw-600 mb-3" style="font-weight:600; color:#1e1b4b;">Catálogos Adicionales</h6>
+                            <div class="row g-3">
+                                @foreach($catalogoTipos as $tipo)
+                                <div class="col-md-6">
+                                    <label class="form-label">
+                                        <i class="fas {{ $tipo->icono ?: 'fa-list' }} me-1" style="color:#a855f7;"></i>{{ $tipo->nombre }}
+                                    </label>
+                                    <select name="catalogo_valores[{{ $tipo->id }}][]" class="form-select" multiple size="4">
+                                        @foreach($tipo->valores as $valor)
+                                            @php
+                                                $seleccionados = old('catalogo_valores.'.$tipo->id, $producto->catalogoValores->pluck('id')->all());
+                                            @endphp
+                                            <option value="{{ $valor->id }}" {{ collect($seleccionados)->contains($valor->id) ? 'selected' : '' }}>
+                                                {{ $valor->nombre }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <div style="font-size:11px; color:#9ca3af; margin-top:2px;">Mantén Ctrl (o Cmd en Mac) para seleccionar varios</div>
+                                </div>
+                                @endforeach
+                            </div>
+                            @endif
                         </div>
 
                         <div class="col-lg-4">
@@ -207,7 +242,7 @@ function previewImage(input) {
     }
 }
 function calcularMargen() {
-    const compra = parseFloat(document.querySelector('[name=precio_compra]').value) || 0;
+    const compra = parseFloat(document.querySelector('[data-precio-compra]').dataset.precioCompra) || 0;
     const venta  = parseFloat(document.querySelector('[name=precio_venta]').value) || 0;
     const margen = compra > 0 ? ((venta - compra) / compra * 100) : 0;
     document.getElementById('margenValor').textContent = margen.toFixed(1) + '%';

@@ -126,16 +126,31 @@
                                 </div>
                             </div>
 
+                            @if($catalogoTipos->isNotEmpty())
                             <hr class="my-4">
-                            <h6 class="fw-600 mb-3" style="font-weight:600; color:#1e1b4b;">Precios y Stock</h6>
+                            <h6 class="fw-600 mb-3" style="font-weight:600; color:#1e1b4b;">Catálogos Adicionales</h6>
                             <div class="row g-3">
-                                <div class="col-md-4">
-                                    <label class="form-label">Precio de Compra ({{ $config->simbolo_moneda }}) <span class="text-danger">*</span></label>
-                                    <input type="number" class="form-control @error('precio_compra') is-invalid @enderror"
-                                           name="precio_compra" value="{{ old('precio_compra',0) }}"
-                                           min="0" step="0.01" oninput="calcularMargen()">
-                                    @error('precio_compra')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                @foreach($catalogoTipos as $tipo)
+                                <div class="col-md-6">
+                                    <label class="form-label">
+                                        <i class="fas {{ $tipo->icono ?: 'fa-list' }} me-1" style="color:#a855f7;"></i>{{ $tipo->nombre }}
+                                    </label>
+                                    <select name="catalogo_valores[{{ $tipo->id }}][]" class="form-select" multiple size="4">
+                                        @foreach($tipo->valores as $valor)
+                                            <option value="{{ $valor->id }}" {{ collect(old('catalogo_valores.'.$tipo->id, []))->contains($valor->id) ? 'selected' : '' }}>
+                                                {{ $valor->nombre }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <div style="font-size:11px; color:#9ca3af; margin-top:2px;">Mantén Ctrl (o Cmd en Mac) para seleccionar varios</div>
                                 </div>
+                                @endforeach
+                            </div>
+                            @endif
+
+                            <hr class="my-4">
+                            <h6 class="fw-600 mb-3" style="font-weight:600; color:#1e1b4b;">Precio de Venta</h6>
+                            <div class="row g-3">
                                 <div class="col-md-4">
                                     <label class="form-label">Precio de Venta ({{ $config->simbolo_moneda }}) <span class="text-danger">*</span></label>
                                     <input type="number" class="form-control @error('precio_venta') is-invalid @enderror"
@@ -144,17 +159,11 @@
                                     @error('precio_venta')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                 </div>
                                 <div class="col-md-4">
-                                    <label class="form-label">Margen de Ganancia</label>
+                                    <label class="form-label">Margen de Ganancia (ref.)</label>
                                     <div class="form-control d-flex align-items-center" style="background:#f9fafb;">
                                         <span id="margenValor" style="font-weight:600; color:#10b981;">0.0%</span>
                                         <span id="margenMonto" class="ms-2 text-muted" style="font-size:12px;"></span>
                                     </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Stock Inicial <span class="text-danger">*</span></label>
-                                    <input type="number" class="form-control @error('stock') is-invalid @enderror"
-                                           name="stock" value="{{ old('stock',0) }}" min="0">
-                                    @error('stock')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Stock Mínimo <span class="text-danger">*</span>
@@ -163,6 +172,25 @@
                                     <input type="number" class="form-control" name="stock_minimo"
                                            value="{{ old('stock_minimo',5) }}" min="0">
                                 </div>
+                            </div>
+
+                            <hr class="my-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="fw-600 mb-0" style="font-weight:600; color:#1e1b4b;">Lotes Iniciales de Inventario</h6>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="agregarLoteRow()">
+                                    <i class="fas fa-plus me-1"></i>Agregar Lote
+                                </button>
+                            </div>
+                            <p class="text-muted mb-3" style="font-size:12px;">
+                                Registra cada lote de compra por separado si tienes unidades con distinto costo o proveedor (costeo FIFO).
+                            </p>
+                            @error('lotes')<div class="alert alert-danger py-2" style="font-size:13px;">{{ $message }}</div>@enderror
+
+                            <div id="lotesContainer"></div>
+
+                            <div class="text-end mt-2" style="font-size:13px;">
+                                <span class="text-muted">Stock total inicial:</span>
+                                <span id="stockTotalLotes" class="fw-600" style="font-weight:600;">0</span>
                             </div>
                         </div>
 
@@ -194,7 +222,7 @@
                             <div class="mt-4 p-3 rounded-3" style="background:#f8f5ff;">
                                 <h6 style="font-size:13px; font-weight:600; margin-bottom:12px;">Resumen de Precio</h6>
                                 <div class="d-flex justify-content-between mb-2" style="font-size:13px;">
-                                    <span class="text-muted">Precio compra</span>
+                                    <span class="text-muted">Costo promedio (lotes)</span>
                                     <span id="resCompra">{{ $config->simbolo_moneda }} 0.00</span>
                                 </div>
                                 <div class="d-flex justify-content-between mb-2" style="font-size:13px;">
@@ -227,6 +255,10 @@
 @push('scripts')
 <script>
 const MONEDA = "{{ $config->simbolo_moneda }}";
+const PROVEEDOR_OPTIONS = `<option value="">— Sin especificar —</option>` +
+    @json($proveedores->pluck('nombre'))
+        .map(nombre => `<option value="${nombre.replace(/"/g, '&quot;')}">${nombre}</option>`)
+        .join('');
 function previewImage(input) {
     if (input.files && input.files[0]) {
         const reader = new FileReader();
@@ -250,8 +282,50 @@ function handleDrop(e) {
     }
 }
 
+let loteIndex = 0;
+
+function agregarLoteRow() {
+    const idx = loteIndex++;
+    const div = document.createElement('div');
+    div.className = 'lote-row row g-2 align-items-end mb-2';
+    div.innerHTML = `
+        <div class="col-md-3">
+            <label class="form-label small mb-1">Cantidad <span class="text-danger">*</span></label>
+            <input type="number" class="form-control form-control-sm" name="lotes[${idx}][cantidad]" min="1" required oninput="calcularMargen()">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small mb-1">Costo Unitario (${MONEDA}) <span class="text-danger">*</span></label>
+            <input type="number" class="form-control form-control-sm" name="lotes[${idx}][costo_unitario]" min="0" step="0.01" required oninput="calcularMargen()">
+        </div>
+        <div class="col-md-4">
+            <label class="form-label small mb-1">Proveedor</label>
+            <select class="form-select form-select-sm" name="lotes[${idx}][proveedor]">${PROVEEDOR_OPTIONS}</select>
+        </div>
+        <div class="col-md-2">
+            <button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="quitarLoteRow(this)">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>`;
+    document.getElementById('lotesContainer').appendChild(div);
+}
+
+function quitarLoteRow(btn) {
+    const filas = document.querySelectorAll('#lotesContainer .lote-row');
+    if (filas.length <= 1) return;
+    btn.closest('.lote-row').remove();
+    calcularMargen();
+}
+
 function calcularMargen() {
-    const compra = parseFloat(document.querySelector('[name=precio_compra]').value) || 0;
+    let cantidadTotal = 0;
+    let costoTotal = 0;
+    document.querySelectorAll('#lotesContainer .lote-row').forEach(fila => {
+        const cant  = parseFloat(fila.querySelector('[name$="[cantidad]"]').value) || 0;
+        const costo = parseFloat(fila.querySelector('[name$="[costo_unitario]"]').value) || 0;
+        cantidadTotal += cant;
+        costoTotal += cant * costo;
+    });
+    const compra = cantidadTotal > 0 ? (costoTotal / cantidadTotal) : 0;
     const venta  = parseFloat(document.querySelector('[name=precio_venta]').value) || 0;
     const margen = compra > 0 ? ((venta - compra) / compra * 100) : 0;
     const ganancia = venta - compra;
@@ -263,6 +337,9 @@ function calcularMargen() {
     document.getElementById('resVenta').textContent   = MONEDA + ' ' + venta.toFixed(2);
     document.getElementById('resGanancia').textContent = MONEDA + ' ' + ganancia.toFixed(2);
     document.getElementById('resGanancia').style.color = ganancia >= 0 ? '#10b981' : '#dc2626';
+    document.getElementById('stockTotalLotes').textContent = cantidadTotal;
 }
+
+agregarLoteRow();
 </script>
 @endpush

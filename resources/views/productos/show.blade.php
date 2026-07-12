@@ -142,6 +142,72 @@
                     </div>
                     @endif
                 </div>
+
+                @if($producto->catalogoValores->isNotEmpty())
+                <hr class="my-3">
+                <div class="row g-3" style="font-size:13.5px;">
+                    @foreach($producto->catalogoValores->groupBy('tipo.nombre') as $nombreTipo => $valores)
+                    <div class="col-md-4">
+                        <span class="text-muted d-block" style="font-size:11px;">
+                            <i class="fas {{ $valores->first()->tipo->icono ?: 'fa-list' }} me-1"></i>{{ strtoupper($nombreTipo) }}
+                        </span>
+                        <strong>{{ $valores->pluck('nombre')->implode(', ') }}</strong>
+                    </div>
+                    @endforeach
+                </div>
+                @endif
+            </div>
+        </div>
+
+        {{-- Lotes de inventario (FIFO) --}}
+        <div class="card mb-4">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h6 class="fw-bold mb-0">Lotes de Inventario</h6>
+                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalAgregarLote">
+                        <i class="fas fa-plus me-1"></i>Agregar Lote
+                    </button>
+                </div>
+
+                @if($producto->lotes->isNotEmpty())
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" style="font-size:13px;">
+                        <thead>
+                            <tr>
+                                <th>Fecha Ingreso</th>
+                                <th>Cant. Inicial</th>
+                                <th>Cant. Restante</th>
+                                <th>Costo Unitario</th>
+                                <th>Proveedor</th>
+                                <th>Notas</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($producto->lotes as $lote)
+                            <tr>
+                                <td style="color:#9ca3af;">{{ $lote->fecha_ingreso->format('d/m/Y H:i') }}</td>
+                                <td>{{ $lote->cantidad_inicial }}</td>
+                                <td>
+                                    @if($lote->cantidad_restante <= 0)
+                                        <span class="text-muted">Agotado</span>
+                                    @else
+                                        <strong>{{ $lote->cantidad_restante }}</strong>
+                                    @endif
+                                </td>
+                                <td>{{ $config->simbolo_moneda }} {{ number_format($lote->costo_unitario, 2) }}</td>
+                                <td>{{ $lote->proveedor ?: '—' }}</td>
+                                <td>{{ $lote->notas ?: '—' }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                @else
+                <div class="text-center py-4 text-muted" style="font-size:13px;">
+                    <i class="fas fa-boxes fa-2x mb-2 d-block opacity-40"></i>
+                    Este producto aún no tiene lotes registrados
+                </div>
+                @endif
             </div>
         </div>
 
@@ -194,6 +260,59 @@
                 </div>
                 @endif
             </div>
+        </div>
+    </div>
+</div>
+
+{{-- Modal: Agregar Lote --}}
+<div class="modal fade" id="modalAgregarLote" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{{ route('productos.lotes.store', $producto) }}" method="POST">
+                @csrf
+                <div class="modal-header">
+                    <h6 class="modal-title fw-bold">Agregar Lote de Inventario</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted mb-3" style="font-size:12px;">
+                        Registra unidades nuevas de <strong>{{ $producto->nombre }}</strong>. Si el costo es distinto
+                        al de lotes anteriores, se conserva por separado (costeo FIFO).
+                    </p>
+                    <div class="mb-3">
+                        <label class="form-label">Cantidad <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" name="cantidad" min="1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Costo Unitario ({{ $config->simbolo_moneda }}) <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" name="costo_unitario" min="0" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Proveedor</label>
+                        <select class="form-select" name="proveedor">
+                            <option value="">— Sin especificar —</option>
+                            @foreach($proveedores as $prov)
+                                <option value="{{ $prov->nombre }}">{{ $prov->nombre }}</option>
+                            @endforeach
+                        </select>
+                        @if($proveedores->isEmpty())
+                            <div style="font-size:11px; color:#9ca3af; margin-top:2px;">
+                                No hay proveedores registrados. <a href="{{ route('catalogos.index') }}">Agregar en Catálogos</a>.
+                            </div>
+                        @endif
+                    </div>
+                    <div class="mb-1">
+                        <label class="form-label">Notas</label>
+                        <textarea class="form-control" name="notas" rows="2" placeholder="Opcional"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Guardar Lote
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

@@ -19,4 +19,9 @@ class CatalogoValor extends Model
     {
         return $this->belongsTo(CatalogoTipo::class, 'catalogo_tipo_id');
     }
+
+    public function productos()
+    {
+        return $this->belongsToMany(Producto::class, 'producto_catalogo_valor');
+    }
 }

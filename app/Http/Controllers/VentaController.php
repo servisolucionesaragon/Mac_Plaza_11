@@ -9,6 +9,7 @@ use App\Models\Cliente;
 use App\Models\User;
 use App\Models\Producto;
 use App\Models\DetalleVenta;
+use App\Models\DetalleVentaLote;
 use App\Models\MetodoPago;
 use App\Models\Categoria;
 use App\Models\Marca;
@@ -205,6 +206,8 @@ class VentaController extends Controller
             $subItem        = ($precioUnitario * $item['cantidad']) - $descItem;
             $subtotal      += $subItem;
 
+            $consumos = $producto->consumirStockFifo((int) $item['cantidad']);
+
             $detalles[] = [
                 'producto_id'    => $producto->id,
                 'cantidad'       => $item['cantidad'],
@@ -213,12 +216,24 @@ class VentaController extends Controller
                 'subtotal'       => $subItem,
                 'imei_vendido'   => $imeiVendido,
                 'serial_vendido' => $serialVendido,
+                '_consumos'      => $consumos,
             ];
-
-            $producto->decrement('stock', $item['cantidad']);
         }
 
         return [$detalles, $subtotal];
+    }
+
+    /** Registra en detalle_venta_lote de qué lote(s) salió cada unidad vendida en esta línea. */
+    private function guardarLotesConsumidos(DetalleVenta $detalle, iterable $consumos): void
+    {
+        foreach ($consumos as $consumo) {
+            DetalleVentaLote::create([
+                'detalle_venta_id' => $detalle->id,
+                'lote_id'          => $consumo['lote_id'],
+                'cantidad'         => $consumo['cantidad'],
+                'costo_unitario'   => $consumo['costo_unitario'],
+            ]);
+        }
     }
 
     /** Calcula subtotal neto/impuesto/total según el modo de precio. */
@@ -320,8 +335,11 @@ class VentaController extends Controller
             ]);
 
             foreach ($detalles as $detalle) {
+                $consumos = $detalle['_consumos'] ?? [];
+                unset($detalle['_consumos']);
                 $detalle['venta_id'] = $venta->id;
-                DetalleVenta::create($detalle);
+                $detalleVenta = DetalleVenta::create($detalle);
+                $this->guardarLotesConsumidos($detalleVenta, $consumos);
             }
 
             if ($esCredito && $abonoInicial > 0) {
@@ -366,9 +384,10 @@ class VentaController extends Controller
         DB::beginTransaction();
         try {
             // Restaurar el stock de los productos/cantidades actuales antes de validar los nuevos.
-            $venta->load('detalles');
+            // Se devuelve cada cantidad a su lote de origen (FIFO), no a "el stock total".
+            $venta->load('detalles.lotes');
             foreach ($venta->detalles as $detalleViejo) {
-                $detalleViejo->producto?->increment('stock', $detalleViejo->cantidad);
+                $detalleViejo->producto?->devolverStockFifo($detalleViejo->lotes);
             }
 
             [$detalles, $subtotal] = $this->procesarProductos($request->productos);
@@ -401,8 +420,11 @@ class VentaController extends Controller
 
             $venta->detalles()->delete();
             foreach ($detalles as $detalle) {
+                $consumos = $detalle['_consumos'] ?? [];
+                unset($detalle['_consumos']);
                 $detalle['venta_id'] = $venta->id;
-                DetalleVenta::create($detalle);
+                $detalleVenta = DetalleVenta::create($detalle);
+                $this->guardarLotesConsumidos($detalleVenta, $consumos);
             }
 
             DB::commit();
@@ -506,8 +528,9 @@ class VentaController extends Controller
         }
 
         DB::transaction(function () use ($venta) {
+            $venta->load('detalles.lotes');
             foreach ($venta->detalles as $detalle) {
-                $detalle->producto->increment('stock', $detalle->cantidad);
+                $detalle->producto?->devolverStockFifo($detalle->lotes);
             }
             $venta->update(['estado' => 'cancelada']);
         });

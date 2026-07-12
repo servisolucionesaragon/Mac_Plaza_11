@@ -9,6 +9,7 @@ use App\Models\Marca;
 use App\Models\Condicion;
 use App\Models\Almacenamiento;
 use App\Models\Ram;
+use App\Models\CatalogoTipo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
@@ -68,6 +69,26 @@ class ProductoController extends Controller
         );
     }
 
+    /** Tipos de catálogo dinámico activos, cada uno con sus valores activos — para los <select multiple> de Productos. */
+    private function catalogoTiposActivos()
+    {
+        return CatalogoTipo::where('activo', true)
+            ->with(['valores' => fn($q) => $q->where('activo', true)->orderBy('nombre')])
+            ->orderBy('nombre')
+            ->get()
+            ->filter(fn($tipo) => $tipo->valores->isNotEmpty())
+            ->values();
+    }
+
+    /** Valores activos del catálogo dinámico "Proveedores" — para el <select> de proveedor en los lotes de inventario. */
+    private function proveedoresActivos()
+    {
+        return CatalogoTipo::where('nombre', 'Proveedores')
+            ->with(['valores' => fn($q) => $q->where('activo', true)->orderBy('nombre')])
+            ->first()
+            ?->valores ?? collect();
+    }
+
     public function create()
     {
         $categorias      = Categoria::where('activo', true)->orderBy('nombre')->get();
@@ -75,7 +96,9 @@ class ProductoController extends Controller
         $condiciones     = Condicion::where('activo', true)->orderBy('nombre')->get();
         $almacenamientos = Almacenamiento::where('activo', true)->orderBy('nombre')->get();
         $rams            = Ram::where('activo', true)->orderBy('nombre')->get();
-        return view('productos.create', compact('categorias', 'marcas', 'condiciones', 'almacenamientos', 'rams'));
+        $catalogoTipos   = $this->catalogoTiposActivos();
+        $proveedores     = $this->proveedoresActivos();
+        return view('productos.create', compact('categorias', 'marcas', 'condiciones', 'almacenamientos', 'rams', 'catalogoTipos', 'proveedores'));
     }
 
     public function store(Request $request)
@@ -90,14 +113,19 @@ class ProductoController extends Controller
             'color'         => 'nullable|string|max:50',
             'almacenamiento_id' => 'nullable|exists:almacenamientos,id',
             'ram_id'        => 'nullable|exists:rams,id',
-            'precio_compra' => 'required|numeric|min:0',
             'precio_venta'  => 'required|numeric|min:0',
-            'stock'         => 'required|integer|min:0',
             'stock_minimo'  => 'required|integer|min:0',
             'requiere_imei'   => 'boolean',
             'requiere_serial' => 'boolean',
             'condicion_id'  => 'required|exists:condiciones,id',
             'imagen'        => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'catalogo_valores'   => 'nullable|array',
+            'catalogo_valores.*' => 'array',
+            'catalogo_valores.*.*' => 'exists:catalogo_valores,id',
+            'lotes'                  => 'required|array|min:1',
+            'lotes.*.cantidad'       => 'required|integer|min:1',
+            'lotes.*.costo_unitario' => 'required|numeric|min:0',
+            'lotes.*.proveedor'      => 'nullable|string|max:150',
         ]);
 
         $validated['requiere_imei']   = $request->boolean('requiere_imei');
@@ -107,16 +135,55 @@ class ProductoController extends Controller
             $validated['imagen'] = $request->file('imagen')->store('productos', 'public');
         }
 
-        Producto::create($validated);
+        $producto = Producto::create(
+            collect($validated)->except(['catalogo_valores', 'lotes'])->all()
+        );
+
+        $idsCatalogoValores = collect($request->input('catalogo_valores', []))->flatten()->unique()->values()->all();
+        $producto->catalogoValores()->sync($idsCatalogoValores);
+
+        foreach ($validated['lotes'] as $lote) {
+            $producto->agregarLote([
+                'cantidad'       => $lote['cantidad'],
+                'costo_unitario' => $lote['costo_unitario'],
+                'proveedor'      => $lote['proveedor'] ?? null,
+                'user_id'        => auth()->id(),
+            ]);
+        }
 
         return redirect()->route('productos.index')
             ->with('success', 'Producto registrado correctamente.');
     }
 
+    public function agregarLote(Request $request, Producto $producto)
+    {
+        $validado = $request->validate([
+            'cantidad'       => 'required|integer|min:1',
+            'costo_unitario' => 'required|numeric|min:0',
+            'proveedor'      => 'nullable|string|max:150',
+            'notas'          => 'nullable|string|max:500',
+        ]);
+
+        $producto->agregarLote([
+            'cantidad'       => $validado['cantidad'],
+            'costo_unitario' => $validado['costo_unitario'],
+            'proveedor'      => $validado['proveedor'] ?? null,
+            'notas'          => $validado['notas'] ?? null,
+            'user_id'        => auth()->id(),
+        ]);
+
+        return back()->with('success', 'Lote agregado correctamente.');
+    }
+
     public function show(Producto $producto)
     {
-        $producto->load(['categoria', 'marca', 'condicion', 'almacenamiento', 'ram', 'detalleVentas.venta.cliente']);
-        return view('productos.show', compact('producto'));
+        $producto->load([
+            'categoria', 'marca', 'condicion', 'almacenamiento', 'ram',
+            'detalleVentas.venta.cliente', 'catalogoValores.tipo',
+            'lotes' => fn ($q) => $q->orderByDesc('fecha_ingreso')->orderByDesc('id'),
+        ]);
+        $proveedores = $this->proveedoresActivos();
+        return view('productos.show', compact('producto', 'proveedores'));
     }
 
     public function edit(Producto $producto)
@@ -126,7 +193,9 @@ class ProductoController extends Controller
         $condiciones     = Condicion::where('activo', true)->orderBy('nombre')->get();
         $almacenamientos = Almacenamiento::where('activo', true)->orderBy('nombre')->get();
         $rams            = Ram::where('activo', true)->orderBy('nombre')->get();
-        return view('productos.edit', compact('producto', 'categorias', 'marcas', 'condiciones', 'almacenamientos', 'rams'));
+        $catalogoTipos   = $this->catalogoTiposActivos();
+        $producto->load('catalogoValores');
+        return view('productos.edit', compact('producto', 'categorias', 'marcas', 'condiciones', 'almacenamientos', 'rams', 'catalogoTipos'));
     }
 
     public function update(Request $request, Producto $producto)
@@ -141,15 +210,16 @@ class ProductoController extends Controller
             'color'         => 'nullable|string|max:50',
             'almacenamiento_id' => 'nullable|exists:almacenamientos,id',
             'ram_id'        => 'nullable|exists:rams,id',
-            'precio_compra' => 'required|numeric|min:0',
             'precio_venta'  => 'required|numeric|min:0',
-            'stock'         => 'required|integer|min:0',
             'stock_minimo'  => 'required|integer|min:0',
             'requiere_imei'   => 'boolean',
             'requiere_serial' => 'boolean',
             'condicion_id'  => 'required|exists:condiciones,id',
             'activo'        => 'boolean',
             'imagen'        => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'catalogo_valores'   => 'nullable|array',
+            'catalogo_valores.*' => 'array',
+            'catalogo_valores.*.*' => 'exists:catalogo_valores,id',
         ]);
 
         $validated['requiere_imei']   = $request->boolean('requiere_imei');
@@ -160,7 +230,10 @@ class ProductoController extends Controller
             $validated['imagen'] = $request->file('imagen')->store('productos', 'public');
         }
 
-        $producto->update($validated);
+        $producto->update(collect($validated)->except('catalogo_valores')->all());
+
+        $idsCatalogoValores = collect($request->input('catalogo_valores', []))->flatten()->unique()->values()->all();
+        $producto->catalogoValores()->sync($idsCatalogoValores);
 
         return redirect()->route('productos.index')
             ->with('success', 'Producto actualizado correctamente.');
