@@ -6,6 +6,7 @@ use App\Models\Venta;
 use App\Models\Abono;
 use App\Models\Caja;
 use App\Models\Cliente;
+use App\Models\User;
 use App\Models\Producto;
 use App\Models\DetalleVenta;
 use App\Models\MetodoPago;
@@ -53,7 +54,11 @@ class VentaController extends Controller
             }
         }
 
-        $ventas = $query->orderByDesc('fecha_venta')->paginate(15);
+        if ($request->filled('vendedor_id')) {
+            $query->where('user_id', $request->vendedor_id);
+        }
+
+        $ventas = $query->orderByDesc('fecha_venta')->paginate(15)->withQueryString();
 
         $totalMes = Venta::where('estado', 'completada')
             ->where('fecha_venta', '>=', Carbon::now()->startOfMonth())
@@ -61,7 +66,13 @@ class VentaController extends Controller
 
         $cajaAbierta = (bool) Caja::abiertaActual();
 
-        return view('ventas.index', compact('ventas', 'totalMes', 'cajaAbierta'));
+        $vendedorFiltrado = $request->filled('vendedor_id')
+            ? User::find($request->vendedor_id)
+            : null;
+
+        $vendedores = User::where('activo', true)->orderBy('name')->get();
+
+        return view('ventas.index', compact('ventas', 'totalMes', 'cajaAbierta', 'vendedorFiltrado', 'vendedores'));
     }
 
     public function create()

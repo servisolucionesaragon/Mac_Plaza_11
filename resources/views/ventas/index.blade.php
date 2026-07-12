@@ -32,6 +32,17 @@
 </div>
 @endunless
 
+@if($vendedorFiltrado)
+<div class="card mb-4" style="border:1px solid #e9d5ff;background:#f8f5ff;">
+    <div class="card-body p-3 d-flex align-items-center justify-content-between" style="font-size:13.5px;color:#5b21b6;">
+        <span><i class="fas fa-user me-2"></i>Filtrado por vendedor: <strong>{{ $vendedorFiltrado->name }}</strong></span>
+        <a href="{{ route('ventas.index', request()->except('vendedor_id')) }}" class="btn btn-sm btn-outline-secondary">
+            <i class="fas fa-times me-1"></i>Quitar filtro
+        </a>
+    </div>
+</div>
+@endif
+
 {{-- Filtros --}}
 <div class="card mb-4">
     <div class="card-body p-3">
@@ -61,6 +72,14 @@
             </div>
             <div class="col-md-2">
                 <input type="date" class="form-control" name="fecha_hasta" value="{{ request('fecha_hasta') }}">
+            </div>
+            <div class="col-md-2">
+                <select class="form-select" name="vendedor_id">
+                    <option value="">Todos los usuarios</option>
+                    @foreach($vendedores as $u)
+                        <option value="{{ $u->id }}" {{ request('vendedor_id')==$u->id?'selected':'' }}>{{ $u->name }}</option>
+                    @endforeach
+                </select>
             </div>
             <div class="col-md-2 d-flex gap-2">
                 <button type="submit" class="btn btn-primary flex-1">
