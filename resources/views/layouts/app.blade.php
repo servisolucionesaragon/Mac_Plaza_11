@@ -496,6 +496,12 @@
         @if(Auth::user()->esAdmin())
         <div class="nav-section-title">Sistema</div>
 
+        <a href="{{ route('usuarios.index') }}"
+           class="nav-link {{ request()->routeIs('usuarios.*') ? 'active' : '' }}">
+            <span class="nav-icon"><i class="fas fa-user-cog"></i></span>
+            Usuarios
+        </a>
+
         <a href="{{ route('configuracion.index') }}"
            class="nav-link {{ request()->routeIs('configuracion.*') ? 'active' : '' }}">
             <span class="nav-icon"><i class="fas fa-cog"></i></span>

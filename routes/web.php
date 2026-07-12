@@ -10,6 +10,7 @@ use App\Http\Controllers\VentaController;
 use App\Http\Controllers\ReparacionController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\ConfiguracionController;
+use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\BackupController;
 use App\Http\Controllers\CatalogoController;
 use App\Http\Controllers\CatalogoTipoController;
@@ -105,11 +106,16 @@ Route::middleware(['auth', 'nocache'])->group(function () {
     Route::middleware('permiso:configuracion')->group(function () {
         Route::get('/configuracion', [ConfiguracionController::class, 'index'])->name('configuracion.index');
         Route::put('/configuracion/general', [ConfiguracionController::class, 'updateGeneral'])->name('configuracion.updateGeneral');
-        Route::put('/configuracion/permisos', [ConfiguracionController::class, 'updatePermisos'])->name('configuracion.updatePermisos');
-        Route::post('/configuracion/usuarios', [ConfiguracionController::class, 'storeUsuario'])->name('configuracion.storeUsuario');
-        Route::patch('/configuracion/usuarios/{usuario}/toggle', [ConfiguracionController::class, 'toggleUsuario'])->name('configuracion.toggleUsuario');
-        Route::put('/configuracion/usuarios/{usuario}', [ConfiguracionController::class, 'updateUsuario'])->name('configuracion.updateUsuario');
-        Route::delete('/configuracion/usuarios/{usuario}', [ConfiguracionController::class, 'destroyUsuario'])->name('configuracion.destroyUsuario');
+    });
+
+    // Usuarios (gestión de usuarios + permisos por rol)
+    Route::middleware('permiso:usuarios')->group(function () {
+        Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
+        Route::put('/usuarios/permisos', [UsuarioController::class, 'updatePermisos'])->name('usuarios.updatePermisos');
+        Route::post('/usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
+        Route::patch('/usuarios/{usuario}/toggle', [UsuarioController::class, 'toggle'])->name('usuarios.toggle');
+        Route::put('/usuarios/{usuario}', [UsuarioController::class, 'update'])->name('usuarios.update');
+        Route::delete('/usuarios/{usuario}', [UsuarioController::class, 'destroy'])->name('usuarios.destroy');
     });
 
     // Backup & Restauración
