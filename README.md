@@ -55,10 +55,14 @@ con control de acceso por roles.
 | Configuración | ✅ | — | — |
 | Backup | ✅ | — | — |
 
-**Nota:** salvo Usuarios/Configuración/Backup (siempre admin-only), esta matriz es
-**configurable en vivo** desde el módulo Usuarios → Permisos de Roles (tabla
-`permisos_rol`), sin tocar código — la tabla de arriba refleja la configuración
-actual, pero puede cambiar en cualquier momento desde la UI.
+**Nota:** Administrador siempre tiene acceso completo a los 9 módulos (chequeo
+`esAdmin()` en `User::puedeAcceder()`, previo a cualquier fila de `permisos_rol`).
+Para Vendedor y Técnico, **toda la matriz — incluyendo Usuarios, Configuración y
+Backup — es configurable en vivo** desde el propio módulo Usuarios → Permisos de
+Roles, sin tocar código: la tabla de arriba refleja la configuración actual, pero
+puede cambiar en cualquier momento desde la UI. El sidebar ("Sistema" → Usuarios/
+Configuración/Backup) usa el mismo `puedeAcceder()` por ítem que el resto del menú,
+ya no hay un gate especial `esAdmin()` para esa sección.
 
 Control de acceso vía middleware `permiso:{modulo}` (`VerificarPermisoModulo`) + tabla
 `permisos_rol`, editable desde Usuarios sin tocar código.
