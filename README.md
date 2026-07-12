@@ -50,10 +50,15 @@ con control de acceso por roles.
 | Inventario | ✅ | ✅ | Solo consulta |
 | Ventas (POS) | ✅ | ✅ | — |
 | Reparaciones | ✅ | Solo consulta | ✅ |
-| Reportes | ✅ | — | — |
+| Reportes | ✅ | ✅ | — |
 | Usuarios | ✅ | — | — |
 | Configuración | ✅ | — | — |
 | Backup | ✅ | — | — |
+
+**Nota:** salvo Usuarios/Configuración/Backup (siempre admin-only), esta matriz es
+**configurable en vivo** desde el módulo Usuarios → Permisos de Roles (tabla
+`permisos_rol`), sin tocar código — la tabla de arriba refleja la configuración
+actual, pero puede cambiar en cualquier momento desde la UI.
 
 Control de acceso vía middleware `permiso:{modulo}` (`VerificarPermisoModulo`) + tabla
 `permisos_rol`, editable desde Usuarios sin tocar código.
