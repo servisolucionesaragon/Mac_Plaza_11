@@ -182,12 +182,22 @@ class VentaController extends Controller
                 throw new \Exception("Stock insuficiente para: {$producto->nombre}");
             }
 
-            if ($producto->requiere_imei && empty($item['imei'] ?? null)) {
-                throw new \Exception("El producto \"{$producto->nombre}\" requiere IMEI para completar la venta.");
+            $imeiVendido = null;
+            if ($producto->requiere_imei) {
+                $imeis = array_values(array_filter((array) ($item['imei'] ?? []), fn($v) => trim((string) $v) !== ''));
+                if (count($imeis) !== (int) $item['cantidad']) {
+                    throw new \Exception("El producto \"{$producto->nombre}\" requiere {$item['cantidad']} IMEI (uno por unidad); se recibieron " . count($imeis) . ".");
+                }
+                $imeiVendido = implode(', ', $imeis);
             }
 
-            if ($producto->requiere_serial && empty($item['serial'] ?? null)) {
-                throw new \Exception("El producto \"{$producto->nombre}\" requiere Serial para completar la venta.");
+            $serialVendido = null;
+            if ($producto->requiere_serial) {
+                $seriales = array_values(array_filter((array) ($item['serial'] ?? []), fn($v) => trim((string) $v) !== ''));
+                if (count($seriales) !== (int) $item['cantidad']) {
+                    throw new \Exception("El producto \"{$producto->nombre}\" requiere {$item['cantidad']} Serial (uno por unidad); se recibieron " . count($seriales) . ".");
+                }
+                $serialVendido = implode(', ', $seriales);
             }
 
             $precioUnitario = $producto->precio_venta;
@@ -201,8 +211,8 @@ class VentaController extends Controller
                 'precio_unitario' => $precioUnitario,
                 'descuento'      => $descItem,
                 'subtotal'       => $subItem,
-                'imei_vendido'   => $item['imei'] ?? null,
-                'serial_vendido' => $item['serial'] ?? null,
+                'imei_vendido'   => $imeiVendido,
+                'serial_vendido' => $serialVendido,
             ];
 
             $producto->decrement('stock', $item['cantidad']);

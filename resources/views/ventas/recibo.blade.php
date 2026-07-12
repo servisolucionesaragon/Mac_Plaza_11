@@ -154,6 +154,9 @@
                                     @if($det->imei_vendido)
                                         <div style="font-size:10.5px; color:#9ca3af;">IMEI: {{ $det->imei_vendido }}</div>
                                     @endif
+                                    @if($det->serial_vendido)
+                                        <div style="font-size:10.5px; color:#9ca3af;">Serial: {{ $det->serial_vendido }}</div>
+                                    @endif
                                 </td>
                                 <td style="padding:8px 0; text-align:center;">{{ $det->cantidad }}</td>
                                 <td style="padding:8px 0; text-align:right;">{{ $config->simbolo_moneda }} {{ number_format($det->precio_unitario, 2) }}</td>
@@ -243,6 +246,12 @@
             <span>&nbsp;&nbsp;{{ $config->simbolo_moneda }} {{ number_format($det->precio_unitario, 2) }} c/u</span>
             <span class="t-bold">{{ $config->simbolo_moneda }} {{ number_format($det->subtotal, 2) }}</span>
         </div>
+        @if($det->imei_vendido)
+        <div style="font-size:10px;">&nbsp;&nbsp;IMEI: {{ $det->imei_vendido }}</div>
+        @endif
+        @if($det->serial_vendido)
+        <div style="font-size:10px;">&nbsp;&nbsp;Serial: {{ $det->serial_vendido }}</div>
+        @endif
         @endforeach
         <hr>
         <div class="t-row"><span>Subtotal</span><span>{{ $config->simbolo_moneda }} {{ number_format($venta->subtotal, 2) }}</span></div>

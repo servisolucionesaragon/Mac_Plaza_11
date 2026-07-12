@@ -386,7 +386,7 @@ buscadorProducto.addEventListener('input', filtrarProductos);
 filtrosProducto.forEach(el => el.addEventListener('change', filtrarProductos));
 
 function agregarProducto(id) {
-    const datos = productosData.find(p => p.id === id);
+    const datos = productosData.find(p => p.id == id);
     if (!datos) return;
 
     const nombre = datos.nombre;
@@ -439,25 +439,7 @@ function agregarProducto(id) {
         tbody.appendChild(tr);
 
         if (datos.requiere_imei || datos.requiere_serial) {
-            const trExtra = document.createElement('tr');
-            trExtra.id = 'fila-extra-' + id;
-            trExtra.innerHTML = `
-                <td colspan="6" class="pt-0">
-                    <div class="row g-2">
-                        ${datos.requiere_imei ? `
-                        <div class="col-md-6">
-                            <input type="text" name="productos[${id}][imei]" class="form-control form-control-sm"
-                                   placeholder="IMEI (requerido para este producto)" required oninput="calcularTotales()">
-                        </div>` : ''}
-                        ${datos.requiere_serial ? `
-                        <div class="col-md-6">
-                            <input type="text" name="productos[${id}][serial]" class="form-control form-control-sm"
-                                   placeholder="Serial (requerido para este producto)" required oninput="calcularTotales()">
-                        </div>` : ''}
-                    </div>
-                </td>
-            `;
-            tbody.appendChild(trExtra);
+            actualizarCamposImeiSerial(id);
         }
     }
 
@@ -473,7 +455,57 @@ function calcularFila(id) {
     const desc  = parseFloat(fila.querySelector('.desc-input').value) || 0;
     const sub   = (productosSeleccionados[id].precio * cant) - desc;
     document.getElementById('sub-' + id).textContent = MONEDA + ' ' + Math.max(sub, 0).toFixed(2);
+    actualizarCamposImeiSerial(id);
     calcularTotales();
+}
+
+/**
+ * Genera/regenera un input de IMEI y/o Serial por cada unidad de la cantidad
+ * actual de la línea (un producto con requiere_imei/requiere_serial necesita
+ * un identificador único por unidad física, no uno solo por línea).
+ * Conserva los valores ya escritos en las posiciones que no cambiaron.
+ */
+function actualizarCamposImeiSerial(id) {
+    const datos = productosData.find(p => p.id == id);
+    if (!datos || (!datos.requiere_imei && !datos.requiere_serial)) return;
+
+    const fila = document.getElementById('fila-' + id);
+    const cant = Math.max(parseInt(fila.querySelector('.cant-input').value) || 0, 0);
+
+    let trExtra = document.getElementById('fila-extra-' + id);
+    if (!trExtra) {
+        trExtra = document.createElement('tr');
+        trExtra.id = 'fila-extra-' + id;
+        fila.after(trExtra);
+    }
+
+    const imeisPrevios     = Array.from(trExtra.querySelectorAll('.imei-input')).map(i => i.value);
+    const serialesPrevios  = Array.from(trExtra.querySelectorAll('.serial-input')).map(i => i.value);
+
+    let html = '<td colspan="6" class="pt-0"><div class="row g-2">';
+
+    if (datos.requiere_imei) {
+        html += `<div class="col-md-6"><label class="form-label" style="font-size:11px;">IMEI (${cant} unidad${cant===1?'':'es'})</label>`;
+        for (let i = 0; i < cant; i++) {
+            const val = imeisPrevios[i] ?? '';
+            html += `<input type="text" name="productos[${id}][imei][]" class="form-control form-control-sm imei-input mb-1"
+                            placeholder="IMEI unidad ${i+1}" value="${val}" required oninput="calcularTotales()">`;
+        }
+        html += '</div>';
+    }
+
+    if (datos.requiere_serial) {
+        html += `<div class="col-md-6"><label class="form-label" style="font-size:11px;">Serial (${cant} unidad${cant===1?'':'es'})</label>`;
+        for (let i = 0; i < cant; i++) {
+            const val = serialesPrevios[i] ?? '';
+            html += `<input type="text" name="productos[${id}][serial][]" class="form-control form-control-sm serial-input mb-1"
+                            placeholder="Serial unidad ${i+1}" value="${val}" required oninput="calcularTotales()">`;
+        }
+        html += '</div>';
+    }
+
+    html += '</div></td>';
+    trExtra.innerHTML = html;
 }
 
 function toggleCredito(esCredito) {
