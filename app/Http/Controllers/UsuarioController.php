@@ -18,7 +18,7 @@ class UsuarioController extends Controller
 
     public function updatePermisos(Request $request)
     {
-        $modulos = ['dashboard', 'clientes', 'productos', 'ventas', 'reparaciones', 'reportes', 'usuarios', 'configuracion', 'backup'];
+        $modulos = ['dashboard', 'clientes', 'productos', 'ventas', 'caja', 'gastos', 'ingresos', 'reparaciones', 'reportes', 'usuarios', 'configuracion', 'backup'];
 
         foreach (['vendedor', 'tecnico'] as $rol) {
             foreach ($modulos as $modulo) {

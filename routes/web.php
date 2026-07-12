@@ -16,6 +16,9 @@ use App\Http\Controllers\CatalogoController;
 use App\Http\Controllers\CatalogoTipoController;
 use App\Http\Controllers\CatalogoValorController;
 use App\Http\Controllers\PerfilController;
+use App\Http\Controllers\CajaController;
+use App\Http\Controllers\GastoController;
+use App\Http\Controllers\IngresoController;
 
 // ── Autenticación ─────────────────────────────────────────────────────────────
 Route::middleware('guest')->group(function () {
@@ -96,6 +99,32 @@ Route::middleware(['auth', 'nocache'])->group(function () {
 
     // Reportes
     Route::get('/reportes', [ReporteController::class, 'index'])->name('reportes.index')->middleware('permiso:reportes');
+
+    // Control de Caja (apertura/cierre diario)
+    Route::middleware('permiso:caja')->group(function () {
+        Route::get('/caja', [CajaController::class, 'index'])->name('caja.index');
+        Route::get('/caja/abrir', [CajaController::class, 'create'])->name('caja.create');
+        Route::post('/caja/abrir', [CajaController::class, 'store'])->name('caja.store');
+        Route::get('/caja/{caja}', [CajaController::class, 'show'])->name('caja.show');
+        Route::get('/caja/{caja}/cerrar', [CajaController::class, 'cierreForm'])->name('caja.cierreForm');
+        Route::post('/caja/{caja}/cerrar', [CajaController::class, 'cerrar'])->name('caja.cerrar');
+        Route::get('/caja/{caja}/reporte', [CajaController::class, 'reporte'])->name('caja.reporte');
+        Route::get('/caja/{caja}/reporte/pdf', [CajaController::class, 'reportePdf'])->name('caja.reportePdf');
+    });
+
+    // Gastos
+    Route::middleware('permiso:gastos')->group(function () {
+        Route::resource('gastos', GastoController::class)
+            ->except(['create', 'edit', 'show'])
+            ->parameters(['gastos' => 'gasto']);
+    });
+
+    // Ingresos
+    Route::middleware('permiso:ingresos')->group(function () {
+        Route::resource('ingresos', IngresoController::class)
+            ->except(['create', 'edit', 'show'])
+            ->parameters(['ingresos' => 'ingreso']);
+    });
 
     // Mi Perfil (disponible para cualquier usuario autenticado, sin permiso de módulo)
     Route::get('/perfil', [PerfilController::class, 'edit'])->name('perfil.edit');

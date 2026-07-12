@@ -393,6 +393,10 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--sidebar-bg); border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--sidebar-bg); opacity: 0.8; }
+
+        @media print {
+            footer { display: none !important; }
+        }
     </style>
 
     @stack('styles')
@@ -437,7 +441,7 @@
         </a>
         @endif
 
-        @if(Auth::user()->puedeAcceder('clientes') || Auth::user()->puedeAcceder('productos') || Auth::user()->esAdmin() || Auth::user()->puedeAcceder('ventas') || Auth::user()->puedeAcceder('reparaciones'))
+        @if(Auth::user()->puedeAcceder('clientes') || Auth::user()->puedeAcceder('productos') || Auth::user()->esAdmin() || Auth::user()->puedeAcceder('ventas') || Auth::user()->puedeAcceder('caja') || Auth::user()->puedeAcceder('gastos') || Auth::user()->puedeAcceder('ingresos') || Auth::user()->puedeAcceder('reparaciones'))
         <div class="nav-section-title">Gestión</div>
         @endif
 
@@ -446,6 +450,30 @@
            class="nav-link {{ request()->routeIs('ventas.*') ? 'active' : '' }}">
             <span class="nav-icon"><i class="fas fa-shopping-cart"></i></span>
             Ventas
+        </a>
+        @endif
+
+        @if(Auth::user()->puedeAcceder('caja'))
+        <a href="{{ route('caja.index') }}"
+           class="nav-link {{ request()->routeIs('caja.*') ? 'active' : '' }}">
+            <span class="nav-icon"><i class="fas fa-cash-register"></i></span>
+            Control de Caja
+        </a>
+        @endif
+
+        @if(Auth::user()->puedeAcceder('gastos'))
+        <a href="{{ route('gastos.index') }}"
+           class="nav-link {{ request()->routeIs('gastos.*') ? 'active' : '' }}">
+            <span class="nav-icon"><i class="fas fa-arrow-circle-down"></i></span>
+            Gastos
+        </a>
+        @endif
+
+        @if(Auth::user()->puedeAcceder('ingresos'))
+        <a href="{{ route('ingresos.index') }}"
+           class="nav-link {{ request()->routeIs('ingresos.*') ? 'active' : '' }}">
+            <span class="nav-icon"><i class="fas fa-arrow-circle-up"></i></span>
+            Ingresos
         </a>
         @endif
 

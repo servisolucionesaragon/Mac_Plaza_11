@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Venta;
 use App\Models\Abono;
+use App\Models\Caja;
 use App\Models\Cliente;
 use App\Models\Producto;
 use App\Models\DetalleVenta;
@@ -58,11 +59,17 @@ class VentaController extends Controller
             ->where('fecha_venta', '>=', Carbon::now()->startOfMonth())
             ->sum('total');
 
-        return view('ventas.index', compact('ventas', 'totalMes'));
+        $cajaAbierta = (bool) Caja::abiertaActual();
+
+        return view('ventas.index', compact('ventas', 'totalMes', 'cajaAbierta'));
     }
 
     public function create()
     {
+        if (!Caja::abiertaActual()) {
+            return redirect()->route('ventas.index')->with('error', 'Debes abrir la caja del día antes de registrar ventas.');
+        }
+
         return view('ventas.create', $this->datosFormulario());
     }
 
@@ -248,6 +255,10 @@ class VentaController extends Controller
             'abono_inicial' => 'nullable|numeric|min:0',
         ]);
 
+        if (!Caja::abiertaActual()) {
+            return back()->with('error', 'Debes abrir la caja del día antes de registrar ventas.')->withInput();
+        }
+
         DB::beginTransaction();
         try {
             [$detalles, $subtotal] = $this->procesarProductos($request->productos);
@@ -394,6 +405,10 @@ class VentaController extends Controller
     {
         if (!$venta->es_credito || $venta->saldo_pendiente <= 0) {
             return back()->with('error', 'Esta venta no tiene saldo pendiente por cobrar.');
+        }
+
+        if (!Caja::abiertaActual()) {
+            return back()->with('error', 'Debes abrir la caja del día antes de registrar un abono.');
         }
 
         $request->validate([
