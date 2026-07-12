@@ -37,7 +37,8 @@ con control de acceso por roles.
 | **Catálogos** | Gestión (crear/editar/activar-desactivar/eliminar) de categorías, marcas, condición, almacenamiento, RAM y métodos de pago — antes eran listas fijas hardcodeadas, ahora son catálogos dinámicos y protegidos contra borrado si tienen productos/ventas asociadas. |
 | **Reportes** | Filtro por fechas, ventas por día/método de pago, top 10 productos/clientes, reparaciones por estado, estadísticas del sistema (usuarios/clientes/productos/ventas/reparaciones), **Cartera por Cobrar** (ventas a crédito con saldo pendiente, con días de atraso si vencieron, sin depender del filtro de fechas), y **Abonos de Crédito Cobrados** en el período (dinero efectivamente recibido, aunque la venta siga "Pendiente"). |
 | **Mi Perfil** | Cualquier usuario autenticado (sin importar rol) puede editar su nombre, correo y teléfono, y cambiar su contraseña (requiere confirmar la contraseña actual). Accesible desde el dropdown de usuario en la esquina superior derecha. |
-| **Configuración** | Datos del negocio (nombre, NIT, teléfono, dirección, ciudad/departamento, correo, web), logo, zona horaria, moneda, % de impuesto configurable, gestión de usuarios y permisos por rol. **Colores configurables:** texto del menú, color sólido del ítem de menú seleccionado, texto/fondo de los botones, 3 colores para los gráficos de Dashboard/Reportes, y 3 colores propios de la **pantalla de login** (fondo de la página, tarjeta de módulos, texto de los módulos — independientes de los colores de marca del panel principal). |
+| **Usuarios** | Módulo independiente (antes vivía dentro de Configuración): gestión de usuarios (crear/editar/activar-desactivar/eliminar, con protección para no auto-eliminarse ni auto-desactivarse) y **Permisos de Roles** — matriz de qué módulos ve Vendedor/Técnico (Administrador siempre tiene acceso completo). |
+| **Configuración** | Organizada en **4 pestañas**: **Empresa** (nombre, NIT, teléfono, dirección, ciudad/departamento, correo, web, zona horaria), **Logo**, **Colores** (colores de la plataforma, del menú, de botones, de los 3 gráficos de Dashboard/Reportes, y 3 colores propios de la **pantalla de login** — fondo de la página, tarjeta de módulos, texto de los módulos, independientes de los colores de marca del panel principal) y **Moneda & Impuestos** (moneda, símbolo, % de impuesto). Un solo formulario guarda todo junto sin importar la pestaña activa. |
 | **Backup & Restauración** | Exportar/importar la BD completa en SQL, restauración con backup automático previo, 3 niveles de reset. |
 
 ## Roles y permisos
@@ -50,11 +51,12 @@ con control de acceso por roles.
 | Ventas (POS) | ✅ | ✅ | — |
 | Reparaciones | ✅ | Solo consulta | ✅ |
 | Reportes | ✅ | — | — |
+| Usuarios | ✅ | — | — |
 | Configuración | ✅ | — | — |
 | Backup | ✅ | — | — |
 
 Control de acceso vía middleware `permiso:{modulo}` (`VerificarPermisoModulo`) + tabla
-`permisos_rol`, editable desde Configuración sin tocar código.
+`permisos_rol`, editable desde Usuarios sin tocar código.
 
 Dentro de Ventas, **editar** y **cancelar** una venta ya registrada están restringidos
 al rol Administrador incluso si Vendedor tiene permiso general sobre el módulo (chequeo
