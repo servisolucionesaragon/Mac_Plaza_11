@@ -33,6 +33,9 @@ con control de acceso por roles.
 | **Clientes** | Registro con DNI/RUC, tipo particular/empresa, historial de compras y reparaciones, búsqueda y filtros. Alerta/filtro/badge de **cumpleaños del mes**. Check **"Cliente Distribuidor"**: aplica automáticamente en Ventas un % de descuento configurable (ver Configuración) sobre el total de sus compras, badge visible en el listado. Botones de WhatsApp en la ficha del cliente: contacto directo, cobro de cartera pendiente (mensaje distinto si el crédito ya está en mora) y felicitación de cumpleaños con oferta de descuento. Indicativo de país fijo `+57` (Colombia). |
 | **Inventario (Productos)** | Stock en tiempo real, alertas de stock mínimo, specs técnicas (IMEI/serial, RAM, almacenamiento), condición (nuevo/reacondicionado/usado), márgenes automáticos, exportar el inventario completo a Excel. |
 | **Ventas (POS)** | Búsqueda de productos en tiempo real, impuesto configurable, descuentos, métodos de pago editables, numeración automática (`VTA-000001`), filtro por tipo de venta (Contado/Crédito), recibo con toggle Hoja Carta / Tirilla térmica 80mm (con logo en la cabecera de la tirilla) y botón para enviarlo por WhatsApp mediante un enlace público firmado. Buscador de cliente por nombre/documento en tiempo real; si el cliente es **Distribuidor**, un banner avisa y su % de descuento configurado se suma automáticamente al descuento manual sobre el subtotal. **Ventas a crédito:** saldo pendiente, fecha de vencimiento, abono inicial opcional al crear, y registro de abonos parciales después (cada uno con su propio recibo hoja/tirilla, también enviable por WhatsApp) — la venta queda en estado "Pendiente" hasta saldar el 100% del crédito, momento en el que pasa a "Completada" automáticamente. **Edición y cancelación** (solo rol Administrador): editar cliente, productos/cantidades, método de pago, tipo de venta y notas de una venta ya registrada (revierte y reaplica el stock correctamente, recalcula el saldo pendiente si ya tiene abonos); cancelar restaura el stock. |
+| **Control de Caja** | Apertura diaria (fondo inicial en efectivo + notas) y cierre (conteo por cada medio de pago activo, comparado contra lo "esperado" — calculado en vivo a partir de ventas de contado + abonos + ingresos − gastos del día — con diferencia resaltada). Solo puede haber una caja abierta a la vez; historial de cajas pasadas con su desglose, filtrable por rango de fechas; el detalle de cada caja también lista los gastos e ingresos individuales del día. **Registrar ventas, abonos, gastos e ingresos requiere una caja abierta ese día** (bloqueado tanto en el guardado como en el acceso al formulario, con aviso visible en Ventas/Gastos/Ingresos cuando no hay caja abierta). Al cerrar, genera un **Reporte de Cierre** (totales de ventas/descuentos/abonos/ingresos/gastos, desglose por método de pago, y el total que debe haber en caja) con toggle Hoja Carta/Tirilla térmica (logo incluido) para imprimir, y descarga en PDF real (`barryvdh/laravel-dompdf`). |
+| **Gastos** | Salidas de dinero de caja durante la operación (descripción, monto, medio de pago, notas), con filtro por fecha/método y total del período. Editar/eliminar un gasto ya registrado está restringido al rol Administrador. |
+| **Ingresos** | Entradas de dinero a caja que no son ventas (ej. préstamos, aportes de capital) — mismo diseño que Gastos (descripción, monto, medio de pago), sumando en vez de restar en el cálculo de caja. Editar/eliminar restringido a Administrador. |
 | **Reparaciones** | Órdenes de servicio con 7 estados (recibido → diagnóstico → esperando repuesto → reparación → listo → entregado), prioridad (baja/media/alta/urgente), asignación de técnico, garantía (con fecha de vencimiento calculada), historial de cambios de estado. Buscador de cliente por nombre/documento en tiempo real al crear una orden (igual que en Ventas). Recibo con toggle Hoja Carta / Tirilla térmica 80mm, enviable por WhatsApp mediante enlace público firmado. Botón de WhatsApp adicional cuando el estado pasa a "Listo para entrega", avisando al cliente. |
 | **Catálogos** | Gestión (crear/editar/activar-desactivar/eliminar) de categorías, marcas, condición, almacenamiento, RAM y métodos de pago — antes eran listas fijas hardcodeadas, ahora son catálogos dinámicos y protegidos contra borrado si tienen productos/ventas asociadas. |
 | **Reportes** | Filtro por fechas, ventas por día/método de pago, top 10 productos/clientes, reparaciones por estado, estadísticas del sistema (usuarios/clientes/productos/ventas/reparaciones), **Cartera por Cobrar** (ventas a crédito con saldo pendiente, con días de atraso si vencieron, sin depender del filtro de fechas), y **Abonos de Crédito Cobrados** en el período (dinero efectivamente recibido, aunque la venta siga "Pendiente"). |
@@ -49,13 +52,16 @@ con control de acceso por roles.
 | Clientes | ✅ | ✅ | — |
 | Inventario | ✅ | ✅ | Solo consulta |
 | Ventas (POS) | ✅ | ✅ | — |
+| Control de Caja | ✅ | ✅ | — |
+| Gastos | ✅ | ✅ | — |
+| Ingresos | ✅ | ✅ | — |
 | Reparaciones | ✅ | Solo consulta | ✅ |
 | Reportes | ✅ | ✅ | — |
 | Usuarios | ✅ | — | — |
 | Configuración | ✅ | — | — |
 | Backup | ✅ | — | — |
 
-**Nota:** Administrador siempre tiene acceso completo a los 9 módulos (chequeo
+**Nota:** Administrador siempre tiene acceso completo a los 12 módulos (chequeo
 `esAdmin()` en `User::puedeAcceder()`, previo a cualquier fila de `permisos_rol`).
 Para Vendedor y Técnico, **toda la matriz — incluyendo Usuarios, Configuración y
 Backup — es configurable en vivo** desde el propio módulo Usuarios → Permisos de
@@ -139,6 +145,10 @@ No commitear nunca un `.env` con credenciales reales — está excluido vía `.g
 | `productos` | Inventario |
 | `ventas` / `detalle_ventas` | Cabecera y detalle de ventas. `ventas` incluye `es_credito`, `saldo_pendiente`, `fecha_vencimiento` para el crédito. |
 | `abonos` | Pagos parciales de una venta a crédito (`venta_id`, `monto`, `fecha_abono`, `metodo_pago_id`, `user_id`, `notas`). |
+| `cajas` | Una fila por sesión de caja (día): `fecha`, `monto_inicial`, `estado` (abierta/cerrada), usuario y fecha de apertura/cierre. Solo una fila con `estado='abierta'` a la vez. |
+| `caja_conteos` | Conteo físico por método de pago al cerrar una caja (`caja_id`, `metodo_pago_id`, `monto_contado`). El monto **esperado** no se guarda — se calcula en vivo en `CajaController::calcularEsperadoPorMetodo()`. |
+| `gastos` | Salidas de dinero de caja (`fecha_gasto`, `descripcion`, `monto`, `metodo_pago_id`, `user_id`, `notas`). |
+| `ingresos` | Entradas de dinero a caja no relacionadas a una venta (misma forma que `gastos`, con `fecha_ingreso`). |
 | `reparaciones` / `reparacion_historial` | Órdenes de servicio técnico y su historial de estados |
 | `configuracion` | Configuración del negocio (fila única tipo singleton), incluye colores de menú/botones/gráficos (`color_menu_texto`, `color_menu_activo`, `color_boton_texto`, `color_boton_fondo`, `color_grafico_1/2/3`) y `descuento_distribuidor` (% aplicado a clientes Distribuidores en Ventas, default 20) |
 | `permisos_rol` | Permisos por rol y módulo |
@@ -296,3 +306,33 @@ botones "Volver"/"Enviar por WhatsApp" solo se muestran cuando `!($publico ?? fa
   variable `--sidebar-bg` (el mismo color de "Fondo del sidebar" en
   Configuración > Colores) en vez de un gris fijo, tanto para Chrome/Edge
   (`::-webkit-scrollbar-thumb`) como Firefox (`scrollbar-color`).
+- **Control de Caja identifica "Efectivo" por nombre, no por ID:** como
+  `metodos_pago` es un catálogo dinámico (gestionado en Catálogos, sin un ID
+  fijo garantizado), `CajaController::calcularEsperadoPorMetodo()` suma el
+  `monto_inicial` (fondo de caja) a la fila cuyo `nombre` sea literalmente
+  "Efectivo" (case-insensitive). **Si se renombra ese método de pago en
+  Catálogos, se pierde ese enlace** — como salvaguarda, el fondo inicial
+  también forma parte del total general de "esperado" aunque no se sume a
+  ninguna fila específica.
+- **Solo una caja abierta a la vez:** `Caja::abiertaActual()` es el único
+  gate — antes de registrar una venta (`VentaController::store()`), un
+  abono (`registrarAbono()`), un gasto o un ingreso, se verifica que exista.
+  Si se necesita permitir cajas por turno/usuario en el futuro, este es el
+  punto central a modificar (hoy es una única caja compartida por día, a
+  petición explícita del usuario).
+- **Footer institucional oculto al imprimir (regla global):** el
+  `<footer>` de `layouts/app.blade.php` (aviso de derechos reservados) no
+  estaba cubierto por ningún `@media print` — aparecía en cualquier
+  impresión. Se agregó `@media print { footer { display:none !important; } }`
+  directo en el layout principal (no en cada vista de recibo/reporte por
+  separado), así que corrige de una vez los recibos de Ventas/Reparaciones y
+  el Reporte de Cierre de Caja.
+- **PDF del Reporte de Cierre de Caja siempre en Hoja Carta:** a diferencia
+  del toggle Hoja/Tirilla que sí existe para la vista en pantalla e impresión
+  vía navegador (`caja/reporte.blade.php`), la descarga en PDF
+  (`caja/reporte-pdf.blade.php`, vista standalone sin Bootstrap para
+  compatibilidad con dompdf) usa `setPaper('letter')` fijo. Calcular el alto
+  dinámico de una tirilla térmica requiere medir el DOM en el navegador
+  (`getBoundingClientRect()`), y dompdf no ejecuta JavaScript — se optó por
+  no replicar ese cálculo en PHP para evitar un layout de tirilla roto en el
+  PDF.

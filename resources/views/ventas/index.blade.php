@@ -13,10 +13,24 @@
             Total del mes: <strong style="color:#a855f7;">{{ $config->simbolo_moneda }} {{ number_format($totalMes, 2) }}</strong>
         </p>
     </div>
+    @if($cajaAbierta)
     <a href="{{ route('ventas.create') }}" class="btn btn-primary px-4">
         <i class="fas fa-plus me-2"></i>Nueva Venta
     </a>
+    @else
+    <a href="{{ route('caja.index') }}" class="btn btn-warning px-4">
+        <i class="fas fa-exclamation-triangle me-2"></i>Abrir Caja para Vender
+    </a>
+    @endif
 </div>
+
+@unless($cajaAbierta)
+<div class="card mb-4" style="border:1px solid #fde68a;background:#fffbeb;">
+    <div class="card-body p-3" style="font-size:13.5px;color:#92400e;">
+        <i class="fas fa-exclamation-triangle me-2"></i>No hay caja abierta. No se pueden registrar nuevas ventas hasta abrir la caja del día.
+    </div>
+</div>
+@endunless
 
 {{-- Filtros --}}
 <div class="card mb-4">
