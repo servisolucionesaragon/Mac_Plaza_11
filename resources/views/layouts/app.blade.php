@@ -388,9 +388,11 @@
         }
 
         /* ── SCROLLBAR ───────────────────────────────────────────── */
-        ::-webkit-scrollbar { width: 5px; }
+        * { scrollbar-width: thin; scrollbar-color: var(--sidebar-bg) transparent; }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb { background: var(--sidebar-bg); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--sidebar-bg); opacity: 0.8; }
     </style>
 
     @stack('styles')
