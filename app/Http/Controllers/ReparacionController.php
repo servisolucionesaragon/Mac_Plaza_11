@@ -49,7 +49,18 @@ class ReparacionController extends Controller
     {
         $clientes  = Cliente::where('activo', true)->orderBy('nombre')->get();
         $tecnicos  = User::where('rol', 'tecnico')->where('activo', true)->orderBy('name')->get();
-        return view('reparaciones.create', compact('clientes', 'tecnicos'));
+
+        $clientesJson = $clientes->map(function ($c) {
+            return [
+                'id'             => $c->id,
+                'nombre'         => $c->nombre_completo,
+                'dni'            => $c->dni,
+                'tipo_documento' => $c->tipo_documento,
+                'telefono'       => $c->telefono,
+            ];
+        })->values();
+
+        return view('reparaciones.create', compact('clientes', 'tecnicos', 'clientesJson'));
     }
 
     public function store(Request $request)

@@ -32,18 +32,22 @@
                                 <i class="fas fa-users me-2" style="color:#a855f7;"></i>Asignación
                             </h6>
                             <div class="row g-3">
-                                <div class="col-md-6">
+                                <div class="col-md-6 position-relative">
                                     <label class="form-label">Cliente <span class="text-danger">*</span></label>
-                                    <select name="cliente_id" class="form-select @error('cliente_id') is-invalid @enderror" required>
-                                        <option value="">— Seleccionar cliente —</option>
-                                        @foreach($clientes as $c)
-                                            <option value="{{ $c->id }}"
-                                                    {{ (old('cliente_id', request('cliente')) == $c->id) ? 'selected' : '' }}>
-                                                {{ $c->nombre_completo }} — {{ $c->telefono }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('cliente_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                    <input type="text" id="buscadorCliente" class="form-control @error('cliente_id') is-invalid @enderror"
+                                           placeholder="Buscar por nombre o número de documento..." autocomplete="off">
+                                    <input type="hidden" name="cliente_id" id="clienteIdInput"
+                                           value="{{ old('cliente_id', request('cliente')) }}" required>
+                                    @error('cliente_id')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+
+                                    <div id="clienteResultados" class="list-group position-absolute w-100 shadow-sm"
+                                         style="z-index:1000; max-height:260px; overflow-y:auto; display:none;"></div>
+
+                                    <div id="clienteSeleccionado" class="mt-2 p-2 rounded-3 d-flex align-items-center justify-content-between"
+                                         style="background:#f8f5ff; font-size:13px; display:none;">
+                                        <span><i class="fas fa-user me-1" style="color:#a855f7;"></i><span id="clienteSeleccionadoTexto"></span></span>
+                                        <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="quitarClienteSeleccionado()">Cambiar</button>
+                                    </div>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Técnico Asignado <span class="text-danger">*</span></label>
@@ -152,3 +156,67 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+const clientesData = @json($clientesJson);
+
+const buscadorCliente     = document.getElementById('buscadorCliente');
+const clienteResultados   = document.getElementById('clienteResultados');
+const clienteIdInput      = document.getElementById('clienteIdInput');
+const clienteSeleccionado = document.getElementById('clienteSeleccionado');
+
+function filtrarClientes() {
+    const q = buscadorCliente.value.trim().toLowerCase();
+    if (!q) { clienteResultados.style.display = 'none'; clienteResultados.innerHTML = ''; return; }
+
+    const coincidencias = clientesData.filter(c =>
+        c.nombre.toLowerCase().includes(q) || (c.dni && c.dni.toLowerCase().includes(q))
+    ).slice(0, 15);
+
+    if (coincidencias.length === 0) {
+        clienteResultados.innerHTML = '<div class="list-group-item text-muted" style="font-size:13px;">Sin coincidencias</div>';
+    } else {
+        clienteResultados.innerHTML = coincidencias.map(c => `
+            <button type="button" class="list-group-item list-group-item-action" style="font-size:13px;" onclick="seleccionarCliente(${c.id})">
+                <div style="font-weight:500;">${c.nombre}</div>
+                <div style="font-size:11px; color:#9ca3af;">${c.tipo_documento ? c.tipo_documento + ': ' : 'Doc: '}${c.dni ?? '—'} · ${c.telefono ?? ''}</div>
+            </button>
+        `).join('');
+    }
+    clienteResultados.style.display = 'block';
+}
+
+function seleccionarCliente(id) {
+    const c = clientesData.find(c => c.id === id);
+    if (!c) return;
+    clienteIdInput.value = c.id;
+    document.getElementById('clienteSeleccionadoTexto').textContent =
+        `${c.nombre} — ${c.tipo_documento ? c.tipo_documento + ' ' : ''}${c.dni ?? ''}`;
+    clienteSeleccionado.style.display = 'flex';
+    buscadorCliente.value = '';
+    buscadorCliente.style.display = 'none';
+    clienteResultados.style.display = 'none';
+    clienteResultados.innerHTML = '';
+}
+
+function quitarClienteSeleccionado() {
+    clienteIdInput.value = '';
+    clienteSeleccionado.style.display = 'none';
+    buscadorCliente.style.display = 'block';
+    buscadorCliente.value = '';
+    buscadorCliente.focus();
+}
+
+buscadorCliente.addEventListener('input', filtrarClientes);
+document.addEventListener('click', function (e) {
+    if (!e.target.closest('#buscadorCliente') && !e.target.closest('#clienteResultados')) {
+        clienteResultados.style.display = 'none';
+    }
+});
+
+@if(old('cliente_id', request('cliente')))
+seleccionarCliente({{ old('cliente_id', request('cliente')) }});
+@endif
+</script>
+@endpush
