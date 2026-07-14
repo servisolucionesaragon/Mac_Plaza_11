@@ -115,17 +115,24 @@
                         <span class="text-muted d-block" style="font-size:11px;">MODELO</span>
                         <strong>{{ $producto->modelo ?: '—' }}</strong>
                     </div>
-                    <div class="col-md-4">
-                        <span class="text-muted d-block" style="font-size:11px;">COLOR</span>
-                        <strong>{{ $producto->color ?: '—' }}</strong>
-                    </div>
-                    <div class="col-md-4">
-                        <span class="text-muted d-block" style="font-size:11px;">ALMACENAMIENTO</span>
-                        <strong>{{ $producto->almacenamiento->nombre ?? '—' }}</strong>
-                    </div>
-                    <div class="col-md-4">
-                        <span class="text-muted d-block" style="font-size:11px;">RAM</span>
-                        <strong>{{ $producto->ram->nombre ?? '—' }}</strong>
+                    @php
+                        $variantesStock = [];
+                        foreach ($producto->lotes as $lote) {
+                            foreach ($lote->variantes as $v) {
+                                if ($v->cantidad_restante <= 0) continue;
+                                $etiqueta = collect([$v->color->nombre ?? null, $v->almacenamiento->nombre ?? null, $v->ram->nombre ?? null])
+                                    ->filter()->implode(' / ') ?: 'Estándar';
+                                $variantesStock[$etiqueta] = ($variantesStock[$etiqueta] ?? 0) + $v->cantidad_restante;
+                            }
+                        }
+                    @endphp
+                    <div class="col-md-8">
+                        <span class="text-muted d-block" style="font-size:11px;">VARIANTES EN STOCK (COLOR / ALMACENAMIENTO / RAM)</span>
+                        @if(count($variantesStock))
+                            <strong>{{ collect($variantesStock)->map(fn($cant, $et) => "{$et} ({$cant})")->implode(', ') }}</strong>
+                        @else
+                            <strong>—</strong>
+                        @endif
                     </div>
                     <div class="col-md-4">
                         <span class="text-muted d-block" style="font-size:11px;">REQUIERE IMEI</span>
@@ -175,6 +182,7 @@
                         <thead>
                             <tr>
                                 <th>Fecha Ingreso</th>
+                                <th>Variante</th>
                                 <th>Cant. Inicial</th>
                                 <th>Cant. Restante</th>
                                 <th>Costo Unitario</th>
@@ -184,20 +192,25 @@
                         </thead>
                         <tbody>
                             @foreach($producto->lotes as $lote)
-                            <tr>
-                                <td style="color:#9ca3af;">{{ $lote->fecha_ingreso->format('d/m/Y H:i') }}</td>
-                                <td>{{ $lote->cantidad_inicial }}</td>
-                                <td>
-                                    @if($lote->cantidad_restante <= 0)
-                                        <span class="text-muted">Agotado</span>
-                                    @else
-                                        <strong>{{ $lote->cantidad_restante }}</strong>
-                                    @endif
-                                </td>
-                                <td>{{ $config->simbolo_moneda }} {{ number_format($lote->costo_unitario, 2) }}</td>
-                                <td>{{ $lote->proveedor ?: '—' }}</td>
-                                <td>{{ $lote->notas ?: '—' }}</td>
-                            </tr>
+                                @foreach($lote->variantes as $v)
+                                <tr>
+                                    <td style="color:#9ca3af;">{{ $lote->fecha_ingreso->format('d/m/Y H:i') }}</td>
+                                    <td>
+                                        {{ collect([$v->color->nombre ?? null, $v->almacenamiento->nombre ?? null, $v->ram->nombre ?? null])->filter()->implode(' / ') ?: 'Estándar' }}
+                                    </td>
+                                    <td>{{ $v->cantidad_inicial }}</td>
+                                    <td>
+                                        @if($v->cantidad_restante <= 0)
+                                            <span class="text-muted">Agotado</span>
+                                        @else
+                                            <strong>{{ $v->cantidad_restante }}</strong>
+                                        @endif
+                                    </td>
+                                    <td>{{ $config->simbolo_moneda }} {{ number_format($lote->costo_unitario, 2) }}</td>
+                                    <td>{{ $lote->proveedor ?: '—' }}</td>
+                                    <td>{{ $lote->notas ?: '—' }}</td>
+                                </tr>
+                                @endforeach
                             @endforeach
                         </tbody>
                     </table>
@@ -277,31 +290,39 @@
                 <div class="modal-body">
                     <p class="text-muted mb-3" style="font-size:12px;">
                         Registra unidades nuevas de <strong>{{ $producto->nombre }}</strong>. Si el costo es distinto
-                        al de lotes anteriores, se conserva por separado (costeo FIFO).
+                        al de lotes anteriores, se conserva por separado (costeo FIFO). Si llegaron varias
+                        combinaciones de color/almacenamiento/RAM en esta compra, agrega una fila de variante por cada una.
                     </p>
-                    <div class="mb-3">
-                        <label class="form-label">Cantidad <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control" name="cantidad" min="1" required>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Costo Unitario del Lote ({{ $config->simbolo_moneda }}) <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" name="costo_unitario" min="0" step="0.01" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Proveedor</label>
+                            <select class="form-select" name="proveedor">
+                                <option value="">— Sin especificar —</option>
+                                @foreach($proveedores as $prov)
+                                    <option value="{{ $prov->nombre }}">{{ $prov->nombre }}</option>
+                                @endforeach
+                            </select>
+                            @if($proveedores->isEmpty())
+                                <div style="font-size:11px; color:#9ca3af; margin-top:2px;">
+                                    No hay proveedores registrados. <a href="{{ route('catalogos.index') }}">Agregar en Catálogos</a>.
+                                </div>
+                            @endif
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Costo Unitario ({{ $config->simbolo_moneda }}) <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control" name="costo_unitario" min="0" step="0.01" required>
+
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="form-label mb-0">Variantes recibidas <span class="text-danger">*</span></label>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="agregarVarianteLoteModal()">
+                            <i class="fas fa-plus me-1"></i>Variante
+                        </button>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Proveedor</label>
-                        <select class="form-select" name="proveedor">
-                            <option value="">— Sin especificar —</option>
-                            @foreach($proveedores as $prov)
-                                <option value="{{ $prov->nombre }}">{{ $prov->nombre }}</option>
-                            @endforeach
-                        </select>
-                        @if($proveedores->isEmpty())
-                            <div style="font-size:11px; color:#9ca3af; margin-top:2px;">
-                                No hay proveedores registrados. <a href="{{ route('catalogos.index') }}">Agregar en Catálogos</a>.
-                            </div>
-                        @endif
-                    </div>
-                    <div class="mb-1">
+                    <div id="variantesLoteModal"></div>
+
+                    <div class="mb-1 mt-3">
                         <label class="form-label">Notas</label>
                         <textarea class="form-control" name="notas" rows="2" placeholder="Opcional"></textarea>
                     </div>
@@ -317,3 +338,53 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+function construirOpcionesLote(lista, placeholder) {
+    return `<option value="">${placeholder}</option>` + lista.map(x => `<option value="${x.id}">${x.nombre}</option>`).join('');
+}
+const COLOR_OPTIONS_LOTE = construirOpcionesLote(@json($colores->map(fn($c) => ['id' => $c->id, 'nombre' => $c->nombre])), '— Sin especificar —');
+const ALMACENAMIENTO_OPTIONS_LOTE = construirOpcionesLote(@json($almacenamientos->map(fn($a) => ['id' => $a->id, 'nombre' => $a->nombre])), '— Sin especificar —');
+const RAM_OPTIONS_LOTE = construirOpcionesLote(@json($rams->map(fn($r) => ['id' => $r->id, 'nombre' => $r->nombre])), '— Sin especificar —');
+
+let varianteLoteModalIndex = 0;
+
+function agregarVarianteLoteModal() {
+    const idx = varianteLoteModalIndex++;
+    const div = document.createElement('div');
+    div.className = 'variante-lote-row row g-2 align-items-end mb-1';
+    div.innerHTML = `
+        <div class="col-md-2">
+            <label class="form-label mb-1" style="font-size:11px;">Cantidad <span class="text-danger">*</span></label>
+            <input type="number" class="form-control form-control-sm" name="variantes[${idx}][cantidad]" min="1" required>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label mb-1" style="font-size:11px;">Color</label>
+            <select class="form-select form-select-sm" name="variantes[${idx}][color_id]">${COLOR_OPTIONS_LOTE}</select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label mb-1" style="font-size:11px;">Almacenamiento</label>
+            <select class="form-select form-select-sm" name="variantes[${idx}][almacenamiento_id]">${ALMACENAMIENTO_OPTIONS_LOTE}</select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label mb-1" style="font-size:11px;">RAM</label>
+            <select class="form-select form-select-sm" name="variantes[${idx}][ram_id]">${RAM_OPTIONS_LOTE}</select>
+        </div>
+        <div class="col-md-1">
+            <button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="quitarVarianteLoteModal(this)">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>`;
+    document.getElementById('variantesLoteModal').appendChild(div);
+}
+
+function quitarVarianteLoteModal(btn) {
+    const filas = document.querySelectorAll('#variantesLoteModal .variante-lote-row');
+    if (filas.length <= 1) return;
+    btn.closest('.variante-lote-row').remove();
+}
+
+agregarVarianteLoteModal();
+</script>
+@endpush

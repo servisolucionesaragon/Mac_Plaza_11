@@ -8,6 +8,7 @@ use App\Models\Marca;
 use App\Models\Condicion;
 use App\Models\Almacenamiento;
 use App\Models\Ram;
+use App\Models\Color;
 use App\Models\MetodoPago;
 use App\Models\CatalogoTipo;
 
@@ -19,6 +20,7 @@ class CatalogoController extends Controller
         'condiciones'     => Condicion::class,
         'almacenamientos' => Almacenamiento::class,
         'rams'            => Ram::class,
+        'colores'         => Color::class,
         'metodos_pago'    => MetodoPago::class,
     ];
 
@@ -28,6 +30,7 @@ class CatalogoController extends Controller
         'condiciones'     => 'Condición',
         'almacenamientos' => 'Almacenamiento',
         'rams'            => 'RAM',
+        'colores'         => 'Color',
         'metodos_pago'    => 'Método de pago',
     ];
 
@@ -38,10 +41,11 @@ class CatalogoController extends Controller
         $condiciones     = Condicion::orderBy('nombre')->get();
         $almacenamientos = Almacenamiento::orderBy('nombre')->get();
         $rams            = Ram::orderBy('nombre')->get();
+        $colores         = Color::orderBy('nombre')->get();
         $metodosPago     = MetodoPago::orderBy('nombre')->get();
         $catalogoTipos   = CatalogoTipo::with('valores')->orderBy('nombre')->get();
 
-        return view('catalogos.index', compact('categorias', 'marcas', 'condiciones', 'almacenamientos', 'rams', 'metodosPago', 'catalogoTipos'));
+        return view('catalogos.index', compact('categorias', 'marcas', 'condiciones', 'almacenamientos', 'rams', 'colores', 'metodosPago', 'catalogoTipos'));
     }
 
     public function store(Request $request, string $tipo)
@@ -88,10 +92,19 @@ class CatalogoController extends Controller
         $modelo = $this->resolverModelo($tipo);
         $registro = $modelo::findOrFail($id);
 
-        $relacion = method_exists($registro, 'productos') ? 'productos' : 'ventas';
+        $relacion = match (true) {
+            method_exists($registro, 'productos')     => 'productos',
+            method_exists($registro, 'loteVariantes') => 'loteVariantes',
+            default                                    => 'ventas',
+        };
+        $etiqueta = match ($relacion) {
+            'productos'     => 'productos',
+            'loteVariantes' => 'lotes de inventario',
+            default         => 'ventas',
+        };
 
         if ($registro->{$relacion}()->exists()) {
-            return back()->with('error', 'No se puede eliminar: hay ' . ($relacion === 'productos' ? 'productos' : 'ventas') . ' usando este valor. Desactívalo en su lugar.');
+            return back()->with('error', "No se puede eliminar: hay {$etiqueta} usando este valor. Desactívalo en su lugar.");
         }
 
         $registro->delete();

@@ -127,9 +127,7 @@
                             <div style="font-size:11px; color:#9ca3af;">{{ $producto->marca->nombre ?? '—' }}</div>
                         </td>
                         <td style="font-size:12px; color:#6b7280;">
-                            @if($producto->almacenamiento) <span class="badge bg-light text-dark me-1">{{ $producto->almacenamiento->nombre }}</span> @endif
-                            @if($producto->ram) <span class="badge bg-light text-dark">{{ $producto->ram->nombre }}</span> @endif
-                            @if($producto->color) <div class="mt-1">{{ $producto->color }}</div> @endif
+                            <a href="{{ route('productos.show', $producto) }}" style="color:#7c3aed;">Ver variantes</a>
                         </td>
                         <td style="font-size:13px; color:#6b7280;">{{ $config->simbolo_moneda }} {{ number_format($producto->precio_compra, 2) }}</td>
                         <td style="font-size:13px; font-weight:600; color:#1e1b4b;">

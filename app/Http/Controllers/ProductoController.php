@@ -9,6 +9,7 @@ use App\Models\Marca;
 use App\Models\Condicion;
 use App\Models\Almacenamiento;
 use App\Models\Ram;
+use App\Models\Color;
 use App\Models\CatalogoTipo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -18,7 +19,7 @@ class ProductoController extends Controller
 {
     protected function queryFiltrada(Request $request)
     {
-        $query = Producto::with(['categoria', 'marca', 'condicion', 'almacenamiento', 'ram']);
+        $query = Producto::with(['categoria', 'marca', 'condicion']);
 
         if ($request->filled('buscar')) {
             $query->where(function ($q) use ($request) {
@@ -60,7 +61,7 @@ class ProductoController extends Controller
     public function exportarExcel(Request $request)
     {
         // Exporta siempre el inventario completo, sin aplicar los filtros de pantalla.
-        $query = Producto::with(['categoria', 'marca', 'condicion', 'almacenamiento', 'ram'])
+        $query = Producto::with(['categoria', 'marca', 'condicion'])
             ->orderBy('nombre');
 
         return Excel::download(
@@ -96,9 +97,10 @@ class ProductoController extends Controller
         $condiciones     = Condicion::where('activo', true)->orderBy('nombre')->get();
         $almacenamientos = Almacenamiento::where('activo', true)->orderBy('nombre')->get();
         $rams            = Ram::where('activo', true)->orderBy('nombre')->get();
+        $colores         = Color::where('activo', true)->orderBy('nombre')->get();
         $catalogoTipos   = $this->catalogoTiposActivos();
         $proveedores     = $this->proveedoresActivos();
-        return view('productos.create', compact('categorias', 'marcas', 'condiciones', 'almacenamientos', 'rams', 'catalogoTipos', 'proveedores'));
+        return view('productos.create', compact('categorias', 'marcas', 'condiciones', 'almacenamientos', 'rams', 'colores', 'catalogoTipos', 'proveedores'));
     }
 
     public function store(Request $request)
@@ -110,9 +112,6 @@ class ProductoController extends Controller
             'categoria_id'  => 'required|exists:categorias,id',
             'marca_id'      => 'required|exists:marcas,id',
             'modelo'        => 'nullable|string|max:100',
-            'color'         => 'nullable|string|max:50',
-            'almacenamiento_id' => 'nullable|exists:almacenamientos,id',
-            'ram_id'        => 'nullable|exists:rams,id',
             'precio_venta'  => 'required|numeric|min:0',
             'stock_minimo'  => 'required|integer|min:0',
             'requiere_imei'   => 'boolean',
@@ -122,10 +121,14 @@ class ProductoController extends Controller
             'catalogo_valores'   => 'nullable|array',
             'catalogo_valores.*' => 'array',
             'catalogo_valores.*.*' => 'exists:catalogo_valores,id',
-            'lotes'                  => 'required|array|min:1',
-            'lotes.*.cantidad'       => 'required|integer|min:1',
-            'lotes.*.costo_unitario' => 'required|numeric|min:0',
-            'lotes.*.proveedor'      => 'nullable|string|max:150',
+            'lotes'                             => 'required|array|min:1',
+            'lotes.*.costo_unitario'            => 'required|numeric|min:0',
+            'lotes.*.proveedor'                 => 'nullable|string|max:150',
+            'lotes.*.variantes'                 => 'required|array|min:1',
+            'lotes.*.variantes.*.cantidad'          => 'required|integer|min:1',
+            'lotes.*.variantes.*.color_id'          => 'nullable|exists:colores,id',
+            'lotes.*.variantes.*.almacenamiento_id' => 'nullable|exists:almacenamientos,id',
+            'lotes.*.variantes.*.ram_id'            => 'nullable|exists:rams,id',
         ]);
 
         $validated['requiere_imei']   = $request->boolean('requiere_imei');
@@ -144,10 +147,15 @@ class ProductoController extends Controller
 
         foreach ($validated['lotes'] as $lote) {
             $producto->agregarLote([
-                'cantidad'       => $lote['cantidad'],
                 'costo_unitario' => $lote['costo_unitario'],
                 'proveedor'      => $lote['proveedor'] ?? null,
                 'user_id'        => auth()->id(),
+                'variantes'      => array_map(fn ($v) => [
+                    'cantidad'          => $v['cantidad'],
+                    'color_id'          => $v['color_id'] ?? null,
+                    'almacenamiento_id' => $v['almacenamiento_id'] ?? null,
+                    'ram_id'            => $v['ram_id'] ?? null,
+                ], $lote['variantes']),
             ]);
         }
 
@@ -158,18 +166,27 @@ class ProductoController extends Controller
     public function agregarLote(Request $request, Producto $producto)
     {
         $validado = $request->validate([
-            'cantidad'       => 'required|integer|min:1',
             'costo_unitario' => 'required|numeric|min:0',
             'proveedor'      => 'nullable|string|max:150',
             'notas'          => 'nullable|string|max:500',
+            'variantes'                 => 'required|array|min:1',
+            'variantes.*.cantidad'          => 'required|integer|min:1',
+            'variantes.*.color_id'          => 'nullable|exists:colores,id',
+            'variantes.*.almacenamiento_id' => 'nullable|exists:almacenamientos,id',
+            'variantes.*.ram_id'            => 'nullable|exists:rams,id',
         ]);
 
         $producto->agregarLote([
-            'cantidad'       => $validado['cantidad'],
             'costo_unitario' => $validado['costo_unitario'],
             'proveedor'      => $validado['proveedor'] ?? null,
             'notas'          => $validado['notas'] ?? null,
             'user_id'        => auth()->id(),
+            'variantes'      => array_map(fn ($v) => [
+                'cantidad'          => $v['cantidad'],
+                'color_id'          => $v['color_id'] ?? null,
+                'almacenamiento_id' => $v['almacenamiento_id'] ?? null,
+                'ram_id'            => $v['ram_id'] ?? null,
+            ], $validado['variantes']),
         ]);
 
         return back()->with('success', 'Lote agregado correctamente.');
@@ -178,12 +195,16 @@ class ProductoController extends Controller
     public function show(Producto $producto)
     {
         $producto->load([
-            'categoria', 'marca', 'condicion', 'almacenamiento', 'ram',
+            'categoria', 'marca', 'condicion',
             'detalleVentas.venta.cliente', 'catalogoValores.tipo',
             'lotes' => fn ($q) => $q->orderByDesc('fecha_ingreso')->orderByDesc('id'),
+            'lotes.variantes.color', 'lotes.variantes.almacenamiento', 'lotes.variantes.ram',
         ]);
-        $proveedores = $this->proveedoresActivos();
-        return view('productos.show', compact('producto', 'proveedores'));
+        $proveedores     = $this->proveedoresActivos();
+        $colores         = Color::where('activo', true)->orderBy('nombre')->get();
+        $almacenamientos = Almacenamiento::where('activo', true)->orderBy('nombre')->get();
+        $rams            = Ram::where('activo', true)->orderBy('nombre')->get();
+        return view('productos.show', compact('producto', 'proveedores', 'colores', 'almacenamientos', 'rams'));
     }
 
     public function edit(Producto $producto)
@@ -191,11 +212,9 @@ class ProductoController extends Controller
         $categorias      = Categoria::where('activo', true)->orderBy('nombre')->get();
         $marcas          = Marca::where('activo', true)->orderBy('nombre')->get();
         $condiciones     = Condicion::where('activo', true)->orderBy('nombre')->get();
-        $almacenamientos = Almacenamiento::where('activo', true)->orderBy('nombre')->get();
-        $rams            = Ram::where('activo', true)->orderBy('nombre')->get();
         $catalogoTipos   = $this->catalogoTiposActivos();
         $producto->load('catalogoValores');
-        return view('productos.edit', compact('producto', 'categorias', 'marcas', 'condiciones', 'almacenamientos', 'rams', 'catalogoTipos'));
+        return view('productos.edit', compact('producto', 'categorias', 'marcas', 'condiciones', 'catalogoTipos'));
     }
 
     public function update(Request $request, Producto $producto)
@@ -207,9 +226,6 @@ class ProductoController extends Controller
             'categoria_id'  => 'required|exists:categorias,id',
             'marca_id'      => 'required|exists:marcas,id',
             'modelo'        => 'nullable|string|max:100',
-            'color'         => 'nullable|string|max:50',
-            'almacenamiento_id' => 'nullable|exists:almacenamientos,id',
-            'ram_id'        => 'nullable|exists:rams,id',
             'precio_venta'  => 'required|numeric|min:0',
             'stock_minimo'  => 'required|integer|min:0',
             'requiere_imei'   => 'boolean',

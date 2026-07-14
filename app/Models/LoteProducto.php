@@ -12,8 +12,7 @@ class LoteProducto extends Model
     protected $table = 'lotes_producto';
 
     protected $fillable = [
-        'producto_id', 'cantidad_inicial', 'cantidad_restante', 'costo_unitario',
-        'proveedor', 'fecha_ingreso', 'notas', 'user_id',
+        'producto_id', 'costo_unitario', 'proveedor', 'fecha_ingreso', 'notas', 'user_id',
     ];
 
     protected $casts = [
@@ -29,5 +28,10 @@ class LoteProducto extends Model
     public function usuario()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function variantes()
+    {
+        return $this->hasMany(LoteVariante::class, 'lote_id');
     }
 }

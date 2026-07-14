@@ -66,11 +66,6 @@
                                            value="{{ old('modelo', $producto->modelo) }}">
                                 </div>
                                 <div class="col-md-4">
-                                    <label class="form-label">Color</label>
-                                    <input type="text" class="form-control" name="color"
-                                           value="{{ old('color', $producto->color) }}">
-                                </div>
-                                <div class="col-md-4">
                                     <label class="form-label">Condición</label>
                                     <select name="condicion_id" class="form-select">
                                         @foreach($condiciones as $c)
@@ -79,22 +74,13 @@
                                     </select>
                                 </div>
                                 <div class="col-md-4">
-                                    <label class="form-label">Almacenamiento</label>
-                                    <select name="almacenamiento_id" class="form-select">
-                                        <option value="">— Sin especificar —</option>
-                                        @foreach($almacenamientos as $alm)
-                                            <option value="{{ $alm->id }}" {{ old('almacenamiento_id',$producto->almacenamiento_id)==$alm->id?'selected':'' }}>{{ $alm->nombre }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">RAM</label>
-                                    <select name="ram_id" class="form-select">
-                                        <option value="">— Sin especificar —</option>
-                                        @foreach($rams as $ram)
-                                            <option value="{{ $ram->id }}" {{ old('ram_id',$producto->ram_id)==$ram->id?'selected':'' }}>{{ $ram->nombre }}</option>
-                                        @endforeach
-                                    </select>
+                                    <label class="form-label">
+                                        Variantes (Color/Almacenamiento/RAM)
+                                        <i class="fas fa-info-circle text-muted fa-xs" title="Gestionadas por lote de inventario — ver ficha del producto"></i>
+                                    </label>
+                                    <div class="form-control" style="background:#f9fafb; font-size:12.5px;">
+                                        <a href="{{ route('productos.show', $producto) }}">Ver / agregar en la ficha del producto</a>
+                                    </div>
                                 </div>
                                 <div class="col-md-4 d-flex align-items-end">
                                     <div class="form-check">

@@ -15,6 +15,7 @@ use App\Models\Categoria;
 use App\Models\Marca;
 use App\Models\Almacenamiento;
 use App\Models\Ram;
+use App\Models\Color;
 use App\Models\Condicion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -92,21 +93,35 @@ class VentaController extends Controller
      * cantidad ya reservada por esta misma venta, para que el formulario de edición
      * no rechace las cantidades ya vendidas.
      */
+    /** Clave compuesta para identificar una combinación de variante dentro de un producto. */
+    private function claveVariante(int $productoId, ?int $colorId, ?int $almacenamientoId, ?int $ramId): string
+    {
+        return "{$productoId}|{$colorId}|{$almacenamientoId}|{$ramId}";
+    }
+
     private function datosFormulario(?Venta $venta = null): array
     {
         $clientes = Cliente::where('activo', true)->orderBy('nombre')->get();
 
-        $cantidadesEnVenta = collect();
+        // Cuánto de cada combinación (producto+color+almacenamiento+ram) ya está "reservado"
+        // por esta misma venta — se le devuelve a la variante para que el formulario de
+        // edición no rechace por "sin stock" lo que la propia venta ya tiene apartado.
+        $reservasEnVenta = [];
+        $idsProductosEnVenta = collect();
         if ($venta) {
             $venta->loadMissing('detalles');
-            $cantidadesEnVenta = $venta->detalles->pluck('cantidad', 'producto_id');
+            foreach ($venta->detalles as $d) {
+                $clave = $this->claveVariante($d->producto_id, $d->color_id, $d->almacenamiento_id, $d->ram_id);
+                $reservasEnVenta[$clave] = ($reservasEnVenta[$clave] ?? 0) + $d->cantidad;
+            }
+            $idsProductosEnVenta = $venta->detalles->pluck('producto_id')->unique();
         }
 
-        $productosQuery = Producto::with(['categoria', 'marca', 'almacenamiento', 'ram', 'condicion']);
-        if ($cantidadesEnVenta->isNotEmpty()) {
-            $productosQuery->where(function ($q) use ($cantidadesEnVenta) {
+        $productosQuery = Producto::with(['categoria', 'marca', 'condicion']);
+        if ($idsProductosEnVenta->isNotEmpty()) {
+            $productosQuery->where(function ($q) use ($idsProductosEnVenta) {
                 $q->where(fn($q2) => $q2->where('activo', true)->where('stock', '>', 0))
-                  ->orWhereIn('id', $cantidadesEnVenta->keys());
+                  ->orWhereIn('id', $idsProductosEnVenta);
             });
         } else {
             $productosQuery->where('activo', true)->where('stock', '>', 0);
@@ -119,10 +134,31 @@ class VentaController extends Controller
         $marcas          = Marca::where('activo', true)->orderBy('nombre')->get();
         $almacenamientos = Almacenamiento::where('activo', true)->orderBy('nombre')->get();
         $rams            = Ram::where('activo', true)->orderBy('nombre')->get();
+        $colores         = Color::where('activo', true)->orderBy('nombre')->get();
         $condiciones     = Condicion::where('activo', true)->orderBy('nombre')->get();
-        $colores         = Producto::where('activo', true)
-            ->whereNotNull('color')->where('color', '!=', '')
-            ->distinct()->orderBy('color')->pluck('color');
+
+        // Stock disponible por combinación de variante (color/almacenamiento/ram), agrupado por producto.
+        $variantesStock = DB::table('lote_variantes')
+            ->join('lotes_producto', 'lotes_producto.id', '=', 'lote_variantes.lote_id')
+            ->leftJoin('colores', 'colores.id', '=', 'lote_variantes.color_id')
+            ->leftJoin('almacenamientos', 'almacenamientos.id', '=', 'lote_variantes.almacenamiento_id')
+            ->leftJoin('rams', 'rams.id', '=', 'lote_variantes.ram_id')
+            ->whereIn('lotes_producto.producto_id', $productos->pluck('id'))
+            ->select(
+                'lotes_producto.producto_id',
+                'lote_variantes.color_id', 'colores.nombre as color_nombre',
+                'lote_variantes.almacenamiento_id', 'almacenamientos.nombre as almacenamiento_nombre',
+                'lote_variantes.ram_id', 'rams.nombre as ram_nombre',
+                DB::raw('SUM(lote_variantes.cantidad_restante) as stock')
+            )
+            ->groupBy(
+                'lotes_producto.producto_id',
+                'lote_variantes.color_id', 'colores.nombre',
+                'lote_variantes.almacenamiento_id', 'almacenamientos.nombre',
+                'lote_variantes.ram_id', 'rams.nombre'
+            )
+            ->get()
+            ->groupBy('producto_id');
 
         $clientesJson = $clientes->map(function ($c) {
             return [
@@ -136,26 +172,37 @@ class VentaController extends Controller
             ];
         })->values();
 
-        $productosJson = $productos->map(function ($p) use ($cantidadesEnVenta) {
+        $productosJson = $productos->map(function ($p) use ($variantesStock, $reservasEnVenta) {
+            $combos = $variantesStock->get($p->id, collect());
+
+            $variantes = $combos->map(function ($fila) use ($p, $reservasEnVenta) {
+                $clave = $this->claveVariante($p->id, $fila->color_id, $fila->almacenamiento_id, $fila->ram_id);
+                return [
+                    'color_id'              => $fila->color_id,
+                    'color_nombre'          => $fila->color_nombre,
+                    'almacenamiento_id'     => $fila->almacenamiento_id,
+                    'almacenamiento_nombre' => $fila->almacenamiento_nombre,
+                    'ram_id'                => $fila->ram_id,
+                    'ram_nombre'            => $fila->ram_nombre,
+                    'stock'                 => (int) $fila->stock + ($reservasEnVenta[$clave] ?? 0),
+                ];
+            })->filter(fn ($v) => $v['stock'] > 0)->values();
+
             return [
                 'id'                    => $p->id,
                 'nombre'                => $p->nombre,
                 'codigo'                => $p->codigo,
                 'precio_venta'          => (float) $p->precio_venta,
-                'stock'                 => $p->stock + ($cantidadesEnVenta[$p->id] ?? 0),
+                'stock'                 => $variantes->sum('stock'),
                 'categoria_id'          => $p->categoria_id,
                 'categoria_nombre'      => $p->categoria->nombre ?? null,
                 'marca_id'              => $p->marca_id,
                 'marca_nombre'          => $p->marca->nombre ?? null,
-                'color'                 => $p->color,
-                'almacenamiento_id'     => $p->almacenamiento_id,
-                'almacenamiento_nombre' => $p->almacenamiento->nombre ?? null,
-                'ram_id'                => $p->ram_id,
-                'ram_nombre'            => $p->ram->nombre ?? null,
                 'condicion_id'          => $p->condicion_id,
                 'condicion_nombre'      => $p->condicion->nombre ?? null,
                 'requiere_imei'         => (bool) $p->requiere_imei,
                 'requiere_serial'       => (bool) $p->requiere_serial,
+                'variantes'             => $variantes,
             ];
         })->values();
 
@@ -179,9 +226,11 @@ class VentaController extends Controller
         foreach ($productosRequest as $item) {
             $producto = Producto::findOrFail($item['id']);
 
-            if ($producto->stock < $item['cantidad']) {
-                throw new \Exception("Stock insuficiente para: {$producto->nombre}");
-            }
+            $variante = [
+                'color_id'          => $item['color_id'] ?? null,
+                'almacenamiento_id' => $item['almacenamiento_id'] ?? null,
+                'ram_id'            => $item['ram_id'] ?? null,
+            ];
 
             $imeiVendido = null;
             if ($producto->requiere_imei) {
@@ -206,30 +255,33 @@ class VentaController extends Controller
             $subItem        = ($precioUnitario * $item['cantidad']) - $descItem;
             $subtotal      += $subItem;
 
-            $consumos = $producto->consumirStockFifo((int) $item['cantidad']);
+            $consumos = $producto->consumirStockFifo((int) $item['cantidad'], $variante);
 
             $detalles[] = [
-                'producto_id'    => $producto->id,
-                'cantidad'       => $item['cantidad'],
-                'precio_unitario' => $precioUnitario,
-                'descuento'      => $descItem,
-                'subtotal'       => $subItem,
-                'imei_vendido'   => $imeiVendido,
-                'serial_vendido' => $serialVendido,
-                '_consumos'      => $consumos,
+                'producto_id'       => $producto->id,
+                'cantidad'          => $item['cantidad'],
+                'precio_unitario'   => $precioUnitario,
+                'descuento'         => $descItem,
+                'subtotal'          => $subItem,
+                'imei_vendido'      => $imeiVendido,
+                'serial_vendido'    => $serialVendido,
+                'color_id'          => $variante['color_id'],
+                'almacenamiento_id' => $variante['almacenamiento_id'],
+                'ram_id'            => $variante['ram_id'],
+                '_consumos'         => $consumos,
             ];
         }
 
         return [$detalles, $subtotal];
     }
 
-    /** Registra en detalle_venta_lote de qué lote(s) salió cada unidad vendida en esta línea. */
+    /** Registra en detalle_venta_lote de qué variante(s) de lote salió cada unidad vendida en esta línea. */
     private function guardarLotesConsumidos(DetalleVenta $detalle, iterable $consumos): void
     {
         foreach ($consumos as $consumo) {
             DetalleVentaLote::create([
                 'detalle_venta_id' => $detalle->id,
-                'lote_id'          => $consumo['lote_id'],
+                'lote_variante_id' => $consumo['lote_variante_id'],
                 'cantidad'         => $consumo['cantidad'],
                 'costo_unitario'   => $consumo['costo_unitario'],
             ]);
@@ -277,6 +329,9 @@ class VentaController extends Controller
             'productos'           => 'required|array|min:1',
             'productos.*.id'      => 'required|exists:productos,id',
             'productos.*.cantidad' => 'required|integer|min:1',
+            'productos.*.color_id'          => 'nullable|exists:colores,id',
+            'productos.*.almacenamiento_id' => 'nullable|exists:almacenamientos,id',
+            'productos.*.ram_id'            => 'nullable|exists:rams,id',
             'descuento_general'   => 'nullable|numeric|min:0',
             'modo_precio'         => 'nullable|in:incluido,sin_impuesto,subtotal_impuesto',
             'notas'               => 'nullable|string',

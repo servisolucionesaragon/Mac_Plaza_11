@@ -13,8 +13,8 @@ class Ram extends Model
 
     protected $casts = ['activo' => 'boolean'];
 
-    public function productos()
+    public function loteVariantes()
     {
-        return $this->hasMany(Producto::class);
+        return $this->hasMany(LoteVariante::class);
     }
 }

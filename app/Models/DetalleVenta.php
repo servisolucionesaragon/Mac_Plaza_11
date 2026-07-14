@@ -12,6 +12,7 @@ class DetalleVenta extends Model
     protected $fillable = [
         'venta_id', 'producto_id', 'cantidad', 'precio_unitario',
         'descuento', 'subtotal', 'imei_vendido', 'serial_vendido',
+        'color_id', 'almacenamiento_id', 'ram_id',
     ];
 
     protected $casts = [
@@ -33,5 +34,20 @@ class DetalleVenta extends Model
     public function lotes()
     {
         return $this->hasMany(DetalleVentaLote::class);
+    }
+
+    public function color()
+    {
+        return $this->belongsTo(Color::class);
+    }
+
+    public function almacenamiento()
+    {
+        return $this->belongsTo(Almacenamiento::class);
+    }
+
+    public function ram()
+    {
+        return $this->belongsTo(Ram::class);
     }
 }

@@ -3,14 +3,20 @@
 namespace App\Exports;
 
 use Illuminate\Database\Eloquent\Builder;
-use Maatwebsite\Excel\Concerns\FromQuery;
+use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class ProductosExport implements FromQuery, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
+/**
+ * Exporta una fila por cada variante (color/almacenamiento/ram) con stock
+ * restante, no una fila por producto — es el único formato que refleja el
+ * stock real por combinación bajo el costeo FIFO por lotes.
+ */
+class ProductosExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
 {
     protected Builder $query;
 
@@ -19,9 +25,31 @@ class ProductosExport implements FromQuery, WithHeadings, WithMapping, WithStyle
         $this->query = $query;
     }
 
-    public function query()
+    public function collection(): Collection
     {
-        return $this->query;
+        $filas = collect();
+
+        $this->query->with(['lotes.variantes.color', 'lotes.variantes.almacenamiento', 'lotes.variantes.ram'])
+            ->get()
+            ->each(function ($producto) use ($filas) {
+                $variantesConStock = $producto->lotes
+                    ->flatMap(fn ($lote) => $lote->variantes->map(fn ($v) => (object) [
+                        'lote'     => $lote,
+                        'variante' => $v,
+                    ]))
+                    ->filter(fn ($item) => $item->variante->cantidad_restante > 0);
+
+                if ($variantesConStock->isEmpty()) {
+                    $filas->push((object) ['producto' => $producto, 'lote' => null, 'variante' => null]);
+                    return;
+                }
+
+                foreach ($variantesConStock as $item) {
+                    $filas->push((object) ['producto' => $producto, 'lote' => $item->lote, 'variante' => $item->variante]);
+                }
+            });
+
+        return $filas;
     }
 
     public function headings(): array
@@ -36,31 +64,37 @@ class ProductosExport implements FromQuery, WithHeadings, WithMapping, WithStyle
             'Almacenamiento',
             'RAM',
             'Condición',
-            'Precio Compra',
+            'Costo Unitario Lote',
             'Precio Venta',
             'Margen %',
-            'Stock',
+            'Cantidad Restante',
+            'Stock Total Producto',
             'Stock Mínimo',
             'Estado Stock',
             'Activo',
         ];
     }
 
-    public function map($producto): array
+    public function map($fila): array
     {
+        $producto = $fila->producto;
+        $variante = $fila->variante;
+        $lote     = $fila->lote;
+
         return [
             $producto->codigo,
             $producto->nombre,
             $producto->categoria->nombre ?? '—',
             $producto->marca->nombre ?? '—',
             $producto->modelo ?? '—',
-            $producto->color ?? '—',
-            $producto->almacenamiento->nombre ?? '—',
-            $producto->ram->nombre ?? '—',
+            $variante?->color->nombre ?? '—',
+            $variante?->almacenamiento->nombre ?? '—',
+            $variante?->ram->nombre ?? '—',
             $producto->condicion->nombre ?? '—',
-            (float) $producto->precio_compra,
+            $lote ? (float) $lote->costo_unitario : (float) $producto->precio_compra,
             (float) $producto->precio_venta,
             round($producto->margen, 1),
+            $variante?->cantidad_restante ?? 0,
             $producto->stock,
             $producto->stock_minimo,
             $producto->tieneStockBajo() ? 'Stock Bajo' : 'OK',

@@ -83,7 +83,7 @@
                                 <select id="filtroColor" class="form-select form-select-sm">
                                     <option value="">Color</option>
                                     @foreach($colores as $col)
-                                        <option value="{{ $col }}">{{ $col }}</option>
+                                        <option value="{{ $col->id }}">{{ $col->nombre }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -354,84 +354,126 @@ function filtrarProductos() {
         if (q && !p.nombre.toLowerCase().includes(q) && !(p.codigo && p.codigo.toLowerCase().includes(q))) return false;
         if (fCategoria && String(p.categoria_id) !== fCategoria) return false;
         if (fMarca && String(p.marca_id) !== fMarca) return false;
-        if (fColor && p.color !== fColor) return false;
-        if (fAlmacenamiento && String(p.almacenamiento_id) !== fAlmacenamiento) return false;
-        if (fRam && String(p.ram_id) !== fRam) return false;
         if (fCondicion && String(p.condicion_id) !== fCondicion) return false;
+        if (fColor && !p.variantes.some(v => String(v.color_id) === fColor)) return false;
+        if (fAlmacenamiento && !p.variantes.some(v => String(v.almacenamiento_id) === fAlmacenamiento)) return false;
+        if (fRam && !p.variantes.some(v => String(v.ram_id) === fRam)) return false;
         return true;
     }).slice(0, 30);
 
     if (coincidencias.length === 0) {
         productoResultados.innerHTML = '<div class="list-group-item text-muted" style="font-size:13px;">Sin coincidencias</div>';
     } else {
-        productoResultados.innerHTML = coincidencias.map(p => `
-            <button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" style="font-size:13px;" onclick="agregarProducto(${p.id})">
+        productoResultados.innerHTML = coincidencias.map(renderResultadoProducto).join('');
+    }
+    productoResultados.style.display = 'block';
+}
+
+/** Etiqueta legible de una variante: "Rojo / 128GB / 8GB" (omite lo que no aplique). */
+function etiquetaVariante(v) {
+    return [v.color_nombre, v.almacenamiento_nombre, v.ram_nombre].filter(Boolean).join(' / ');
+}
+
+/**
+ * Si el producto tiene una sola combinación de color/almacenamiento/ram con stock,
+ * se agrega directo al hacer clic. Si tiene varias, se listan como sub-botones para
+ * que el vendedor elija cuál vender antes de agregarlo al carrito.
+ */
+function renderResultadoProducto(p) {
+    if (p.variantes.length <= 1) {
+        const v = p.variantes[0] || { color_id: null, almacenamiento_id: null, ram_id: null, stock: p.stock };
+        const etiqueta = etiquetaVariante(v);
+        return `
+            <button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" style="font-size:13px;" onclick="agregarProducto(${p.id}, 0)">
                 <span>
                     <div style="font-weight:500;">${p.nombre}</div>
                     <div style="font-size:11px; color:#9ca3af;">
-                        ${p.codigo ?? ''}${p.marca_nombre ? ' · ' + p.marca_nombre : ''}${p.color ? ' · ' + p.color : ''}${p.almacenamiento_nombre ? ' · ' + p.almacenamiento_nombre : ''}${p.ram_nombre ? ' · ' + p.ram_nombre : ''}
+                        ${p.codigo ?? ''}${p.marca_nombre ? ' · ' + p.marca_nombre : ''}${etiqueta ? ' · ' + etiqueta : ''}
                     </div>
                 </span>
                 <span class="text-end">
                     <div style="font-weight:600;">${MONEDA} ${p.precio_venta.toFixed(2)}</div>
-                    <div style="font-size:11px; color:#9ca3af;">Stock: ${p.stock}</div>
+                    <div style="font-size:11px; color:#9ca3af;">Stock: ${v.stock}</div>
                 </span>
-            </button>
-        `).join('');
+            </button>`;
     }
-    productoResultados.style.display = 'block';
+
+    const opciones = p.variantes.map((v, i) => `
+        <button type="button" class="btn btn-sm btn-outline-secondary me-1 mb-1" style="font-size:11px;"
+                onclick="event.stopPropagation(); agregarProducto(${p.id}, ${i})">
+            ${etiquetaVariante(v) || 'Estándar'} <span class="text-muted">(${v.stock})</span>
+        </button>
+    `).join('');
+
+    return `
+        <div class="list-group-item" style="font-size:13px;">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <span style="font-weight:500;">${p.nombre}</span>
+                <span style="font-weight:600;">${MONEDA} ${p.precio_venta.toFixed(2)}</span>
+            </div>
+            <div style="font-size:11px; color:#9ca3af; margin-bottom:4px;">Elige la variante a vender:</div>
+            <div>${opciones}</div>
+        </div>`;
 }
 
 buscadorProducto.addEventListener('input', filtrarProductos);
 filtrosProducto.forEach(el => el.addEventListener('change', filtrarProductos));
 
-function agregarProducto(id) {
+function agregarProducto(id, varianteIndex) {
     const datos = productosData.find(p => p.id == id);
     if (!datos) return;
 
+    const variante = datos.variantes[varianteIndex] || { color_id: null, almacenamiento_id: null, ram_id: null, stock: datos.stock };
+    const claveFila = id + '-' + (variante.color_id ?? 'x') + '-' + (variante.almacenamiento_id ?? 'x') + '-' + (variante.ram_id ?? 'x');
+
     const nombre = datos.nombre;
     const precio = datos.precio_venta;
-    const stock  = datos.stock;
+    const stock  = variante.stock;
 
-    if (productosSeleccionados[id]) {
+    if (productosSeleccionados[claveFila]) {
         // Ya existe: incrementar cantidad
-        const fila = document.getElementById('fila-' + id);
+        const fila = document.getElementById('fila-' + claveFila);
         const cantInput = fila.querySelector('.cant-input');
         const nuevaCant = parseInt(cantInput.value) + 1;
         if (nuevaCant > stock) { alert('Stock insuficiente'); return; }
         cantInput.value = nuevaCant;
-        calcularFila(id);
+        calcularFila(claveFila);
     } else {
-        productosSeleccionados[id] = { nombre, precio, stock };
+        productosSeleccionados[claveFila] = { productoId: id, nombre, precio, stock };
         document.getElementById('filaVacia').style.display = 'none';
+
+        const etiqueta = etiquetaVariante(variante);
 
         const tbody = document.getElementById('productosBody');
         const tr = document.createElement('tr');
-        tr.id = 'fila-' + id;
+        tr.id = 'fila-' + claveFila;
         tr.innerHTML = `
             <td>
-                <input type="hidden" name="productos[${id}][id]" value="${id}">
+                <input type="hidden" name="productos[${claveFila}][id]" value="${id}">
+                <input type="hidden" name="productos[${claveFila}][color_id]" value="${variante.color_id ?? ''}">
+                <input type="hidden" name="productos[${claveFila}][almacenamiento_id]" value="${variante.almacenamiento_id ?? ''}">
+                <input type="hidden" name="productos[${claveFila}][ram_id]" value="${variante.ram_id ?? ''}">
                 <div style="font-size:13.5px; font-weight:500;">${nombre}</div>
-                <div style="font-size:11px; color:#9ca3af;">Stock: ${stock}</div>
+                <div style="font-size:11px; color:#9ca3af;">${etiqueta ? etiqueta + ' · ' : ''}Stock: ${stock}</div>
             </td>
             <td>
-                <input type="number" name="productos[${id}][cantidad]" value="1" min="1" max="${stock}"
+                <input type="number" name="productos[${claveFila}][cantidad]" value="1" min="1" max="${stock}"
                        class="form-control form-control-sm cant-input" style="width:65px;"
-                       oninput="calcularFila('${id}')">
+                       oninput="calcularFila('${claveFila}')">
             </td>
             <td style="font-size:13.5px; font-weight:500;">${MONEDA} ${precio.toFixed(2)}</td>
             <td>
-                <input type="number" name="productos[${id}][descuento]" value="0" min="0" step="0.01"
+                <input type="number" name="productos[${claveFila}][descuento]" value="0" min="0" step="0.01"
                        class="form-control form-control-sm desc-input" style="width:80px;"
-                       oninput="calcularFila('${id}')">
+                       oninput="calcularFila('${claveFila}')">
             </td>
-            <td id="sub-${id}" style="font-size:13.5px; font-weight:600; color:#1e1b4b;">
+            <td id="sub-${claveFila}" style="font-size:13.5px; font-weight:600; color:#1e1b4b;">
                 ${MONEDA} ${precio.toFixed(2)}
             </td>
             <td>
                 <button type="button" class="btn btn-sm"
                         style="background:#fee2e2; color:#dc2626; border-radius:8px; padding:4px 8px;"
-                        onclick="quitarProducto('${id}')">
+                        onclick="quitarProducto('${claveFila}')">
                     <i class="fas fa-times fa-xs"></i>
                 </button>
             </td>
@@ -439,7 +481,7 @@ function agregarProducto(id) {
         tbody.appendChild(tr);
 
         if (datos.requiere_imei || datos.requiere_serial) {
-            actualizarCamposImeiSerial(id);
+            actualizarCamposImeiSerial(id, claveFila);
         }
     }
 
@@ -449,13 +491,13 @@ function agregarProducto(id) {
     calcularTotales();
 }
 
-function calcularFila(id) {
-    const fila  = document.getElementById('fila-' + id);
+function calcularFila(claveFila) {
+    const fila  = document.getElementById('fila-' + claveFila);
     const cant  = parseFloat(fila.querySelector('.cant-input').value) || 0;
     const desc  = parseFloat(fila.querySelector('.desc-input').value) || 0;
-    const sub   = (productosSeleccionados[id].precio * cant) - desc;
-    document.getElementById('sub-' + id).textContent = MONEDA + ' ' + Math.max(sub, 0).toFixed(2);
-    actualizarCamposImeiSerial(id);
+    const sub   = (productosSeleccionados[claveFila].precio * cant) - desc;
+    document.getElementById('sub-' + claveFila).textContent = MONEDA + ' ' + Math.max(sub, 0).toFixed(2);
+    actualizarCamposImeiSerial(productosSeleccionados[claveFila].productoId, claveFila);
     calcularTotales();
 }
 
@@ -465,17 +507,17 @@ function calcularFila(id) {
  * un identificador único por unidad física, no uno solo por línea).
  * Conserva los valores ya escritos en las posiciones que no cambiaron.
  */
-function actualizarCamposImeiSerial(id) {
-    const datos = productosData.find(p => p.id == id);
+function actualizarCamposImeiSerial(productoId, claveFila) {
+    const datos = productosData.find(p => p.id == productoId);
     if (!datos || (!datos.requiere_imei && !datos.requiere_serial)) return;
 
-    const fila = document.getElementById('fila-' + id);
+    const fila = document.getElementById('fila-' + claveFila);
     const cant = Math.max(parseInt(fila.querySelector('.cant-input').value) || 0, 0);
 
-    let trExtra = document.getElementById('fila-extra-' + id);
+    let trExtra = document.getElementById('fila-extra-' + claveFila);
     if (!trExtra) {
         trExtra = document.createElement('tr');
-        trExtra.id = 'fila-extra-' + id;
+        trExtra.id = 'fila-extra-' + claveFila;
         fila.after(trExtra);
     }
 
@@ -488,7 +530,7 @@ function actualizarCamposImeiSerial(id) {
         html += `<div class="col-md-6"><label class="form-label" style="font-size:11px;">IMEI (${cant} unidad${cant===1?'':'es'})</label>`;
         for (let i = 0; i < cant; i++) {
             const val = imeisPrevios[i] ?? '';
-            html += `<input type="text" name="productos[${id}][imei][]" class="form-control form-control-sm imei-input mb-1"
+            html += `<input type="text" name="productos[${claveFila}][imei][]" class="form-control form-control-sm imei-input mb-1"
                             placeholder="IMEI unidad ${i+1}" value="${val}" required oninput="calcularTotales()">`;
         }
         html += '</div>';
@@ -498,7 +540,7 @@ function actualizarCamposImeiSerial(id) {
         html += `<div class="col-md-6"><label class="form-label" style="font-size:11px;">Serial (${cant} unidad${cant===1?'':'es'})</label>`;
         for (let i = 0; i < cant; i++) {
             const val = serialesPrevios[i] ?? '';
-            html += `<input type="text" name="productos[${id}][serial][]" class="form-control form-control-sm serial-input mb-1"
+            html += `<input type="text" name="productos[${claveFila}][serial][]" class="form-control form-control-sm serial-input mb-1"
                             placeholder="Serial unidad ${i+1}" value="${val}" required oninput="calcularTotales()">`;
         }
         html += '</div>';

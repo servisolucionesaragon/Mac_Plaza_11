@@ -72,11 +72,6 @@
                                            value="{{ old('modelo') }}" placeholder="A54, iPhone 15...">
                                 </div>
                                 <div class="col-md-4">
-                                    <label class="form-label">Color</label>
-                                    <input type="text" class="form-control" name="color"
-                                           value="{{ old('color') }}" placeholder="Negro, Blanco...">
-                                </div>
-                                <div class="col-md-4">
                                     <label class="form-label">Condición <span class="text-danger">*</span></label>
                                     <select name="condicion_id" class="form-select @error('condicion_id') is-invalid @enderror" required>
                                         @foreach($condiciones as $c)
@@ -84,26 +79,6 @@
                                         @endforeach
                                     </select>
                                     @error('condicion_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Almacenamiento</label>
-                                    <select name="almacenamiento_id" class="form-select @error('almacenamiento_id') is-invalid @enderror">
-                                        <option value="">— Sin especificar —</option>
-                                        @foreach($almacenamientos as $alm)
-                                            <option value="{{ $alm->id }}" {{ old('almacenamiento_id')==$alm->id?'selected':'' }}>{{ $alm->nombre }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('almacenamiento_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">RAM</label>
-                                    <select name="ram_id" class="form-select @error('ram_id') is-invalid @enderror">
-                                        <option value="">— Sin especificar —</option>
-                                        @foreach($rams as $ram)
-                                            <option value="{{ $ram->id }}" {{ old('ram_id')==$ram->id?'selected':'' }}>{{ $ram->nombre }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('ram_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                 </div>
                                 <div class="col-md-4 d-flex align-items-end">
                                     <div class="form-check">
@@ -183,6 +158,7 @@
                             </div>
                             <p class="text-muted mb-3" style="font-size:12px;">
                                 Registra cada lote de compra por separado si tienes unidades con distinto costo o proveedor (costeo FIFO).
+                                Dentro de un lote puedes agregar varias variantes (color/almacenamiento/RAM) si llegaron mezcladas al mismo costo.
                             </p>
                             @error('lotes')<div class="alert alert-danger py-2" style="font-size:13px;">{{ $message }}</div>@enderror
 
@@ -255,10 +231,19 @@
 @push('scripts')
 <script>
 const MONEDA = "{{ $config->simbolo_moneda }}";
+
+function construirOpciones(lista, placeholder) {
+    return `<option value="">${placeholder}</option>` + lista.map(x => `<option value="${x.id}">${x.nombre}</option>`).join('');
+}
+
 const PROVEEDOR_OPTIONS = `<option value="">— Sin especificar —</option>` +
     @json($proveedores->pluck('nombre'))
         .map(nombre => `<option value="${nombre.replace(/"/g, '&quot;')}">${nombre}</option>`)
         .join('');
+
+const COLOR_OPTIONS = construirOpciones(@json($colores->map(fn($c) => ['id' => $c->id, 'nombre' => $c->nombre])), '— Sin especificar —');
+const ALMACENAMIENTO_OPTIONS = construirOpciones(@json($almacenamientos->map(fn($a) => ['id' => $a->id, 'nombre' => $a->nombre])), '— Sin especificar —');
+const RAM_OPTIONS = construirOpciones(@json($rams->map(fn($r) => ['id' => $r->id, 'nombre' => $r->nombre])), '— Sin especificar —');
 function previewImage(input) {
     if (input.files && input.files[0]) {
         const reader = new FileReader();
@@ -283,35 +268,78 @@ function handleDrop(e) {
 }
 
 let loteIndex = 0;
+let varianteIndex = 0;
 
 function agregarLoteRow() {
     const idx = loteIndex++;
     const div = document.createElement('div');
-    div.className = 'lote-row row g-2 align-items-end mb-2';
+    div.className = 'lote-row border rounded-3 p-3 mb-3';
     div.innerHTML = `
-        <div class="col-md-3">
-            <label class="form-label small mb-1">Cantidad <span class="text-danger">*</span></label>
-            <input type="number" class="form-control form-control-sm" name="lotes[${idx}][cantidad]" min="1" required oninput="calcularMargen()">
+        <div class="row g-2 align-items-end mb-2">
+            <div class="col-md-4">
+                <label class="form-label small mb-1">Costo Unitario del Lote (${MONEDA}) <span class="text-danger">*</span></label>
+                <input type="number" class="form-control form-control-sm" name="lotes[${idx}][costo_unitario]" min="0" step="0.01" required oninput="calcularMargen()">
+            </div>
+            <div class="col-md-5">
+                <label class="form-label small mb-1">Proveedor</label>
+                <select class="form-select form-select-sm" name="lotes[${idx}][proveedor]">${PROVEEDOR_OPTIONS}</select>
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-outline-secondary btn-sm w-100" onclick="agregarVarianteRow(${idx})">
+                    <i class="fas fa-plus"></i> Variante
+                </button>
+            </div>
+            <div class="col-md-1">
+                <button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="quitarLoteRow(this)" title="Quitar lote">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
         </div>
-        <div class="col-md-3">
-            <label class="form-label small mb-1">Costo Unitario (${MONEDA}) <span class="text-danger">*</span></label>
-            <input type="number" class="form-control form-control-sm" name="lotes[${idx}][costo_unitario]" min="0" step="0.01" required oninput="calcularMargen()">
-        </div>
-        <div class="col-md-4">
-            <label class="form-label small mb-1">Proveedor</label>
-            <select class="form-select form-select-sm" name="lotes[${idx}][proveedor]">${PROVEEDOR_OPTIONS}</select>
-        </div>
+        <div class="variantes-container" id="variantes-${idx}"></div>`;
+    document.getElementById('lotesContainer').appendChild(div);
+    agregarVarianteRow(idx);
+}
+
+function agregarVarianteRow(loteIdx) {
+    const vIdx = varianteIndex++;
+    const div = document.createElement('div');
+    div.className = 'variante-row row g-2 align-items-end mb-1';
+    div.innerHTML = `
         <div class="col-md-2">
-            <button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="quitarLoteRow(this)">
-                <i class="fas fa-trash"></i>
+            <label class="form-label mb-1" style="font-size:11px;">Cantidad <span class="text-danger">*</span></label>
+            <input type="number" class="form-control form-control-sm" name="lotes[${loteIdx}][variantes][${vIdx}][cantidad]" min="1" required oninput="calcularMargen()">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label mb-1" style="font-size:11px;">Color</label>
+            <select class="form-select form-select-sm" name="lotes[${loteIdx}][variantes][${vIdx}][color_id]">${COLOR_OPTIONS}</select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label mb-1" style="font-size:11px;">Almacenamiento</label>
+            <select class="form-select form-select-sm" name="lotes[${loteIdx}][variantes][${vIdx}][almacenamiento_id]">${ALMACENAMIENTO_OPTIONS}</select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label mb-1" style="font-size:11px;">RAM</label>
+            <select class="form-select form-select-sm" name="lotes[${loteIdx}][variantes][${vIdx}][ram_id]">${RAM_OPTIONS}</select>
+        </div>
+        <div class="col-md-1">
+            <button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="quitarVarianteRow(this)" title="Quitar variante">
+                <i class="fas fa-times"></i>
             </button>
         </div>`;
-    document.getElementById('lotesContainer').appendChild(div);
+    document.getElementById('variantes-' + loteIdx).appendChild(div);
+}
+
+function quitarVarianteRow(btn) {
+    const contenedor = btn.closest('.variantes-container');
+    const filas = contenedor.querySelectorAll('.variante-row');
+    if (filas.length <= 1) return;
+    btn.closest('.variante-row').remove();
+    calcularMargen();
 }
 
 function quitarLoteRow(btn) {
-    const filas = document.querySelectorAll('#lotesContainer .lote-row');
-    if (filas.length <= 1) return;
+    const lotes = document.querySelectorAll('#lotesContainer .lote-row');
+    if (lotes.length <= 1) return;
     btn.closest('.lote-row').remove();
     calcularMargen();
 }
@@ -319,11 +347,13 @@ function quitarLoteRow(btn) {
 function calcularMargen() {
     let cantidadTotal = 0;
     let costoTotal = 0;
-    document.querySelectorAll('#lotesContainer .lote-row').forEach(fila => {
-        const cant  = parseFloat(fila.querySelector('[name$="[cantidad]"]').value) || 0;
-        const costo = parseFloat(fila.querySelector('[name$="[costo_unitario]"]').value) || 0;
-        cantidadTotal += cant;
-        costoTotal += cant * costo;
+    document.querySelectorAll('#lotesContainer .lote-row').forEach(loteEl => {
+        const costo = parseFloat(loteEl.querySelector('[name$="[costo_unitario]"]').value) || 0;
+        loteEl.querySelectorAll('.variante-row [name$="[cantidad]"]').forEach(input => {
+            const cant = parseFloat(input.value) || 0;
+            cantidadTotal += cant;
+            costoTotal += cant * costo;
+        });
     });
     const compra = cantidadTotal > 0 ? (costoTotal / cantidadTotal) : 0;
     const venta  = parseFloat(document.querySelector('[name=precio_venta]').value) || 0;

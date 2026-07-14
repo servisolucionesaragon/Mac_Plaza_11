@@ -11,7 +11,7 @@ class DetalleVentaLote extends Model
 
     protected $table = 'detalle_venta_lote';
 
-    protected $fillable = ['detalle_venta_id', 'lote_id', 'cantidad', 'costo_unitario'];
+    protected $fillable = ['detalle_venta_id', 'lote_variante_id', 'cantidad', 'costo_unitario'];
 
     protected $casts = [
         'costo_unitario' => 'decimal:2',
@@ -22,8 +22,8 @@ class DetalleVentaLote extends Model
         return $this->belongsTo(DetalleVenta::class);
     }
 
-    public function lote()
+    public function loteVariante()
     {
-        return $this->belongsTo(LoteProducto::class, 'lote_id');
+        return $this->belongsTo(LoteVariante::class, 'lote_variante_id');
     }
 }

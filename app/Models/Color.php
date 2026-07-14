@@ -5,9 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Almacenamiento extends Model
+class Color extends Model
 {
     use HasFactory;
+
+    protected $table = 'colores';
 
     protected $fillable = ['nombre', 'activo'];
 

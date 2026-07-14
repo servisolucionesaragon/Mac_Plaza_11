@@ -32,6 +32,7 @@
         ['tipo' => 'condiciones',     'label' => 'Condición',      'singular' => 'Condición',       'icon' => 'fa-certificate', 'items' => $condiciones],
         ['tipo' => 'almacenamientos', 'label' => 'Almacenamiento', 'singular' => 'Almacenamiento',  'icon' => 'fa-sd-card',     'items' => $almacenamientos],
         ['tipo' => 'rams',            'label' => 'RAM',            'singular' => 'RAM',             'icon' => 'fa-memory',      'items' => $rams],
+        ['tipo' => 'colores',         'label' => 'Colores',        'singular' => 'Color',           'icon' => 'fa-palette',     'items' => $colores],
         ['tipo' => 'metodos_pago',    'label' => 'Métodos de Pago', 'singular' => 'Método de pago', 'icon' => 'fa-credit-card', 'items' => $metodosPago],
     ];
 
