@@ -495,7 +495,7 @@ class VentaController extends Controller
 
     public function show(Venta $venta)
     {
-        $venta->load(['cliente', 'vendedor', 'detalles.producto.marca', 'metodoPago', 'abonos.metodoPago', 'abonos.usuario']);
+        $venta->load(['cliente', 'vendedor', 'detalles.producto.marca', 'detalles.color', 'detalles.almacenamiento', 'detalles.ram', 'metodoPago', 'abonos.metodoPago', 'abonos.usuario']);
         return view('ventas.show', compact('venta'));
     }
 
@@ -544,7 +544,7 @@ class VentaController extends Controller
 
     public function recibo(Venta $venta)
     {
-        $venta->load(['cliente', 'vendedor', 'detalles.producto.marca', 'metodoPago']);
+        $venta->load(['cliente', 'vendedor', 'detalles.producto.marca', 'detalles.color', 'detalles.almacenamiento', 'detalles.ram', 'metodoPago']);
         return view('ventas.recibo', compact('venta'));
     }
 
@@ -559,7 +559,7 @@ class VentaController extends Controller
     /** Recibo de venta accesible sin login, vía link firmado (para compartir por WhatsApp). */
     public function reciboPublico(Venta $venta)
     {
-        $venta->load(['cliente', 'vendedor', 'detalles.producto.marca', 'metodoPago']);
+        $venta->load(['cliente', 'vendedor', 'detalles.producto.marca', 'detalles.color', 'detalles.almacenamiento', 'detalles.ram', 'metodoPago']);
         $layout = 'layouts.publico';
         $publico = true;
         return view('ventas.recibo', compact('venta', 'layout', 'publico'));

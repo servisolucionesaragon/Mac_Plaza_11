@@ -242,6 +242,7 @@
                                 <th>N° Venta</th>
                                 <th>Cliente</th>
                                 <th>Fecha</th>
+                                <th>Variante</th>
                                 <th>Cant.</th>
                                 <th>Precio</th>
                                 <th>Subtotal</th>
@@ -258,6 +259,9 @@
                                 </td>
                                 <td>{{ $det->venta->cliente->nombre_completo ?? '—' }}</td>
                                 <td style="color:#9ca3af;">{{ $det->venta->fecha_venta?->format('d/m/Y') ?? '—' }}</td>
+                                <td style="color:#6b7280;">
+                                    {{ collect([$det->color->nombre ?? null, $det->almacenamiento->nombre ?? null, $det->ram->nombre ?? null])->filter()->implode(' / ') ?: '—' }}
+                                </td>
                                 <td>{{ $det->cantidad }}</td>
                                 <td>{{ $config->simbolo_moneda }} {{ number_format($det->precio_unitario, 2) }}</td>
                                 <td style="font-weight:600;">{{ $config->simbolo_moneda }} {{ number_format($det->subtotal, 2) }}</td>

@@ -151,6 +151,12 @@
                                     @if($det->producto && $det->producto->marca)
                                         <div style="font-size:10.5px; color:#9ca3af;">{{ $det->producto->marca->nombre }}</div>
                                     @endif
+                                    @php
+                                        $variante = collect([$det->color->nombre ?? null, $det->almacenamiento->nombre ?? null, $det->ram->nombre ?? null])->filter()->implode(' / ');
+                                    @endphp
+                                    @if($variante)
+                                        <div style="font-size:10.5px; color:#9ca3af;">{{ $variante }}</div>
+                                    @endif
                                     @if($det->imei_vendido)
                                         <div style="font-size:10.5px; color:#9ca3af;">IMEI: {{ $det->imei_vendido }}</div>
                                     @endif
@@ -246,6 +252,12 @@
             <span>&nbsp;&nbsp;{{ $config->simbolo_moneda }} {{ number_format($det->precio_unitario, 2) }} c/u</span>
             <span class="t-bold">{{ $config->simbolo_moneda }} {{ number_format($det->subtotal, 2) }}</span>
         </div>
+        @php
+            $varianteTirilla = collect([$det->color->nombre ?? null, $det->almacenamiento->nombre ?? null, $det->ram->nombre ?? null])->filter()->implode(' / ');
+        @endphp
+        @if($varianteTirilla)
+        <div style="font-size:10px;">&nbsp;&nbsp;{{ $varianteTirilla }}</div>
+        @endif
         @if($det->imei_vendido)
         <div style="font-size:10px;">&nbsp;&nbsp;IMEI: {{ $det->imei_vendido }}</div>
         @endif

@@ -196,7 +196,7 @@ class ProductoController extends Controller
     {
         $producto->load([
             'categoria', 'marca', 'condicion',
-            'detalleVentas.venta.cliente', 'catalogoValores.tipo',
+            'detalleVentas.venta.cliente', 'detalleVentas.color', 'detalleVentas.almacenamiento', 'detalleVentas.ram', 'catalogoValores.tipo',
             'lotes' => fn ($q) => $q->orderByDesc('fecha_ingreso')->orderByDesc('id'),
             'lotes.variantes.color', 'lotes.variantes.almacenamiento', 'lotes.variantes.ram',
         ]);

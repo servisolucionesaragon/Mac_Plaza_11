@@ -117,6 +117,12 @@
                                     @if($det->producto && $det->producto->marca)
                                         <div style="font-size:11px; color:#9ca3af;">{{ $det->producto->marca->nombre }}</div>
                                     @endif
+                                    @php
+                                        $variante = collect([$det->color->nombre ?? null, $det->almacenamiento->nombre ?? null, $det->ram->nombre ?? null])->filter()->implode(' / ');
+                                    @endphp
+                                    @if($variante)
+                                        <div style="font-size:11px; color:#9ca3af;">{{ $variante }}</div>
+                                    @endif
                                     @if($det->imei_vendido)
                                         <div style="font-size:11px; color:#9ca3af;">IMEI: {{ $det->imei_vendido }}</div>
                                     @endif
