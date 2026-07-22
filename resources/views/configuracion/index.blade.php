@@ -293,6 +293,28 @@
                                     @error('color_login_texto_modulos')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                 </div>
                             </div>
+
+                            <label class="form-label">Colores de Paginación</label>
+                            <div class="row g-3 mb-1">
+                                <div class="col-4">
+                                    <label class="form-label" style="font-size:12px;">Texto y flechas</label>
+                                    <input type="color" name="color_paginacion_texto" class="form-control form-control-color w-100 @error('color_paginacion_texto') is-invalid @enderror"
+                                           value="{{ old('color_paginacion_texto', $config->color_paginacion_texto) }}" title="Color del texto y flechas de paginación">
+                                    @error('color_paginacion_texto')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                                <div class="col-4">
+                                    <label class="form-label" style="font-size:12px;">Fondo página activa</label>
+                                    <input type="color" name="color_paginacion_activo_fondo" class="form-control form-control-color w-100 @error('color_paginacion_activo_fondo') is-invalid @enderror"
+                                           value="{{ old('color_paginacion_activo_fondo', $config->color_paginacion_activo_fondo) }}" title="Color de fondo de la página activa">
+                                    @error('color_paginacion_activo_fondo')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                                <div class="col-4">
+                                    <label class="form-label" style="font-size:12px;">Texto página activa</label>
+                                    <input type="color" name="color_paginacion_activo_texto" class="form-control form-control-color w-100 @error('color_paginacion_activo_texto') is-invalid @enderror"
+                                           value="{{ old('color_paginacion_activo_texto', $config->color_paginacion_activo_texto) }}" title="Color del texto de la página activa">
+                                    @error('color_paginacion_activo_texto')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                            </div>
                         </div>
 
                         {{-- ═══ MONEDA & IMPUESTOS ═══ --}}

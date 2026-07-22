@@ -31,7 +31,7 @@ con control de acceso por roles.
 |---|---|
 | **Dashboard** | KPIs en tiempo real (ventas del día/mes, clientes nuevos, stock bajo, reparaciones pendientes, cartera pendiente por cobrar), gráfico de ventas de los últimos 7 días (Chart.js), top productos vendidos. Colores de los gráficos y de las tarjetas de ranking configurables desde Configuración. Campana de alertas en el topbar: stock bajo, créditos vencidos, créditos por vencer en ≤3 días y clientes de cumpleaños en el mes. |
 | **Clientes** | Registro con DNI/RUC, tipo particular/empresa, historial de compras y reparaciones, búsqueda y filtros. Alerta/filtro/badge de **cumpleaños del mes**. Check **"Cliente Distribuidor"**: aplica automáticamente en Ventas un % de descuento configurable (ver Configuración) sobre el total de sus compras, badge visible en el listado. Botones de WhatsApp en la ficha del cliente: contacto directo, cobro de cartera pendiente (mensaje distinto si el crédito ya está en mora) y felicitación de cumpleaños con oferta de descuento. Indicativo de país fijo `+57` (Colombia). |
-| **Inventario (Productos)** | Stock en tiempo real, alertas de stock mínimo, specs técnicas (IMEI/serial), condición (nuevo/reacondicionado/usado), márgenes automáticos, exportar el inventario completo a Excel. **Catálogos dinámicos**: cualquier "tipo de catálogo" activo creado en Catálogos (ej. "Proveedores") aparece automáticamente como un `<select multiple>` al crear/editar un producto — un producto puede tener varios valores del mismo catálogo a la vez (ej. varios proveedores), sin tocar código al agregar un tipo nuevo. **Lotes de inventario con costeo FIFO y variantes por lote**: el stock ya no es un solo número con un solo costo — cada ingreso de mercancía (al crear el producto o al reabastecerlo después) queda registrado como un **lote** independiente con su propio costo unitario y proveedor (lista desplegable conectada al catálogo "Proveedores"). **Color, Almacenamiento y RAM ya no son atributos fijos del producto: viven en el lote**, porque una misma referencia puede llegar en varias combinaciones a la vez (ej. un pedido con 40 unidades rojas + 35 negras + 25 verdes al mismo costo) — cada lote admite una o más "variantes" (color/almacenamiento/RAM + cantidad). Las ventas consumen stock de los lotes más antiguos primero (FIFO) **dentro de la variante específica vendida**, incluso repartiendo una sola venta entre dos lotes de esa variante si hace falta, sin tocar el stock de otras variantes del mismo producto; editar o cancelar una venta devuelve las unidades exactamente a la variante/lote de donde salieron. `stock` y `precio_compra` del producto se recalculan automáticamente (agregado de todas sus variantes; el costo mostrado es siempre el del lote vigente más antiguo) y **ya no se editan a mano** desde Editar Producto — quedan de solo lectura, gestionados desde la ficha del producto ("Agregar Lote"). |
+| **Inventario (Productos)** | Stock en tiempo real, alertas de stock mínimo, specs técnicas (IMEI/serial), condición (nuevo/reacondicionado/usado), márgenes automáticos, exportar el inventario completo a Excel. **Catálogos dinámicos**: cualquier "tipo de catálogo" activo creado en Catálogos (ej. "Proveedores") aparece automáticamente como un `<select multiple>` al crear/editar un producto — un producto puede tener varios valores del mismo catálogo a la vez (ej. varios proveedores), sin tocar código al agregar un tipo nuevo. **Lotes de inventario con costeo FIFO y variantes por lote**: el stock ya no es un solo número con un solo costo — cada ingreso de mercancía (al crear el producto o al reabastecerlo después) queda registrado como un **lote** independiente con su propio costo unitario y proveedor (lista desplegable conectada al catálogo "Proveedores"). **Color, Almacenamiento y RAM ya no son atributos fijos del producto: viven en el lote**, porque una misma referencia puede llegar en varias combinaciones a la vez (ej. un pedido con 40 unidades rojas + 35 negras + 25 verdes al mismo costo) — cada lote admite una o más "variantes" (color/almacenamiento/RAM + cantidad). Las ventas consumen stock de los lotes más antiguos primero (FIFO) **dentro de la variante específica vendida**, incluso repartiendo una sola venta entre dos lotes de esa variante si hace falta, sin tocar el stock de otras variantes del mismo producto; editar o cancelar una venta devuelve las unidades exactamente a la variante/lote de donde salieron. `stock` y `precio_compra` del producto se recalculan automáticamente (agregado de todas sus variantes; el costo mostrado es siempre el del lote vigente más antiguo) y **ya no se editan a mano** desde Editar Producto — quedan de solo lectura, gestionados desde la ficha del producto ("Agregar Lote"). Cada variante listada en la ficha del producto tiene sus propios botones **Editar** y **Eliminar** — se comportan de forma individual (cantidad, color/almacenamiento/RAM, y opcionalmente el costo/proveedor/notas compartidos del lote) aunque varias hayan llegado juntas en la misma compra; ambas acciones quedan bloqueadas si esa variante específica ya tuvo ventas, y eliminar la última variante de un lote borra también el lote (ya vacío). |
 | **Ventas (POS)** | Búsqueda de productos en tiempo real, impuesto configurable, descuentos, métodos de pago editables, numeración automática (`VTA-000001`), filtro por tipo de venta (Contado/Crédito) y por vendedor (dropdown en los filtros o `vendedor_id` en la URL, con aviso "Filtrado por vendedor" y opción de quitarlo — también usado por el botón "Detalle" de Reportes > Ventas por Usuario), recibo con toggle Hoja Carta / Tirilla térmica 80mm (con logo en la cabecera de la tirilla) y botón para enviarlo por WhatsApp mediante un enlace público firmado. **Selector de variante:** si el producto elegido tiene más de una combinación de color/almacenamiento/RAM con stock, se listan como sub-opciones con su propio stock antes de agregarlo al carrito (si solo tiene una, se agrega directo sin fricción); la variante vendida queda registrada en la línea de la venta. **IMEI/Serial por unidad:** si el producto de la línea `requiere_imei`/`requiere_serial`, el formulario pide un campo por cada unidad de la cantidad (no uno solo por línea), regenerándose dinámicamente si la cantidad cambia; el recibo muestra todos los valores. Buscador de cliente por nombre/documento en tiempo real; si el cliente es **Distribuidor**, un banner avisa y su % de descuento configurado se suma automáticamente al descuento manual sobre el subtotal. **Ventas a crédito:** saldo pendiente, fecha de vencimiento, abono inicial opcional al crear, y registro de abonos parciales después (cada uno con su propio recibo hoja/tirilla, también enviable por WhatsApp) — la venta queda en estado "Pendiente" hasta saldar el 100% del crédito, momento en el que pasa a "Completada" automáticamente. **Edición y cancelación** (solo rol Administrador): editar cliente, productos/cantidades, método de pago, tipo de venta y notas de una venta ya registrada (revierte y reaplica el stock correctamente, recalcula el saldo pendiente si ya tiene abonos); cancelar restaura el stock. |
 | **Control de Caja** | Apertura diaria (fondo inicial en efectivo + notas) y cierre (conteo por cada medio de pago activo, comparado contra lo "esperado" — calculado en vivo a partir de ventas de contado + abonos + ingresos − gastos del día — con diferencia resaltada). Solo puede haber una caja abierta a la vez; historial de cajas pasadas con su desglose, filtrable por rango de fechas; el detalle de cada caja también lista los gastos e ingresos individuales del día. **Registrar ventas, abonos, gastos e ingresos requiere una caja abierta ese día** (bloqueado tanto en el guardado como en el acceso al formulario, con aviso visible en Ventas/Gastos/Ingresos cuando no hay caja abierta). Al cerrar, genera un **Reporte de Cierre** (totales de ventas/descuentos/abonos/ingresos/gastos, desglose por método de pago, y el total que debe haber en caja) con toggle Hoja Carta/Tirilla térmica (logo incluido) para imprimir, y descarga en PDF real (`barryvdh/laravel-dompdf`). |
 | **Gastos** | Salidas de dinero de caja durante la operación (descripción, monto, medio de pago, notas), con filtro por fecha/método y total del período. Editar/eliminar un gasto ya registrado está restringido al rol Administrador. |
@@ -41,7 +41,7 @@ con control de acceso por roles.
 | **Reportes** | Filtro por fechas (por defecto, **Hoy**), ventas por día/método de pago, top 10 productos/clientes, reparaciones por estado, estadísticas del sistema (usuarios/clientes/productos/ventas/reparaciones), **Cartera por Cobrar** (ventas a crédito con saldo pendiente, con días de atraso si vencieron, sin depender del filtro de fechas), **Abonos de Crédito Cobrados** en el período (dinero efectivamente recibido, aunque la venta siga "Pendiente"), **Ventas por Usuario** (cantidad, ticket promedio y total vendido en el período por cada usuario que registró ventas, con badge de su rol y botón para ver el detalle de esas ventas en Ventas — pensado para calcular comisiones) y **Gastos Realizados** en el período. |
 | **Mi Perfil** | Cualquier usuario autenticado (sin importar rol) puede editar su nombre, correo y teléfono, y cambiar su contraseña (requiere confirmar la contraseña actual). Accesible desde el dropdown de usuario en la esquina superior derecha. |
 | **Usuarios** | Módulo independiente (antes vivía dentro de Configuración): gestión de usuarios (crear/editar/activar-desactivar/eliminar, con protección para no auto-eliminarse ni auto-desactivarse) y **Permisos de Roles** — matriz de qué módulos ve Vendedor/Técnico (Administrador siempre tiene acceso completo). |
-| **Configuración** | Organizada en **5 pestañas**: **Empresa** (nombre, NIT, teléfono, dirección, ciudad/departamento, correo, web, zona horaria), **Logo**, **Colores** (colores de la plataforma, del menú, de botones, de los 3 gráficos de Dashboard/Reportes, y 3 colores propios de la **pantalla de login** — fondo de la página, tarjeta de módulos, texto de los módulos, independientes de los colores de marca del panel principal), **Moneda & Impuestos** (moneda, símbolo, % de impuesto) y **Parámetro de Cliente** (% de descuento automático para clientes Distribuidores, por defecto 20%). Un solo formulario guarda todo junto sin importar la pestaña activa. |
+| **Configuración** | Organizada en **5 pestañas**: **Empresa** (nombre, NIT, teléfono, dirección, ciudad/departamento, correo, web, zona horaria), **Logo**, **Colores** (colores de la plataforma, del menú, de botones, de los 3 gráficos de Dashboard/Reportes, 3 colores propios de la **pantalla de login** — fondo de la página, tarjeta de módulos, texto de los módulos, independientes de los colores de marca del panel principal —, y 3 colores propios de la **paginación** — texto/flechas, fondo y texto de la página activa —, con valores por defecto de alto contraste ya pensados para no repetir el bug de texto morado sobre fondo morado), **Moneda & Impuestos** (moneda, símbolo, % de impuesto) y **Parámetro de Cliente** (% de descuento automático para clientes Distribuidores, por defecto 20%). Un solo formulario guarda todo junto sin importar la pestaña activa. |
 | **Backup & Restauración** | Exportar/importar la BD completa en SQL, restauración con backup automático previo, 3 niveles de reset. |
 
 ## Roles y permisos
@@ -155,7 +155,7 @@ No commitear nunca un `.env` con credenciales reales — está excluido vía `.g
 | `gastos` | Salidas de dinero de caja (`fecha_gasto`, `descripcion`, `monto`, `metodo_pago_id`, `user_id`, `notas`). |
 | `ingresos` | Entradas de dinero a caja no relacionadas a una venta (misma forma que `gastos`, con `fecha_ingreso`). |
 | `reparaciones` / `reparacion_historial` | Órdenes de servicio técnico y su historial de estados |
-| `configuracion` | Configuración del negocio (fila única tipo singleton), incluye colores de menú/botones/gráficos (`color_menu_texto`, `color_menu_activo`, `color_boton_texto`, `color_boton_fondo`, `color_grafico_1/2/3`) y `descuento_distribuidor` (% aplicado a clientes Distribuidores en Ventas, default 20) |
+| `configuracion` | Configuración del negocio (fila única tipo singleton), incluye colores de menú/botones/gráficos (`color_menu_texto`, `color_menu_activo`, `color_boton_texto`, `color_boton_fondo`, `color_grafico_1/2/3`), colores de paginación (`color_paginacion_texto`, `color_paginacion_activo_fondo`, `color_paginacion_activo_texto`) y `descuento_distribuidor` (% aplicado a clientes Distribuidores en Ventas, default 20) |
 | `permisos_rol` | Permisos por rol y módulo |
 
 ## Estructura del proyecto
@@ -195,6 +195,21 @@ limpia el número (fuerza indicativo `57` de Colombia) y codifica el mensaje con
 
 Todos los mensajes incluyen el nombre de la tienda en **negrita** (`*Nombre*`, sintaxis
 de WhatsApp).
+
+### Ícono de navegador y app instalable (PWA)
+
+`PwaController` sirve dos rutas públicas (sin `auth`, el navegador las pide antes de
+iniciar sesión): `GET /manifest.webmanifest` (nombre/colores/íconos leídos de
+`Configuracion::actual()`, blindado por tienda ya que hay 2 instancias con marca
+distinta) y `GET /pwa-icon/{192|512}.png` (redimensiona el logo subido en
+Configuración con GD — sin logo, genera un cuadrado sólido con `color_primario` como
+respaldo). El resultado se cachea en `storage/app/public/pwa/icon-{size}-{timestamp
+de configuracion.updated_at}.png`, así que cambiar el logo o el color invalida el
+caché automáticamente sin necesidad de borrar nada a mano. `layouts/app.blade.php` y
+`auth/login.blade.php` enlazan el manifest, `apple-touch-icon` y `theme-color` —
+permite "Agregar a pantalla de inicio" en Android/iOS. `layouts/publico.blade.php`
+(recibos compartidos por WhatsApp) solo mantiene el favicon existente, no el
+manifest completo, porque no es una pantalla pensada para instalarse como app.
 
 ### Recibos públicos con enlace firmado
 
@@ -358,3 +373,40 @@ botones "Volver"/"Enviar por WhatsApp" solo se muestran cuando `!($publico ?? fa
   (`getBoundingClientRect()`), y dompdf no ejecuta JavaScript — se optó por
   no replicar ese cálculo en PHP para evitar un layout de tirilla roto en el
   PDF.
+- **Paginación con flechas gigantes y texto sin traducir ("pagination.previous"):**
+  la app nunca llamaba `Paginator::useBootstrap()` en `AppServiceProvider::boot()`,
+  así que Laravel renderizaba su vista de paginación **por defecto** (`pagination::
+  tailwind`, con iconos SVG e inglés hardcodeado) en una app que solo carga
+  Bootstrap — los SVG salían sin ningún estilo (se veían enormes) porque no hay CSS
+  de Tailwind cargado. Además faltaba `lang/es/pagination.php` (Laravel no lo
+  publica por defecto desde la versión que quitó `resources/lang` del esqueleto
+  base), así que `@lang('pagination.previous')`/`@lang('pagination.next')` caían al
+  texto de la clave cruda en vez de traducirse. Fix: `Paginator::useBootstrap()` en
+  `AppServiceProvider::boot()` (usa la vista `pagination::bootstrap-4`, que ya
+  encaja con las clases `.page-link`/`.page-item` que el layout ya traía definidas)
+  + `lang/es/pagination.php` con `previous`/`next` en español. Afecta a los 7
+  listados paginados del sistema (Clientes, Productos, Ventas, Reparaciones, Caja,
+  Gastos, Ingresos) por igual, al ser una configuración global.
+- **Contraste de la página activa en la paginación:** el estilo original pintaba el
+  número de la página activa con `color: var(--accent1)` sobre
+  `background: var(--gradient)` (el mismo degradado morado/rosa que usa `--accent1`
+  como uno de sus extremos) — texto morado sobre fondo morado, prácticamente
+  ilegible. Se reemplazó por 3 variables de color propias y configurables (ver tabla
+  de Módulos → Configuración → Colores de Paginación), con default de alto
+  contraste (fondo sólido + texto blanco) en vez de reutilizar el degradado de
+  marca.
+- **Edición/eliminación de lotes es por variante, no por lote completo:** aunque un
+  mismo lote de compra puede traer varias combinaciones de color/almacenamiento/RAM
+  mezcladas (`lote_variantes`, ver tabla de Base de datos), los botones Editar/
+  Eliminar de la ficha del producto actúan sobre **una variante a la vez**
+  (`Producto::actualizarVariante()`/`eliminarVariante()`), no sobre el lote entero —
+  decisión explícita del usuario tras notar que agrupar el botón por lote (con
+  `rowspan`, una sola acción para todas las variantes agrupadas) resultaba confuso
+  y parecía que a algunas variantes les faltaba el botón. El costo/proveedor/notas
+  siguen siendo del lote (compartidos, porque es el mismo pedido de compra) y se
+  editan desde el modal de cualquiera de sus variantes; la cantidad y el color/
+  almacenamiento/RAM sí son exclusivos de cada variante. Ambas acciones se bloquean
+  si esa variante específica ya tiene ventas asociadas en `detalle_venta_lote`
+  (mismo criterio que ya se usaba para no dejar borrar un producto con ventas), y
+  eliminar la última variante de un lote borra también el lote (ya vacío), para no
+  dejar registros huérfanos.

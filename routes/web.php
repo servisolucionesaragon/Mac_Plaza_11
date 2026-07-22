@@ -19,6 +19,7 @@ use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\CajaController;
 use App\Http\Controllers\GastoController;
 use App\Http\Controllers\IngresoController;
+use App\Http\Controllers\PwaController;
 
 // ── Autenticación ─────────────────────────────────────────────────────────────
 Route::middleware('guest')->group(function () {
@@ -41,6 +42,10 @@ Route::middleware('signed')->group(function () {
         ->name('publico.abono.recibo');
 });
 
+// ── PWA (manifest + íconos, públicos — el navegador los pide antes del login) ──
+Route::get('/manifest.webmanifest', [PwaController::class, 'manifest'])->name('pwa.manifest');
+Route::get('/pwa-icon/{size}.png', [PwaController::class, 'icon'])->name('pwa.icon');
+
 // ── Rutas protegidas (requieren autenticación) ────────────────────────────────
 Route::middleware(['auth', 'nocache'])->group(function () {
 
@@ -56,6 +61,10 @@ Route::middleware(['auth', 'nocache'])->group(function () {
     Route::resource('productos', ProductoController::class)->middleware('permiso:productos');
     Route::post('/productos/{producto}/lotes', [ProductoController::class, 'agregarLote'])
         ->name('productos.lotes.store')->middleware('permiso:productos');
+    Route::put('/productos/{producto}/variantes/{variante}', [ProductoController::class, 'actualizarVariante'])
+        ->name('productos.variantes.update')->middleware('permiso:productos');
+    Route::delete('/productos/{producto}/variantes/{variante}', [ProductoController::class, 'eliminarVariante'])
+        ->name('productos.variantes.destroy')->middleware('permiso:productos');
 
     // Catálogos (categorías, marcas, condición, almacenamiento, ram)
     Route::prefix('catalogos')->name('catalogos.')->middleware('permiso:catalogos')->group(function () {

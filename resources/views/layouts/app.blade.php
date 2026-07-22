@@ -9,6 +9,15 @@
         <link rel="icon" type="{{ \Illuminate\Support\Facades\Storage::disk('public')->mimeType($config->logo) ?? 'image/png' }}" href="{{ asset('storage/' . $config->logo) }}?v={{ $config->updated_at->timestamp }}">
     @endif
 
+    <!-- PWA: instalable / "Agregar a pantalla de inicio" -->
+    <link rel="manifest" href="{{ route('pwa.manifest') }}">
+    <link rel="apple-touch-icon" href="{{ route('pwa.icon', ['size' => 192]) }}">
+    <meta name="theme-color" content="{{ (isset($config) ? $config->color_primario : null) ?? '#a855f7' }}">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="{{ (isset($config) ? $config->nombre_tienda : null) ?? 'CRM' }}">
+
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
@@ -34,6 +43,9 @@
             --nav-hover-bg:  rgba(168,85,247,0.2);
             --btn-bg:        {{ $config->color_boton_fondo ?? '#a855f7' }};
             --btn-text:      {{ $config->color_boton_texto ?? '#ffffff' }};
+            --pagination-text:        {{ $config->color_paginacion_texto ?? '#7c3aed' }};
+            --pagination-active-bg:   {{ $config->color_paginacion_activo_fondo ?? '#7c3aed' }};
+            --pagination-active-text: {{ $config->color_paginacion_activo_texto ?? '#ffffff' }};
         }
 
         * { box-sizing: border-box; }
@@ -374,11 +386,15 @@
         .pagination .page-link {
             border-radius: 8px !important;
             margin: 0 2px;
-            color: var(--accent1);
+            color: var(--pagination-text);
         }
         .pagination .page-item.active .page-link {
-            background: var(--gradient);
+            background: var(--pagination-active-bg);
             border-color: transparent;
+            color: var(--pagination-active-text);
+        }
+        .pagination .page-item.disabled .page-link {
+            color: var(--text-muted);
         }
 
         /* ── RESPONSIVE ──────────────────────────────────────────── */

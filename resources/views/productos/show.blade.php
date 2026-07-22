@@ -188,6 +188,7 @@
                                 <th>Costo Unitario</th>
                                 <th>Proveedor</th>
                                 <th>Notas</th>
+                                <th class="text-end">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -209,6 +210,21 @@
                                     <td>{{ $config->simbolo_moneda }} {{ number_format($lote->costo_unitario, 2) }}</td>
                                     <td>{{ $lote->proveedor ?: '—' }}</td>
                                     <td>{{ $lote->notas ?: '—' }}</td>
+                                    <td class="text-end">
+                                        <div class="d-flex gap-1 justify-content-end">
+                                            <button type="button" class="btn btn-sm" style="background:#ede9fe; color:#7c3aed; border-radius:8px; padding:5px 10px;"
+                                                    title="Editar variante" data-bs-toggle="modal" data-bs-target="#modalEditarVariante{{ $v->id }}">
+                                                <i class="fas fa-edit fa-sm"></i>
+                                            </button>
+                                            <form action="{{ route('productos.variantes.destroy', [$producto, $v]) }}" method="POST"
+                                                  onsubmit="return confirm('¿Eliminar esta variante? Esta acción no se puede deshacer.')">
+                                                @csrf @method('DELETE')
+                                                <button type="submit" class="btn btn-sm" style="background:#fee2e2; color:#dc2626; border-radius:8px; padding:5px 10px;" title="Eliminar variante">
+                                                    <i class="fas fa-trash fa-sm"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
                                 </tr>
                                 @endforeach
                             @endforeach
@@ -341,6 +357,96 @@
         </div>
     </div>
 </div>
+
+{{-- Modales: Editar Variante (uno por variante) --}}
+@foreach($producto->lotes as $lote)
+    @foreach($lote->variantes as $v)
+    <div class="modal fade" id="modalEditarVariante{{ $v->id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="{{ route('productos.variantes.update', [$producto, $v]) }}" method="POST">
+                    @csrf @method('PUT')
+                    <div class="modal-header">
+                        <h6 class="modal-title fw-bold">Editar Variante — {{ $lote->fecha_ingreso->format('d/m/Y H:i') }}</h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-muted mb-3" style="font-size:12px;">
+                            El costo, proveedor y notas se comparten con las demás variantes de esta misma compra (si
+                            las hay). La cantidad y la combinación de color/almacenamiento/RAM son propias de esta
+                            variante y no afectan a las demás.
+                        </p>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Costo Unitario del Lote ({{ $config->simbolo_moneda }}) <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" name="costo_unitario" min="0" step="0.01" value="{{ $lote->costo_unitario }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Proveedor</label>
+                                <select class="form-select" name="proveedor">
+                                    <option value="">— Sin especificar —</option>
+                                    @foreach($proveedores as $prov)
+                                        <option value="{{ $prov->nombre }}" @selected($lote->proveedor === $prov->nombre)>{{ $prov->nombre }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <label class="form-label mb-2">Esta Variante</label>
+                        <div class="row g-2 align-items-end mb-1">
+                            <div class="col-md-3">
+                                <label class="form-label mb-1" style="font-size:11px;">Cantidad <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control form-control-sm" name="cantidad" min="1" value="{{ $v->cantidad_inicial }}" required>
+                                @if($v->cantidad_inicial > $v->cantidad_restante)
+                                    <div style="font-size:10px; color:#9ca3af;">Ya vendidas: {{ $v->cantidad_inicial - $v->cantidad_restante }} (no puede bajar de eso)</div>
+                                @endif
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label mb-1" style="font-size:11px;">Color</label>
+                                <select class="form-select form-select-sm" name="color_id">
+                                    <option value="">— Sin especificar —</option>
+                                    @foreach($colores as $c)
+                                        <option value="{{ $c->id }}" @selected($v->color_id === $c->id)>{{ $c->nombre }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label mb-1" style="font-size:11px;">Almacenamiento</label>
+                                <select class="form-select form-select-sm" name="almacenamiento_id">
+                                    <option value="">— Sin especificar —</option>
+                                    @foreach($almacenamientos as $a)
+                                        <option value="{{ $a->id }}" @selected($v->almacenamiento_id === $a->id)>{{ $a->nombre }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label mb-1" style="font-size:11px;">RAM</label>
+                                <select class="form-select form-select-sm" name="ram_id">
+                                    <option value="">— Sin especificar —</option>
+                                    @foreach($rams as $r)
+                                        <option value="{{ $r->id }}" @selected($v->ram_id === $r->id)>{{ $r->nombre }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-1 mt-3">
+                            <label class="form-label">Notas del lote</label>
+                            <textarea class="form-control" name="notas" rows="2" placeholder="Opcional">{{ $lote->notas }}</textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    @endforeach
+@endforeach
 @endsection
 
 @push('scripts')

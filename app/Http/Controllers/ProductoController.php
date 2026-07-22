@@ -11,6 +11,7 @@ use App\Models\Almacenamiento;
 use App\Models\Ram;
 use App\Models\Color;
 use App\Models\CatalogoTipo;
+use App\Models\LoteVariante;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
@@ -190,6 +191,42 @@ class ProductoController extends Controller
         ]);
 
         return back()->with('success', 'Lote agregado correctamente.');
+    }
+
+    public function actualizarVariante(Request $request, Producto $producto, LoteVariante $variante)
+    {
+        abort_unless($variante->lote->producto_id === $producto->id, 404);
+
+        $validado = $request->validate([
+            'costo_unitario'    => 'required|numeric|min:0',
+            'proveedor'         => 'nullable|string|max:150',
+            'notas'             => 'nullable|string|max:500',
+            'cantidad'          => 'required|integer|min:1',
+            'color_id'          => 'nullable|exists:colores,id',
+            'almacenamiento_id' => 'nullable|exists:almacenamientos,id',
+            'ram_id'            => 'nullable|exists:rams,id',
+        ]);
+
+        try {
+            $producto->actualizarVariante($variante, $validado);
+        } catch (\InvalidArgumentException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', 'Variante actualizada correctamente.');
+    }
+
+    public function eliminarVariante(Producto $producto, LoteVariante $variante)
+    {
+        abort_unless($variante->lote->producto_id === $producto->id, 404);
+
+        try {
+            $producto->eliminarVariante($variante);
+        } catch (\InvalidArgumentException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', 'Variante eliminada correctamente.');
     }
 
     public function show(Producto $producto)

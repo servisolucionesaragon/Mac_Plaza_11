@@ -181,6 +181,73 @@ class Producto extends Model
         }
     }
 
+    /**
+     * Edita una variante individual de un lote: su color/almacenamiento/ram y
+     * cantidad, más los datos generales del lote al que pertenece (costo/proveedor/
+     * notas — compartidos con las demás variantes de esa misma compra, si las hay).
+     * La cantidad se interpreta como la nueva `cantidad_inicial`; el delta (nueva -
+     * vieja) se aplica también a `cantidad_restante` y al stock del producto. No se
+     * puede bajar la cantidad por debajo de lo que ya se vendió de esta variante.
+     */
+    public function actualizarVariante(LoteVariante $variante, array $datos): void
+    {
+        $consumido = $variante->cantidad_inicial - $variante->cantidad_restante;
+        $nuevaCantidad = (int) $datos['cantidad'];
+
+        if ($nuevaCantidad < $consumido) {
+            throw new \InvalidArgumentException(
+                "La cantidad no puede ser menor a lo ya vendido ({$consumido} unidades) de esta variante."
+            );
+        }
+
+        $delta = $nuevaCantidad - $variante->cantidad_inicial;
+
+        $variante->update([
+            'color_id'          => $datos['color_id'] ?? null,
+            'almacenamiento_id' => $datos['almacenamiento_id'] ?? null,
+            'ram_id'            => $datos['ram_id'] ?? null,
+            'cantidad_inicial'  => $nuevaCantidad,
+            'cantidad_restante' => $variante->cantidad_restante + $delta,
+        ]);
+
+        $variante->lote->update([
+            'costo_unitario' => $datos['costo_unitario'],
+            'proveedor'      => $datos['proveedor'] ?? null,
+            'notas'          => $datos['notas'] ?? null,
+        ]);
+
+        if ($delta !== 0) {
+            $this->increment('stock', $delta);
+        }
+        $this->recalcularPrecioCompra();
+    }
+
+    /**
+     * Elimina una única variante (no todo el lote). Bloquea la eliminación si esa
+     * variante ya fue consumida por una venta (registro en `detalle_venta_lote`) —
+     * mismo criterio que impide borrar un producto con ventas. Si era la última
+     * variante que quedaba en su lote, el lote (ya vacío) se elimina también.
+     */
+    public function eliminarVariante(LoteVariante $variante): void
+    {
+        if (DetalleVentaLote::where('lote_variante_id', $variante->id)->exists()) {
+            throw new \InvalidArgumentException('No se puede eliminar: ya se vendieron unidades de esta variante.');
+        }
+
+        $restante = $variante->cantidad_restante;
+        $lote = $variante->lote;
+        $variante->delete();
+
+        if ($lote->variantes()->count() === 0) {
+            $lote->delete();
+        }
+
+        if ($restante > 0) {
+            $this->decrement('stock', $restante);
+        }
+        $this->recalcularPrecioCompra();
+    }
+
     /** Costo del lote más antiguo con alguna variante en existencia (el "frente" FIFO) — no cambia si ya no queda stock. */
     private function recalcularPrecioCompra(): void
     {

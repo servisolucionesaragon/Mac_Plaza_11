@@ -45,6 +45,9 @@ class ConfiguracionController extends Controller
             'color_login_fondo'          => 'required|string|regex:/^#[0-9A-Fa-f]{6}$/',
             'color_login_tarjeta'        => 'required|string|regex:/^#[0-9A-Fa-f]{6}$/',
             'color_login_texto_modulos'  => 'required|string|regex:/^#[0-9A-Fa-f]{6}$/',
+            'color_paginacion_texto'         => 'required|string|regex:/^#[0-9A-Fa-f]{6}$/',
+            'color_paginacion_activo_fondo'  => 'required|string|regex:/^#[0-9A-Fa-f]{6}$/',
+            'color_paginacion_activo_texto'  => 'required|string|regex:/^#[0-9A-Fa-f]{6}$/',
             'descuento_distribuidor'     => 'required|numeric|min:0|max:100',
         ], [
             'logo.image'  => 'El archivo debe ser una imagen (JPG, PNG, GIF, BMP o WEBP). Fotos en formato HEIC de iPhone no son compatibles: conviértelas a JPG o PNG antes de subirlas.',
