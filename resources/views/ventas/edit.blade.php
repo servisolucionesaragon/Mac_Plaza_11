@@ -423,13 +423,14 @@ function renderResultadoProducto(p) {
 buscadorProducto.addEventListener('input', filtrarProductos);
 filtrosProducto.forEach(el => el.addEventListener('change', filtrarProductos));
 
-function agregarFilaProducto(productoId, variante, cantidadInicial, descuentoInicial, imeiInicial, serialInicial) {
+function agregarFilaProducto(productoId, variante, cantidadInicial, descuentoInicial, imeiInicial, serialInicial, precioInicial) {
     const datos = productosData.find(p => p.id == productoId);
     if (!datos) return;
 
     const claveFila = productoId + '-' + (variante.color_id ?? 'x') + '-' + (variante.almacenamiento_id ?? 'x') + '-' + (variante.ram_id ?? 'x');
     const nombre = datos.nombre;
-    const precio = datos.precio_venta;
+    const precioMinimo = datos.precio_venta;
+    const precio = (precioInicial !== undefined && precioInicial !== null) ? precioInicial : precioMinimo;
     const stock  = variante.stock;
     const etiqueta = etiquetaVariante(variante);
 
@@ -453,7 +454,12 @@ function agregarFilaProducto(productoId, variante, cantidadInicial, descuentoIni
                    class="form-control form-control-sm cant-input" style="width:65px;"
                    oninput="calcularFila('${claveFila}')">
         </td>
-        <td style="font-size:13.5px; font-weight:500;">${MONEDA} ${precio.toFixed(2)}</td>
+        <td>
+            <input type="number" name="productos[${claveFila}][precio_unitario]" value="${precio.toFixed(2)}" min="${precioMinimo}" step="0.01"
+                   class="form-control form-control-sm precio-input" style="width:95px;"
+                   oninput="calcularFila('${claveFila}')"
+                   onblur="this.value = Math.max(parseFloat(this.value) || 0, ${precioMinimo}).toFixed(2); calcularFila('${claveFila}');">
+        </td>
         <td>
             <input type="number" name="productos[${claveFila}][descuento]" value="${descuentoInicial}" min="0" step="0.01"
                    class="form-control form-control-sm desc-input" style="width:80px;"
@@ -482,13 +488,13 @@ function agregarFilaProducto(productoId, variante, cantidadInicial, descuentoIni
 }
 
 /** Precarga una línea de la venta existente, resolviendo su variante contra el stock disponible actual. */
-function agregarFilaProductoPreload(productoId, colorId, almacenamientoId, ramId, cantidadInicial, descuentoInicial, imeiInicial, serialInicial) {
+function agregarFilaProductoPreload(productoId, colorId, almacenamientoId, ramId, cantidadInicial, descuentoInicial, imeiInicial, serialInicial, precioInicial) {
     const datos = productosData.find(p => p.id == productoId);
     let variante = datos ? datos.variantes.find(v => v.color_id == colorId && v.almacenamiento_id == almacenamientoId && v.ram_id == ramId) : null;
     if (!variante) {
         variante = { color_id: colorId, almacenamiento_id: almacenamientoId, ram_id: ramId, stock: cantidadInicial };
     }
-    agregarFilaProducto(productoId, variante, cantidadInicial, descuentoInicial, imeiInicial, serialInicial);
+    agregarFilaProducto(productoId, variante, cantidadInicial, descuentoInicial, imeiInicial, serialInicial, precioInicial);
 }
 
 function agregarProducto(id, varianteIndex) {
@@ -516,10 +522,11 @@ function agregarProducto(id, varianteIndex) {
 }
 
 function calcularFila(claveFila) {
-    const fila  = document.getElementById('fila-' + claveFila);
-    const cant  = parseFloat(fila.querySelector('.cant-input').value) || 0;
-    const desc  = parseFloat(fila.querySelector('.desc-input').value) || 0;
-    const sub   = (productosSeleccionados[claveFila].precio * cant) - desc;
+    const fila   = document.getElementById('fila-' + claveFila);
+    const cant   = parseFloat(fila.querySelector('.cant-input').value) || 0;
+    const desc   = parseFloat(fila.querySelector('.desc-input').value) || 0;
+    const precio = parseFloat(fila.querySelector('.precio-input').value) || 0;
+    const sub    = (precio * cant) - desc;
     document.getElementById('sub-' + claveFila).textContent = MONEDA + ' ' + Math.max(sub, 0).toFixed(2);
     actualizarCamposImeiSerial(productosSeleccionados[claveFila].productoId, claveFila);
     calcularTotales();
@@ -603,11 +610,12 @@ function calcularTotales() {
     const productos = Object.keys(productosSeleccionados);
 
     productos.forEach(id => {
-        const fila = document.getElementById('fila-' + id);
+        const fila   = document.getElementById('fila-' + id);
         if (!fila) return;
-        const cant = parseFloat(fila.querySelector('.cant-input').value) || 0;
-        const desc = parseFloat(fila.querySelector('.desc-input').value) || 0;
-        subtotal  += (productosSeleccionados[id].precio * cant) - desc;
+        const cant   = parseFloat(fila.querySelector('.cant-input').value) || 0;
+        const desc   = parseFloat(fila.querySelector('.desc-input').value) || 0;
+        const precio = parseFloat(fila.querySelector('.precio-input').value) || 0;
+        subtotal  += (precio * cant) - desc;
         unidades  += cant;
     });
 
@@ -657,7 +665,8 @@ agregarFilaProductoPreload(
     {{ $d->cantidad }},
     {{ $d->descuento }},
     @json($d->imei_vendido),
-    @json($d->serial_vendido)
+    @json($d->serial_vendido),
+    {{ $d->precio_unitario }}
 );
 @endforeach
 calcularTotales();

@@ -250,7 +250,14 @@ class VentaController extends Controller
                 $serialVendido = implode(', ', $seriales);
             }
 
-            $precioUnitario = $producto->precio_venta;
+            $precioUnitario = isset($item['precio_unitario']) && $item['precio_unitario'] !== ''
+                ? (float) $item['precio_unitario']
+                : $producto->precio_venta;
+
+            if ($precioUnitario < $producto->precio_venta) {
+                throw new \Exception("El precio unitario de \"{$producto->nombre}\" no puede ser menor al precio de venta ({$producto->precio_venta}).");
+            }
+
             $descItem       = isset($item['descuento']) ? (float)$item['descuento'] : 0;
             $subItem        = ($precioUnitario * $item['cantidad']) - $descItem;
             $subtotal      += $subItem;
@@ -329,6 +336,7 @@ class VentaController extends Controller
             'productos'           => 'required|array|min:1',
             'productos.*.id'      => 'required|exists:productos,id',
             'productos.*.cantidad' => 'required|integer|min:1',
+            'productos.*.precio_unitario'   => 'nullable|numeric|min:0',
             'productos.*.color_id'          => 'nullable|exists:colores,id',
             'productos.*.almacenamiento_id' => 'nullable|exists:almacenamientos,id',
             'productos.*.ram_id'            => 'nullable|exists:rams,id',

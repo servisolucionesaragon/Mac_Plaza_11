@@ -461,7 +461,12 @@ function agregarProducto(id, varianteIndex) {
                        class="form-control form-control-sm cant-input" style="width:65px;"
                        oninput="calcularFila('${claveFila}')">
             </td>
-            <td style="font-size:13.5px; font-weight:500;">${MONEDA} ${precio.toFixed(2)}</td>
+            <td>
+                <input type="number" name="productos[${claveFila}][precio_unitario]" value="${precio.toFixed(2)}" min="${precio}" step="0.01"
+                       class="form-control form-control-sm precio-input" style="width:95px;"
+                       oninput="calcularFila('${claveFila}')"
+                       onblur="this.value = Math.max(parseFloat(this.value) || 0, ${precio}).toFixed(2); calcularFila('${claveFila}');">
+            </td>
             <td>
                 <input type="number" name="productos[${claveFila}][descuento]" value="0" min="0" step="0.01"
                        class="form-control form-control-sm desc-input" style="width:80px;"
@@ -492,10 +497,11 @@ function agregarProducto(id, varianteIndex) {
 }
 
 function calcularFila(claveFila) {
-    const fila  = document.getElementById('fila-' + claveFila);
-    const cant  = parseFloat(fila.querySelector('.cant-input').value) || 0;
-    const desc  = parseFloat(fila.querySelector('.desc-input').value) || 0;
-    const sub   = (productosSeleccionados[claveFila].precio * cant) - desc;
+    const fila   = document.getElementById('fila-' + claveFila);
+    const cant   = parseFloat(fila.querySelector('.cant-input').value) || 0;
+    const desc   = parseFloat(fila.querySelector('.desc-input').value) || 0;
+    const precio = parseFloat(fila.querySelector('.precio-input').value) || 0;
+    const sub    = (precio * cant) - desc;
     document.getElementById('sub-' + claveFila).textContent = MONEDA + ' ' + Math.max(sub, 0).toFixed(2);
     actualizarCamposImeiSerial(productosSeleccionados[claveFila].productoId, claveFila);
     calcularTotales();
@@ -581,11 +587,12 @@ function calcularTotales() {
     const productos = Object.keys(productosSeleccionados);
 
     productos.forEach(id => {
-        const fila = document.getElementById('fila-' + id);
+        const fila   = document.getElementById('fila-' + id);
         if (!fila) return;
-        const cant = parseFloat(fila.querySelector('.cant-input').value) || 0;
-        const desc = parseFloat(fila.querySelector('.desc-input').value) || 0;
-        subtotal  += (productosSeleccionados[id].precio * cant) - desc;
+        const cant   = parseFloat(fila.querySelector('.cant-input').value) || 0;
+        const desc   = parseFloat(fila.querySelector('.desc-input').value) || 0;
+        const precio = parseFloat(fila.querySelector('.precio-input').value) || 0;
+        subtotal  += (precio * cant) - desc;
         unidades  += cant;
     });
 
