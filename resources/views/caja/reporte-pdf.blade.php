@@ -67,6 +67,9 @@
         <td><div class="resumen-caja"><div class="resumen-label">Ingresos</div><div class="resumen-value text-verde">+ {{ $config->simbolo_moneda }} {{ number_format($totalIngresos, 2) }}</div></div></td>
         <td><div class="resumen-caja"><div class="resumen-label">Gastos</div><div class="resumen-value text-rojo">- {{ $config->simbolo_moneda }} {{ number_format($totalGastos, 2) }}</div></div></td>
     </tr>
+    <tr>
+        <td><div class="resumen-caja"><div class="resumen-label">Reparaciones Cobradas</div><div class="resumen-value text-verde">+ {{ $config->simbolo_moneda }} {{ number_format($totalReparaciones, 2) }}</div></div></td>
+    </tr>
 </table>
 
 <div class="total-caja">
@@ -150,6 +153,25 @@
     @if($caja->notas_apertura)<div><strong>Notas de apertura:</strong> {{ $caja->notas_apertura }}</div>@endif
     @if($caja->notas_cierre)<div><strong>Notas de cierre:</strong> {{ $caja->notas_cierre }}</div>@endif
 </div>
+@endif
+
+@if($reparacionesDelDia->isNotEmpty())
+<div class="seccion-titulo">Detalle de Reparaciones Cobradas</div>
+<table class="detalle-tabla">
+    <thead>
+        <tr><th>Hora</th><th>Orden</th><th>Metodo</th><th class="text-right">Monto</th></tr>
+    </thead>
+    <tbody>
+        @foreach($reparacionesDelDia as $rep)
+        <tr>
+            <td>{{ $rep->fecha_entrega->format('H:i') }}</td>
+            <td>{{ $rep->numero_orden }}</td>
+            <td>{{ $rep->metodoPago->nombre ?? '—' }}</td>
+            <td class="text-right text-verde">+ {{ $config->simbolo_moneda }} {{ number_format($rep->costo_final, 2) }}</td>
+        </tr>
+        @endforeach
+    </tbody>
+</table>
 @endif
 
 <div style="font-size:9px;color:#9ca3af;margin-top:16px;">Generado el {{ now()->format('d/m/Y H:i') }}</div>

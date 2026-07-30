@@ -44,7 +44,7 @@
                             <div class="row g-3">
                                 <div class="col-md-5">
                                     <label class="form-label">Estado Actual <span class="text-danger">*</span></label>
-                                    <select name="estado" class="form-select" required>
+                                    <select name="estado" id="estadoReparacion" class="form-select" required onchange="toggleMedioPagoRequerido()">
                                         @php $estados = ['recibido'=>'📥 Recibido','en_diagnostico'=>'🔍 En Diagnóstico','esperando_repuesto'=>'⏳ Esperando Repuesto','en_reparacion'=>'🔧 En Reparación','listo'=>'✅ Listo para Entregar','entregado'=>'📦 Entregado','no_reparable'=>'❌ No Reparable']; @endphp
                                         @foreach($estados as $val => $lbl)
                                             <option value="{{ $val }}" {{ old('estado',$reparacion->estado)==$val?'selected':'' }}>
@@ -160,6 +160,18 @@
                                            value="{{ old('costo_final',$reparacion->costo_final) }}" min="0" step="0.01">
                                 </div>
                                 <div class="col-md-3">
+                                    <label class="form-label" id="labelMedioPago">Medio de Pago</label>
+                                    <select name="metodo_pago_id" id="metodoPagoReparacion" class="form-select">
+                                        <option value="">— Seleccionar —</option>
+                                        @foreach($metodosPago as $mp)
+                                            <option value="{{ $mp->id }}" {{ old('metodo_pago_id',$reparacion->metodo_pago_id)==$mp->id ? 'selected' : '' }}>
+                                                {{ $mp->nombre }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <div class="form-text" style="font-size:11px;">Obligatorio al entregar (se refleja en el Control de Caja).</div>
+                                </div>
+                                <div class="col-md-3">
                                     <label class="form-label">¿Incluye Garantía?</label>
                                     <select name="garantia" class="form-select">
                                         <option value="0" {{ !$reparacion->garantia?'selected':'' }}>No</option>
@@ -191,4 +203,16 @@
         </div>
     </div>
 </div>
+
+<script>
+function toggleMedioPagoRequerido() {
+    const estado = document.getElementById('estadoReparacion').value;
+    const select = document.getElementById('metodoPagoReparacion');
+    const label = document.getElementById('labelMedioPago');
+    const requerido = estado === 'entregado';
+    select.required = requerido;
+    label.innerHTML = 'Medio de Pago' + (requerido ? ' <span class="text-danger">*</span>' : '');
+}
+document.addEventListener('DOMContentLoaded', toggleMedioPagoRequerido);
+</script>
 @endsection

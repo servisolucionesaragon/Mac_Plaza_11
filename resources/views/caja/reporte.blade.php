@@ -136,6 +136,12 @@
                             <div class="resumen-value" style="color:#dc2626;">− {{ $config->simbolo_moneda }} {{ number_format($totalGastos, 2) }}</div>
                         </div>
                     </div>
+                    <div class="col-4">
+                        <div class="resumen-item">
+                            <div class="resumen-label">Reparaciones Cobradas</div>
+                            <div class="resumen-value" style="color:#16a34a;">+ {{ $config->simbolo_moneda }} {{ number_format($totalReparaciones, 2) }}</div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center p-3 rounded-3 mb-4 reporte-seccion-print"
@@ -232,6 +238,32 @@
                 </div>
                 @endif
 
+                @if($reparacionesDelDia->isNotEmpty())
+                <div class="mb-4">
+                    <div class="resumen-label mb-2">Detalle de Reparaciones Cobradas</div>
+                    <table class="table mb-0" style="font-size:12.5px;">
+                        <thead>
+                            <tr style="border-bottom:2px solid #e9d5ff;">
+                                <th style="padding:6px 0;color:#6b7280;font-size:10.5px;text-transform:uppercase;">Hora</th>
+                                <th style="padding:6px 0;color:#6b7280;font-size:10.5px;text-transform:uppercase;">Orden</th>
+                                <th style="padding:6px 0;color:#6b7280;font-size:10.5px;text-transform:uppercase;">Método</th>
+                                <th style="padding:6px 0;color:#6b7280;font-size:10.5px;text-transform:uppercase;text-align:right;">Monto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($reparacionesDelDia as $rep)
+                            <tr style="border-bottom:1px solid #f3f4f6;">
+                                <td style="padding:6px 0;">{{ $rep->fecha_entrega->format('H:i') }}</td>
+                                <td style="padding:6px 0;">{{ $rep->numero_orden }}</td>
+                                <td style="padding:6px 0;">{{ $rep->metodoPago->nombre ?? '—' }}</td>
+                                <td style="padding:6px 0;text-align:right;color:#16a34a;">+ {{ $config->simbolo_moneda }} {{ number_format($rep->costo_final, 2) }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                @endif
+
                 @if($caja->notas_apertura || $caja->notas_cierre)
                 <div class="p-3 rounded-3" style="background:#f9fafb;font-size:12.5px;color:#6b7280;">
                     @if($caja->notas_apertura)<div><strong>Notas de apertura:</strong> {{ $caja->notas_apertura }}</div>@endif
@@ -265,6 +297,7 @@
         <div class="t-row"><span>Abonos Cobrados</span><span>{{ $config->simbolo_moneda }} {{ number_format($totalAbonos, 2) }}</span></div>
         <div class="t-row"><span>Ingresos</span><span>+ {{ $config->simbolo_moneda }} {{ number_format($totalIngresos, 2) }}</span></div>
         <div class="t-row"><span>Gastos</span><span>- {{ $config->simbolo_moneda }} {{ number_format($totalGastos, 2) }}</span></div>
+        <div class="t-row"><span>Reparaciones Cobradas</span><span>+ {{ $config->simbolo_moneda }} {{ number_format($totalReparaciones, 2) }}</span></div>
         <hr>
         <div class="t-row t-bold" style="font-size:13px;"><span>TOTAL EN CAJA</span><span>{{ $config->simbolo_moneda }} {{ number_format($totalEsperado, 2) }}</span></div>
         <hr>
@@ -291,6 +324,13 @@
         <div class="t-bold">Ingresos</div>
         @foreach($ingresosDelDia as $ingreso)
         <div class="t-row"><span>{{ $ingreso->descripcion }}</span><span>+{{ number_format($ingreso->monto, 2) }}</span></div>
+        @endforeach
+        @endif
+        @if($reparacionesDelDia->isNotEmpty())
+        <hr>
+        <div class="t-bold">Reparaciones Cobradas</div>
+        @foreach($reparacionesDelDia as $rep)
+        <div class="t-row"><span>{{ $rep->numero_orden }}</span><span>+{{ number_format($rep->costo_final, 2) }}</span></div>
         @endforeach
         @endif
         <hr>

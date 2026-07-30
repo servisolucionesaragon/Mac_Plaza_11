@@ -14,7 +14,7 @@ class Reparacion extends Model
     protected $fillable = [
         'numero_orden', 'cliente_id', 'tecnico_id', 'dispositivo', 'marca',
         'modelo', 'imei', 'color', 'falla_reportada', 'diagnostico',
-        'solucion', 'presupuesto', 'costo_final', 'estado', 'prioridad',
+        'solucion', 'presupuesto', 'costo_final', 'metodo_pago_id', 'estado', 'prioridad',
         'fecha_recepcion', 'fecha_estimada', 'fecha_entrega', 'notas',
         'garantia', 'dias_garantia',
     ];
@@ -36,6 +36,11 @@ class Reparacion extends Model
     public function tecnico()
     {
         return $this->belongsTo(User::class, 'tecnico_id');
+    }
+
+    public function metodoPago()
+    {
+        return $this->belongsTo(MetodoPago::class, 'metodo_pago_id');
     }
 
     public function historial()

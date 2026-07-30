@@ -6,6 +6,7 @@ use App\Models\Reparacion;
 use App\Models\Cliente;
 use App\Models\User;
 use App\Models\HistorialReparacion;
+use App\Models\MetodoPago;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -100,7 +101,7 @@ class ReparacionController extends Controller
 
     public function show(Reparacion $reparacion)
     {
-        $reparacion->load(['cliente', 'tecnico', 'historial.usuario']);
+        $reparacion->load(['cliente', 'tecnico', 'metodoPago', 'historial.usuario']);
         return view('reparaciones.show', compact('reparacion'));
     }
 
@@ -123,7 +124,8 @@ class ReparacionController extends Controller
     {
         $clientes = Cliente::where('activo', true)->orderBy('nombre')->get();
         $tecnicos = User::where('rol', 'tecnico')->where('activo', true)->orderBy('name')->get();
-        return view('reparaciones.edit', compact('reparacion', 'clientes', 'tecnicos'));
+        $metodosPago = MetodoPago::where('activo', true)->orderBy('nombre')->get();
+        return view('reparaciones.edit', compact('reparacion', 'clientes', 'tecnicos', 'metodosPago'));
     }
 
     public function update(Request $request, Reparacion $reparacion)
@@ -140,6 +142,7 @@ class ReparacionController extends Controller
             'solucion'        => 'nullable|string',
             'presupuesto'     => 'nullable|numeric|min:0',
             'costo_final'     => 'nullable|numeric|min:0',
+            'metodo_pago_id'  => 'required_if:estado,entregado|nullable|exists:metodos_pago,id',
             'estado'          => 'required|in:recibido,en_diagnostico,esperando_repuesto,en_reparacion,listo,entregado,no_reparable',
             'prioridad'       => 'required|in:baja,media,alta,urgente',
             'fecha_estimada'  => 'nullable|date',
@@ -147,6 +150,8 @@ class ReparacionController extends Controller
             'dias_garantia'   => 'nullable|integer|min:0',
             'notas'           => 'nullable|string',
             'nota_cambio'     => 'nullable|string',
+        ], [
+            'metodo_pago_id.required_if' => 'Debes indicar el medio de pago para entregar la reparación.',
         ]);
 
         $estadoAnterior = $reparacion->estado;

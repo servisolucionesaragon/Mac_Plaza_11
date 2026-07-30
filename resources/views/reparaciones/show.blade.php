@@ -138,6 +138,14 @@
                             </div>
                         </div>
                     </div>
+                    @if($reparacion->metodo_pago_id)
+                    <div class="col-12">
+                        <div class="d-flex justify-content-between align-items-center px-1" style="font-size:13px;">
+                            <span class="text-muted">Medio de Pago</span>
+                            <strong>{{ $reparacion->metodoPago->nombre ?? '—' }}</strong>
+                        </div>
+                    </div>
+                    @endif
                     @if($reparacion->garantia)
                     <div class="col-12">
                         <div class="p-3 rounded-3 d-flex align-items-center gap-3" style="background:#e0f2fe;">

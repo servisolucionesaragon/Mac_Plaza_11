@@ -133,7 +133,7 @@
         </div>
 
         <div class="row g-4 mt-1">
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="card">
                     <div class="card-body p-4">
                         <h6 class="fw-bold mb-3"><i class="fas fa-arrow-circle-down me-2" style="color:#dc2626;"></i>Gastos del Día</h6>
@@ -159,7 +159,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="card">
                     <div class="card-body p-4">
                         <h6 class="fw-bold mb-3"><i class="fas fa-arrow-circle-up me-2" style="color:#16a34a;"></i>Ingresos del Día</h6>
@@ -180,6 +180,32 @@
                             <div class="d-flex justify-content-between pt-2 mt-1" style="font-size:13px;font-weight:700;">
                                 <span>Total Ingresos</span>
                                 <span style="color:#16a34a;">{{ $config->simbolo_moneda }} {{ number_format($ingresosDelDia->sum('monto'), 2) }}</span>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body p-4">
+                        <h6 class="fw-bold mb-3"><i class="fas fa-tools me-2" style="color:#16a34a;"></i>Reparaciones Cobradas</h6>
+                        @forelse($reparacionesDelDia as $rep)
+                            <div class="d-flex justify-content-between align-items-start py-2" style="border-bottom:1px solid #f3f4f6;font-size:13px;">
+                                <div>
+                                    <div style="font-weight:500;">{{ $rep->numero_orden }}</div>
+                                    <div style="font-size:11px;color:#9ca3af;">
+                                        {{ $rep->fecha_entrega->format('H:i') }} · {{ $rep->metodoPago->nombre ?? '—' }}
+                                    </div>
+                                </div>
+                                <span style="font-weight:600;color:#16a34a;">+ {{ $config->simbolo_moneda }} {{ number_format($rep->costo_final, 2) }}</span>
+                            </div>
+                        @empty
+                            <p class="text-muted mb-0" style="font-size:13px;">Sin reparaciones entregadas este día.</p>
+                        @endforelse
+                        @if($reparacionesDelDia->isNotEmpty())
+                            <div class="d-flex justify-content-between pt-2 mt-1" style="font-size:13px;font-weight:700;">
+                                <span>Total Reparaciones</span>
+                                <span style="color:#16a34a;">{{ $config->simbolo_moneda }} {{ number_format($reparacionesDelDia->sum('costo_final'), 2) }}</span>
                             </div>
                         @endif
                     </div>

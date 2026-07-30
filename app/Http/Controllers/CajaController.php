@@ -8,6 +8,7 @@ use App\Models\CajaConteo;
 use App\Models\Gasto;
 use App\Models\Ingreso;
 use App\Models\MetodoPago;
+use App\Models\Reparacion;
 use App\Models\Venta;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -85,8 +86,11 @@ class CajaController extends Controller
         $fecha = $caja->fecha->format('Y-m-d');
         $gastosDelDia = Gasto::with('metodoPago', 'usuario')->whereDate('fecha_gasto', $fecha)->orderBy('fecha_gasto')->get();
         $ingresosDelDia = Ingreso::with('metodoPago', 'usuario')->whereDate('fecha_ingreso', $fecha)->orderBy('fecha_ingreso')->get();
+        $reparacionesDelDia = Reparacion::with('metodoPago')
+            ->where('estado', 'entregado')->whereDate('fecha_entrega', $fecha)
+            ->orderBy('fecha_entrega')->get();
 
-        return view('caja.show', compact('caja', 'esperadoPorMetodo', 'totalEsperado', 'totalContado', 'gastosDelDia', 'ingresosDelDia'));
+        return view('caja.show', compact('caja', 'esperadoPorMetodo', 'totalEsperado', 'totalContado', 'gastosDelDia', 'ingresosDelDia', 'reparacionesDelDia'));
     }
 
     public function cierreForm(Caja $caja)
@@ -155,6 +159,9 @@ class CajaController extends Controller
         $abonosDelDia = Abono::with('metodoPago')->whereDate('fecha_abono', $fecha)->get();
         $gastosDelDia = Gasto::with('metodoPago', 'usuario')->whereDate('fecha_gasto', $fecha)->orderBy('fecha_gasto')->get();
         $ingresosDelDia = Ingreso::with('metodoPago', 'usuario')->whereDate('fecha_ingreso', $fecha)->orderBy('fecha_ingreso')->get();
+        $reparacionesDelDia = Reparacion::with('metodoPago')
+            ->where('estado', 'entregado')->whereDate('fecha_entrega', $fecha)
+            ->orderBy('fecha_entrega')->get();
 
         $totalVentasContado = $ventasContado->sum('total');
         $cantidadVentasContado = $ventasContado->count();
@@ -162,6 +169,7 @@ class CajaController extends Controller
         $totalAbonos = $abonosDelDia->sum('monto');
         $totalGastos = $gastosDelDia->sum('monto');
         $totalIngresos = $ingresosDelDia->sum('monto');
+        $totalReparaciones = $reparacionesDelDia->sum('costo_final');
 
         $esperadoPorMetodo = $this->calcularEsperadoPorMetodo($caja);
         $totalEsperado = $esperadoPorMetodo->sum('esperado');
@@ -170,9 +178,9 @@ class CajaController extends Controller
         $totalContado = $caja->conteos->sum('monto_contado');
 
         return compact(
-            'caja', 'ventasContado', 'abonosDelDia', 'gastosDelDia', 'ingresosDelDia',
+            'caja', 'ventasContado', 'abonosDelDia', 'gastosDelDia', 'ingresosDelDia', 'reparacionesDelDia',
             'totalVentasContado', 'cantidadVentasContado', 'totalDescuentos', 'totalAbonos',
-            'totalGastos', 'totalIngresos', 'esperadoPorMetodo', 'totalEsperado', 'totalContado'
+            'totalGastos', 'totalIngresos', 'totalReparaciones', 'esperadoPorMetodo', 'totalEsperado', 'totalContado'
         );
     }
 
@@ -207,11 +215,19 @@ class CajaController extends Controller
             ->groupBy('metodo_pago_id')
             ->pluck('monto', 'metodo_pago_id');
 
+        $reparaciones = Reparacion::selectRaw('metodo_pago_id, SUM(costo_final) as monto')
+            ->where('estado', 'entregado')
+            ->whereNotNull('metodo_pago_id')
+            ->whereDate('fecha_entrega', $fecha)
+            ->groupBy('metodo_pago_id')
+            ->pluck('monto', 'metodo_pago_id');
+
         return MetodoPago::where('activo', true)->orderBy('nombre')->get()
-            ->map(function ($metodo) use ($ventas, $abonos, $ingresos, $gastos, $caja) {
+            ->map(function ($metodo) use ($ventas, $abonos, $ingresos, $gastos, $reparaciones, $caja) {
                 $esperado = (float) ($ventas[$metodo->id] ?? 0)
                     + (float) ($abonos[$metodo->id] ?? 0)
                     + (float) ($ingresos[$metodo->id] ?? 0)
+                    + (float) ($reparaciones[$metodo->id] ?? 0)
                     - (float) ($gastos[$metodo->id] ?? 0);
 
                 if (strtolower(trim($metodo->nombre)) === 'efectivo') {
