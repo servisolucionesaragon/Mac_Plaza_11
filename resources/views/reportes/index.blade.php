@@ -114,7 +114,7 @@
         <div class="kpi-card bg-grad-red">
             <div class="kpi-icon"><i class="fas fa-arrow-circle-down"></i></div>
             <div class="kpi-value">{{ $config->simbolo_moneda }} {{ number_format($totalGastos, 0) }}</div>
-            <div class="kpi-label">Gastos Realizados</div>
+            <div class="kpi-label">Egresos Realizados</div>
             <span class="kpi-badge"><i class="fas fa-receipt fa-xs"></i> {{ $cantidadGastos }} registros</span>
         </div>
     </div>
@@ -136,7 +136,7 @@
             </div>
             <div class="col-md-4">
                 <div class="p-3 rounded-3" style="background:#fef2f2;">
-                    <div style="font-size:11px; color:#991b1b; margin-bottom:4px;">GASTOS REALIZADOS</div>
+                    <div style="font-size:11px; color:#991b1b; margin-bottom:4px;">EGRESOS REALIZADOS</div>
                     <div style="font-size:22px; font-weight:700; color:#dc2626;">
                         {{ $config->simbolo_moneda }} {{ number_format($totalGastos, 2) }}
                     </div>
@@ -172,7 +172,7 @@
             <i class="fas fa-triangle-exclamation me-1"></i>
             Este período los gastos superaron el ingreso real del negocio por
             <strong>{{ $config->simbolo_moneda }} {{ number_format(abs($balancePeriodo), 2) }}</strong>.
-            Revisa el detalle de Gastos Realizados más abajo para identificar la causa (ej. una compra grande de
+            Revisa el detalle de Egresos Realizados más abajo para identificar la causa (ej. una compra grande de
             inventario) antes de sacar conclusiones sobre si el negocio perdió dinero — un gasto de reabastecimiento
             no es lo mismo que una pérdida real.
         </div>

@@ -147,7 +147,7 @@
                             'productos'    => 'Inventario',
                             'ventas'       => 'Ventas',
                             'caja'         => 'Control de Caja',
-                            'gastos'       => 'Gastos',
+                            'gastos'       => 'Egresos',
                             'ingresos'     => 'Ingresos',
                             'reparaciones' => 'Reparaciones',
                             'reportes'     => 'Reportes',

@@ -65,7 +65,7 @@
     <tr>
         <td><div class="resumen-caja"><div class="resumen-label">Abonos de Credito Cobrados</div><div class="resumen-value">{{ $config->simbolo_moneda }} {{ number_format($totalAbonos, 2) }}</div></div></td>
         <td><div class="resumen-caja"><div class="resumen-label">Ingresos</div><div class="resumen-value text-verde">+ {{ $config->simbolo_moneda }} {{ number_format($totalIngresos, 2) }}</div></div></td>
-        <td><div class="resumen-caja"><div class="resumen-label">Gastos</div><div class="resumen-value text-rojo">- {{ $config->simbolo_moneda }} {{ number_format($totalGastos, 2) }}</div></div></td>
+        <td><div class="resumen-caja"><div class="resumen-label">Egresos</div><div class="resumen-value text-rojo">- {{ $config->simbolo_moneda }} {{ number_format($totalGastos, 2) }}</div></div></td>
     </tr>
     <tr>
         <td><div class="resumen-caja"><div class="resumen-label">Reparaciones Cobradas</div><div class="resumen-value text-verde">+ {{ $config->simbolo_moneda }} {{ number_format($totalReparaciones, 2) }}</div></div></td>
@@ -111,7 +111,7 @@
 </table>
 
 @if($gastosDelDia->isNotEmpty())
-<div class="seccion-titulo">Detalle de Gastos</div>
+<div class="seccion-titulo">Detalle de Egresos</div>
 <table class="detalle-tabla">
     <thead>
         <tr><th>Hora</th><th>Descripcion</th><th>Metodo</th><th class="text-right">Monto</th></tr>

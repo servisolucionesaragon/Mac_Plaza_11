@@ -148,7 +148,7 @@
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-body p-4">
-                        <h6 class="fw-bold mb-3"><i class="fas fa-arrow-circle-down me-2" style="color:#dc2626;"></i>Gastos del Día</h6>
+                        <h6 class="fw-bold mb-3"><i class="fas fa-arrow-circle-down me-2" style="color:#dc2626;"></i>Egresos del Día</h6>
                         @forelse($gastosDelDia as $gasto)
                             <div class="d-flex justify-content-between align-items-start py-2" style="border-bottom:1px solid #f3f4f6;font-size:13px;">
                                 <div>
@@ -164,7 +164,7 @@
                         @endforelse
                         @if($gastosDelDia->isNotEmpty())
                             <div class="d-flex justify-content-between pt-2 mt-1" style="font-size:13px;font-weight:700;">
-                                <span>Total Gastos</span>
+                                <span>Total Egresos</span>
                                 <span style="color:#dc2626;">{{ $config->simbolo_moneda }} {{ number_format($gastosDelDia->sum('monto'), 2) }}</span>
                             </div>
                         @endif

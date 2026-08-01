@@ -482,7 +482,7 @@
         <a href="{{ route('gastos.index') }}"
            class="nav-link {{ request()->routeIs('gastos.*') ? 'active' : '' }}">
             <span class="nav-icon"><i class="fas fa-arrow-circle-down"></i></span>
-            Gastos
+            Egresos
         </a>
         @endif
 

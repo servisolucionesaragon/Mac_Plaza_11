@@ -1,25 +1,25 @@
 @extends('layouts.app')
-@section('title', 'Gastos')
+@section('title', 'Egresos')
 
 @section('breadcrumb')
-    <li class="breadcrumb-item active">Gastos</li>
+    <li class="breadcrumb-item active">Egresos</li>
 @endsection
 
 @section('content')
 <div class="d-flex align-items-center justify-content-between mb-4">
     <div>
-        <h4 class="mb-1 fw-bold">Gastos</h4>
+        <h4 class="mb-1 fw-bold">Egresos</h4>
         <p class="text-muted mb-0" style="font-size:13px;">
             Total del período: <strong style="color:#dc2626;">{{ $config->simbolo_moneda }} {{ number_format($totalPeriodo, 2) }}</strong>
         </p>
     </div>
     @if($cajaAbierta)
     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevoGasto">
-        <i class="fas fa-plus me-2"></i>Nuevo Gasto
+        <i class="fas fa-plus me-2"></i>Nuevo Egreso
     </button>
     @else
     <a href="{{ route('caja.index') }}" class="btn btn-warning px-4">
-        <i class="fas fa-exclamation-triangle me-2"></i>Abrir Caja para Registrar Gastos
+        <i class="fas fa-exclamation-triangle me-2"></i>Abrir Caja para Registrar Egresos
     </a>
     @endif
 </div>
@@ -27,7 +27,7 @@
 @unless($cajaAbierta)
 <div class="card mb-4" style="border:1px solid #fde68a;background:#fffbeb;">
     <div class="card-body p-3" style="font-size:13.5px;color:#92400e;">
-        <i class="fas fa-exclamation-triangle me-2"></i>No hay caja abierta. No se pueden registrar nuevos gastos hasta abrir la caja del día.
+        <i class="fas fa-exclamation-triangle me-2"></i>No hay caja abierta. No se pueden registrar nuevos egresos hasta abrir la caja del día.
     </div>
 </div>
 @endunless
@@ -93,12 +93,12 @@
                             @if(Auth::user()->esAdmin())
                             <div class="d-flex gap-1 justify-content-end">
                                 <button class="btn btn-sm btn-outline-secondary" style="border-radius:8px;padding:4px 10px;"
-                                        title="Editar gasto"
+                                        title="Editar egreso"
                                         onclick="abrirModalEditar({{ $gasto->id }}, @json($gasto->fecha_gasto->format('Y-m-d\TH:i')), @json($gasto->descripcion), {{ $gasto->monto }}, {{ $gasto->metodo_pago_id }}, @json($gasto->notas))">
                                     <i class="fas fa-edit" style="font-size:12px;"></i>
                                 </button>
                                 <form action="{{ route('gastos.destroy', $gasto) }}" method="POST"
-                                      onsubmit="return confirm('¿Eliminar este gasto? Esta acción no se puede deshacer.')">
+                                      onsubmit="return confirm('¿Eliminar este egreso? Esta acción no se puede deshacer.')">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-outline-danger" style="border-radius:8px;padding:4px 10px;">
                                         <i class="fas fa-trash" style="font-size:12px;"></i>
@@ -113,7 +113,7 @@
                     @empty
                     <tr>
                         <td colspan="6" class="text-center text-muted py-4" style="font-size:13px;">
-                            No hay gastos registrados en el período seleccionado.
+                            No hay egresos registrados en el período seleccionado.
                         </td>
                     </tr>
                     @endforelse
@@ -133,7 +133,7 @@
         <div class="modal-content" style="border-radius:16px;border:none;">
             <div class="modal-header" style="border-bottom:1px solid #f3f4f6;padding:20px 24px;">
                 <h6 class="modal-title fw-bold">
-                    <i class="fas fa-arrow-circle-down me-2" style="color:#dc2626;"></i>Nuevo Gasto
+                    <i class="fas fa-arrow-circle-down me-2" style="color:#dc2626;"></i>Nuevo Egreso
                 </h6>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
@@ -176,7 +176,7 @@
                 <div class="modal-footer" style="border-top:1px solid #f3f4f6;padding:16px 24px;">
                     <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-primary px-4">
-                        <i class="fas fa-save me-2"></i>Registrar Gasto
+                        <i class="fas fa-save me-2"></i>Registrar Egreso
                     </button>
                 </div>
             </form>
@@ -191,7 +191,7 @@
         <div class="modal-content" style="border-radius:16px;border:none;">
             <div class="modal-header" style="border-bottom:1px solid #f3f4f6;padding:20px 24px;">
                 <h6 class="modal-title fw-bold">
-                    <i class="fas fa-edit me-2" style="color:#dc2626;"></i>Editar Gasto
+                    <i class="fas fa-edit me-2" style="color:#dc2626;"></i>Editar Egreso
                 </h6>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>

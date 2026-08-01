@@ -39,7 +39,7 @@ class GastoController extends Controller
     public function store(Request $request)
     {
         if (!Caja::abiertaActual()) {
-            return back()->with('error', 'Debes abrir la caja del día antes de registrar un gasto.')->withInput();
+            return back()->with('error', 'Debes abrir la caja del día antes de registrar un egreso.')->withInput();
         }
 
         $validated = $request->validate([
@@ -59,12 +59,12 @@ class GastoController extends Controller
             'notas'          => $validated['notas'] ?? null,
         ]);
 
-        return back()->with('success', 'Gasto registrado correctamente.');
+        return back()->with('success', 'Egreso registrado correctamente.');
     }
 
     public function update(Request $request, Gasto $gasto)
     {
-        abort_unless(Auth::user()->esAdmin(), 403, 'Solo un administrador puede editar un gasto ya registrado.');
+        abort_unless(Auth::user()->esAdmin(), 403, 'Solo un administrador puede editar un egreso ya registrado.');
 
         $validated = $request->validate([
             'fecha_gasto'    => 'nullable|date',
@@ -82,15 +82,15 @@ class GastoController extends Controller
             'notas'          => $validated['notas'] ?? null,
         ]);
 
-        return back()->with('success', 'Gasto actualizado correctamente.');
+        return back()->with('success', 'Egreso actualizado correctamente.');
     }
 
     public function destroy(Gasto $gasto)
     {
-        abort_unless(Auth::user()->esAdmin(), 403, 'Solo un administrador puede eliminar un gasto.');
+        abort_unless(Auth::user()->esAdmin(), 403, 'Solo un administrador puede eliminar un egreso.');
 
         $gasto->delete();
 
-        return back()->with('success', 'Gasto eliminado correctamente.');
+        return back()->with('success', 'Egreso eliminado correctamente.');
     }
 }

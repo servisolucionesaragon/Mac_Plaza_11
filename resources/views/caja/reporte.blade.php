@@ -132,7 +132,7 @@
                     </div>
                     <div class="col-4">
                         <div class="resumen-item">
-                            <div class="resumen-label">Gastos</div>
+                            <div class="resumen-label">Egresos</div>
                             <div class="resumen-value" style="color:#dc2626;">− {{ $config->simbolo_moneda }} {{ number_format($totalGastos, 2) }}</div>
                         </div>
                     </div>
@@ -188,7 +188,7 @@
 
                 @if($gastosDelDia->isNotEmpty())
                 <div class="mb-4">
-                    <div class="resumen-label mb-2">Detalle de Gastos</div>
+                    <div class="resumen-label mb-2">Detalle de Egresos</div>
                     <table class="table mb-0" style="font-size:12.5px;">
                         <thead>
                             <tr style="border-bottom:2px solid #e9d5ff;">
@@ -296,7 +296,7 @@
         <div class="t-row"><span>Descuentos</span><span>- {{ $config->simbolo_moneda }} {{ number_format($totalDescuentos, 2) }}</span></div>
         <div class="t-row"><span>Abonos Cobrados</span><span>{{ $config->simbolo_moneda }} {{ number_format($totalAbonos, 2) }}</span></div>
         <div class="t-row"><span>Ingresos</span><span>+ {{ $config->simbolo_moneda }} {{ number_format($totalIngresos, 2) }}</span></div>
-        <div class="t-row"><span>Gastos</span><span>- {{ $config->simbolo_moneda }} {{ number_format($totalGastos, 2) }}</span></div>
+        <div class="t-row"><span>Egresos</span><span>- {{ $config->simbolo_moneda }} {{ number_format($totalGastos, 2) }}</span></div>
         <div class="t-row"><span>Reparaciones Cobradas</span><span>+ {{ $config->simbolo_moneda }} {{ number_format($totalReparaciones, 2) }}</span></div>
         <hr>
         <div class="t-row t-bold" style="font-size:13px;"><span>TOTAL EN CAJA</span><span>{{ $config->simbolo_moneda }} {{ number_format($totalEsperado, 2) }}</span></div>
@@ -314,7 +314,7 @@
         @endforeach
         @if($gastosDelDia->isNotEmpty())
         <hr>
-        <div class="t-bold">Gastos</div>
+        <div class="t-bold">Egresos</div>
         @foreach($gastosDelDia as $gasto)
         <div class="t-row"><span>{{ $gasto->descripcion }}</span><span>-{{ number_format($gasto->monto, 2) }}</span></div>
         @endforeach
