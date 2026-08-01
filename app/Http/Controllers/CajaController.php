@@ -90,7 +90,9 @@ class CajaController extends Controller
             ->where('estado', 'entregado')->whereDate('fecha_entrega', $fecha)
             ->orderBy('fecha_entrega')->get();
 
-        return view('caja.show', compact('caja', 'esperadoPorMetodo', 'totalEsperado', 'totalContado', 'gastosDelDia', 'ingresosDelDia', 'reparacionesDelDia'));
+        $hayOtraCajaAbierta = !$caja->estaAbierta() && Caja::abiertaActual() !== null;
+
+        return view('caja.show', compact('caja', 'esperadoPorMetodo', 'totalEsperado', 'totalContado', 'gastosDelDia', 'ingresosDelDia', 'reparacionesDelDia', 'hayOtraCajaAbierta'));
     }
 
     public function cierreForm(Caja $caja)
@@ -131,6 +133,26 @@ class CajaController extends Controller
         });
 
         return redirect()->route('caja.reporte', $caja)->with('success', 'Caja cerrada correctamente.');
+    }
+
+    public function reabrir(Caja $caja)
+    {
+        abort_unless(Auth::user()->esAdmin(), 403, 'Solo un administrador puede reabrir una caja.');
+        abort_if($caja->estaAbierta(), 403, 'Esta caja ya está abierta.');
+        abort_if(Caja::abiertaActual(), 403, 'Ya hay otra caja abierta. Ciérrala antes de reabrir esta.');
+
+        DB::transaction(function () use ($caja) {
+            $caja->conteos()->delete();
+            $caja->update([
+                'estado'         => 'abierta',
+                'fecha_cierre'   => null,
+                'user_cierre_id' => null,
+                'notas_cierre'   => null,
+            ]);
+        });
+
+        return redirect()->route('caja.show', $caja)
+            ->with('success', 'Caja reabierta correctamente. El conteo anterior se eliminó — vuelve a cerrarla cuando termines de corregir lo necesario.');
     }
 
     public function reporte(Caja $caja)

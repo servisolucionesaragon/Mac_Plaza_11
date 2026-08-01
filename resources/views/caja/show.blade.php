@@ -25,6 +25,18 @@
             <a href="{{ route('caja.cierreForm', $caja) }}" class="btn btn-danger px-4">
                 <i class="fas fa-door-closed me-2"></i>Cerrar Caja
             </a>
+        @elseif(Auth::user()->esAdmin() && !$hayOtraCajaAbierta)
+            <form action="{{ route('caja.reabrir', $caja) }}" method="POST"
+                  onsubmit="return confirm('¿Reabrir esta caja? Se eliminará el conteo de cierre registrado y quedará como si no se hubiera cerrado.')">
+                @csrf @method('PATCH')
+                <button type="submit" class="btn btn-outline-warning px-4">
+                    <i class="fas fa-door-open me-2"></i>Reabrir Caja
+                </button>
+            </form>
+        @elseif(Auth::user()->esAdmin() && $hayOtraCajaAbierta)
+            <span class="text-muted" style="font-size:12px;" title="Cierra la caja abierta actual antes de poder reabrir esta.">
+                <i class="fas fa-lock me-1"></i>No se puede reabrir (hay otra caja abierta)
+            </span>
         @endif
     </div>
 </div>

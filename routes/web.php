@@ -119,6 +119,7 @@ Route::middleware(['auth', 'nocache'])->group(function () {
         Route::get('/caja/{caja}', [CajaController::class, 'show'])->name('caja.show');
         Route::get('/caja/{caja}/cerrar', [CajaController::class, 'cierreForm'])->name('caja.cierreForm');
         Route::post('/caja/{caja}/cerrar', [CajaController::class, 'cerrar'])->name('caja.cerrar');
+        Route::patch('/caja/{caja}/reabrir', [CajaController::class, 'reabrir'])->name('caja.reabrir');
         Route::get('/caja/{caja}/reporte', [CajaController::class, 'reporte'])->name('caja.reporte');
         Route::get('/caja/{caja}/reporte/pdf', [CajaController::class, 'reportePdf'])->name('caja.reportePdf');
     });
