@@ -6,6 +6,7 @@ use App\Models\Venta;
 use App\Models\Abono;
 use App\Models\Cliente;
 use App\Models\Gasto;
+use App\Models\Ingreso;
 use App\Models\Producto;
 use App\Models\Reparacion;
 use App\Models\DetalleVenta;
@@ -39,6 +40,15 @@ class ReporteController extends Controller
 
         $totalGastos    = Gasto::whereBetween('fecha_gasto', [$desde, $hasta])->sum('monto');
         $cantidadGastos = Gasto::whereBetween('fecha_gasto', [$desde, $hasta])->count();
+
+        // "Ingresos" (módulo Ingresos/Caja) son préstamos/aportes que se le hacen a la
+        // caja para cubrir gastos cuando todavía no ha entrado el dinero de ventas —
+        // no son ingreso real del negocio, por eso van aparte del balance de abajo.
+        $totalPrestamosCaja    = Ingreso::whereBetween('fecha_ingreso', [$desde, $hasta])->sum('monto');
+        $cantidadPrestamosCaja = Ingreso::whereBetween('fecha_ingreso', [$desde, $hasta])->count();
+
+        $ingresoRealNegocio = $totalVentas + $ingresosPorAbonos + $totalReparaciones;
+        $balancePeriodo     = $ingresoRealNegocio - $totalGastos;
 
         // ── Ventas por día ────────────────────────────────────────────────
         $ventasPorDia = Venta::select(
@@ -137,6 +147,7 @@ class ReporteController extends Controller
             'totalVentas', 'cantidadVentas', 'ticketPromedio',
             'totalReparaciones', 'clientesNuevos', 'ingresosPorAbonos',
             'totalGastos', 'cantidadGastos',
+            'totalPrestamosCaja', 'cantidadPrestamosCaja', 'ingresoRealNegocio', 'balancePeriodo',
             'ventasPorDia', 'ventasPorPago', 'ventasPorUsuario',
             'topProductos', 'topClientes',
             'repPorEstado', 'stockBajo',

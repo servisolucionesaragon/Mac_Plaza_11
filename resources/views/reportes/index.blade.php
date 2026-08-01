@@ -120,6 +120,66 @@
     </div>
 </div>
 
+{{-- Balance del período --}}
+<div class="card mb-4">
+    <div class="card-body p-4">
+        <h6 class="fw-bold mb-3">Balance del Período</h6>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="p-3 rounded-3" style="background:#f0fdf4;">
+                    <div style="font-size:11px; color:#166534; margin-bottom:4px;">INGRESO REAL DEL NEGOCIO</div>
+                    <div style="font-size:22px; font-weight:700; color:#16a34a;">
+                        {{ $config->simbolo_moneda }} {{ number_format($ingresoRealNegocio, 2) }}
+                    </div>
+                    <div style="font-size:11px; color:#6b7280;">Ventas + Abonos de crédito + Reparaciones</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-3 rounded-3" style="background:#fef2f2;">
+                    <div style="font-size:11px; color:#991b1b; margin-bottom:4px;">GASTOS REALIZADOS</div>
+                    <div style="font-size:22px; font-weight:700; color:#dc2626;">
+                        {{ $config->simbolo_moneda }} {{ number_format($totalGastos, 2) }}
+                    </div>
+                    <div style="font-size:11px; color:#6b7280;">{{ $cantidadGastos }} registros en el período</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-3 rounded-3" style="background:{{ $balancePeriodo >= 0 ? '#f0fdf4' : '#fef2f2' }};">
+                    <div style="font-size:11px; color:{{ $balancePeriodo >= 0 ? '#166534' : '#991b1b' }}; margin-bottom:4px;">BALANCE (INGRESO REAL − GASTOS)</div>
+                    <div style="font-size:22px; font-weight:700; color:{{ $balancePeriodo >= 0 ? '#16a34a' : '#dc2626' }};">
+                        {{ $balancePeriodo >= 0 ? '' : '−' }}{{ $config->simbolo_moneda }} {{ number_format(abs($balancePeriodo), 2) }}
+                    </div>
+                    <div style="font-size:11px; color:#6b7280;">No incluye costo de mercancía ni inventario</div>
+                </div>
+            </div>
+        </div>
+
+        @if($totalPrestamosCaja > 0)
+        <div class="mt-3 p-3 rounded-3 d-flex align-items-start gap-3" style="background:#fffbeb;">
+            <i class="fas fa-hand-holding-usd mt-1" style="color:#b45309;"></i>
+            <div style="font-size:12.5px; color:#78350f;">
+                <strong>{{ $config->simbolo_moneda }} {{ number_format($totalPrestamosCaja, 2) }}</strong>
+                en {{ $cantidadPrestamosCaja }} préstamo(s)/aporte(s) a caja (módulo Ingresos) en este período —
+                <strong>no es ingreso real del negocio</strong>, es dinero adelantado a la caja para cubrir gastos
+                cuando todavía no había entrado el dinero de una venta. No está incluido en el balance de arriba
+                a propósito, para no confundirlo con ganancia.
+            </div>
+        </div>
+        @endif
+
+        @if($balancePeriodo < 0)
+        <div class="mt-3 p-3 rounded-3" style="background:#fef2f2; font-size:12.5px; color:#991b1b;">
+            <i class="fas fa-triangle-exclamation me-1"></i>
+            Este período los gastos superaron el ingreso real del negocio por
+            <strong>{{ $config->simbolo_moneda }} {{ number_format(abs($balancePeriodo), 2) }}</strong>.
+            Revisa el detalle de Gastos Realizados más abajo para identificar la causa (ej. una compra grande de
+            inventario) antes de sacar conclusiones sobre si el negocio perdió dinero — un gasto de reabastecimiento
+            no es lo mismo que una pérdida real.
+        </div>
+        @endif
+    </div>
+</div>
+
 {{-- Gráficas --}}
 <div class="row g-4 mb-4">
     {{-- Ventas por día --}}
