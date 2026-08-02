@@ -144,6 +144,40 @@
             </div>
         </div>
 
+        @if($caja->conteoDenominaciones->isNotEmpty())
+        <div class="card mt-4">
+            <div class="card-body p-4">
+                <h6 class="fw-bold mb-3"><i class="fas fa-coins me-2" style="color:#a855f7;"></i>Detalle del Conteo de Efectivo</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width:60px;"></th>
+                                <th>Denominación</th>
+                                <th class="text-end">Cantidad</th>
+                                <th class="text-end">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($caja->conteoDenominaciones->sortByDesc(fn($c) => $c->denominacion->valor ?? 0) as $c)
+                            <tr>
+                                <td>
+                                    @if($c->denominacion?->imagen)
+                                        <img src="{{ asset('storage/' . $c->denominacion->imagen) }}" style="width:44px;height:44px;object-fit:contain;border-radius:6px;background:#f9fafb;">
+                                    @endif
+                                </td>
+                                <td style="font-size:13px;">{{ $config->simbolo_moneda }} {{ number_format($c->denominacion->valor ?? 0, 0, ',', '.') }}</td>
+                                <td class="text-end" style="font-size:13px;">{{ $c->cantidad }}</td>
+                                <td class="text-end" style="font-size:13px;font-weight:600;">{{ $config->simbolo_moneda }} {{ number_format($c->cantidad * ($c->denominacion->valor ?? 0), 0, ',', '.') }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        @endif
+
         <div class="row g-4 mt-1">
             <div class="col-md-4">
                 <div class="card">

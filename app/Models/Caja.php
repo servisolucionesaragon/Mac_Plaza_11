@@ -36,6 +36,11 @@ class Caja extends Model
         return $this->hasMany(CajaConteo::class);
     }
 
+    public function conteoDenominaciones()
+    {
+        return $this->hasMany(CajaConteoDenominacion::class);
+    }
+
     public function estaAbierta(): bool
     {
         return $this->estado === 'abierta';

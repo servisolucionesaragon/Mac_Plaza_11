@@ -19,6 +19,7 @@ use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\CajaController;
 use App\Http\Controllers\GastoController;
 use App\Http\Controllers\IngresoController;
+use App\Http\Controllers\DenominacionController;
 use App\Http\Controllers\PwaController;
 
 // ── Autenticación ─────────────────────────────────────────────────────────────
@@ -147,6 +148,12 @@ Route::middleware(['auth', 'nocache'])->group(function () {
     Route::middleware('permiso:configuracion')->group(function () {
         Route::get('/configuracion', [ConfiguracionController::class, 'index'])->name('configuracion.index');
         Route::put('/configuracion/general', [ConfiguracionController::class, 'updateGeneral'])->name('configuracion.updateGeneral');
+
+        Route::get('/denominaciones', [DenominacionController::class, 'index'])->name('denominaciones.index');
+        Route::post('/denominaciones', [DenominacionController::class, 'store'])->name('denominaciones.store');
+        Route::put('/denominaciones/{denominacion}', [DenominacionController::class, 'update'])->name('denominaciones.update');
+        Route::patch('/denominaciones/{denominacion}/toggle', [DenominacionController::class, 'toggle'])->name('denominaciones.toggle');
+        Route::delete('/denominaciones/{denominacion}', [DenominacionController::class, 'destroy'])->name('denominaciones.destroy');
     });
 
     // Usuarios (gestión de usuarios + permisos por rol)

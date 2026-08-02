@@ -74,6 +74,11 @@
                                 <i class="fas fa-user-tag me-2"></i>Parámetro de Cliente
                             </button>
                         </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="tab-denominaciones-btn" data-bs-toggle="tab" data-bs-target="#tab-denominaciones" type="button" role="tab" aria-controls="tab-denominaciones">
+                                <i class="fas fa-money-bill-wave me-2"></i>Denominaciones
+                            </button>
+                        </li>
                     </ul>
 
                     <div class="tab-content pt-2">
@@ -373,6 +378,18 @@
                                 Se aplica automáticamente sobre el total de la compra a todo cliente marcado como
                                 "Distribuidor" en su ficha (Clientes → Nuevo/Editar Cliente). Por defecto 20%.
                             </div>
+                        </div>
+
+                        {{-- ═══ DENOMINACIONES ═══ --}}
+                        <div class="tab-pane fade" id="tab-denominaciones" role="tabpanel">
+                            <p class="text-muted mb-3" style="font-size:13px;">
+                                Registra los billetes y monedas (con su imagen) que se usan para contar el
+                                efectivo físico al cerrar la caja del día — se gestionan en su propia pantalla,
+                                no forman parte de este formulario.
+                            </p>
+                            <a href="{{ route('denominaciones.index') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-money-bill-wave me-2"></i>Gestionar Denominaciones
+                            </a>
                         </div>
 
                     </div>

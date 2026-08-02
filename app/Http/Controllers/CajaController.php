@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Abono;
 use App\Models\Caja;
 use App\Models\CajaConteo;
+use App\Models\CajaConteoDenominacion;
+use App\Models\Denominacion;
 use App\Models\Gasto;
 use App\Models\Ingreso;
 use App\Models\MetodoPago;
@@ -80,7 +82,7 @@ class CajaController extends Controller
         $esperadoPorMetodo = $this->calcularEsperadoPorMetodo($caja);
         $totalEsperado = $esperadoPorMetodo->sum('esperado');
 
-        $caja->load('conteos.metodoPago', 'usuarioApertura', 'usuarioCierre');
+        $caja->load('conteos.metodoPago', 'conteoDenominaciones.denominacion', 'usuarioApertura', 'usuarioCierre');
         $totalContado = $caja->conteos->sum('monto_contado');
 
         $fecha = $caja->fecha->format('Y-m-d');
@@ -102,7 +104,11 @@ class CajaController extends Controller
         $esperadoPorMetodo = $this->calcularEsperadoPorMetodo($caja);
         $totalEsperado = $esperadoPorMetodo->sum('esperado');
 
-        return view('caja.cierre', compact('caja', 'esperadoPorMetodo', 'totalEsperado'));
+        $metodoEfectivoId = MetodoPago::whereRaw('LOWER(nombre) = ?', ['efectivo'])->value('id');
+        $billetes = Denominacion::where('tipo', 'billete')->where('activo', true)->orderByDesc('valor')->get();
+        $monedas  = Denominacion::where('tipo', 'moneda')->where('activo', true)->orderByDesc('valor')->get();
+
+        return view('caja.cierre', compact('caja', 'esperadoPorMetodo', 'totalEsperado', 'metodoEfectivoId', 'billetes', 'monedas'));
     }
 
     public function cerrar(Request $request, Caja $caja)
@@ -110,18 +116,45 @@ class CajaController extends Controller
         abort_if(!$caja->estaAbierta(), 403, 'Esta caja ya está cerrada.');
 
         $validated = $request->validate([
-            'notas_cierre'  => 'nullable|string',
-            'conteos'       => 'required|array',
-            'conteos.*'     => 'required|numeric|min:0',
+            'notas_cierre'      => 'nullable|string',
+            'conteos'           => 'required|array',
+            'conteos.*'         => 'required|numeric|min:0',
+            'denominaciones'    => 'nullable|array',
+            'denominaciones.*'  => 'nullable|integer|min:0',
         ]);
 
-        DB::transaction(function () use ($caja, $validated) {
+        $metodoEfectivoId = MetodoPago::whereRaw('LOWER(nombre) = ?', ['efectivo'])->value('id');
+        $denominacionesContadas = collect($validated['denominaciones'] ?? [])->filter(fn ($cantidad) => (int) $cantidad > 0);
+
+        // Si se contaron denominaciones, el efectivo declarado se recalcula desde ahí
+        // (billetes/monedas x cantidad) en vez de confiar en el número que llegó del
+        // formulario — así el conteo físico es el que manda, no un valor editable a mano.
+        if ($metodoEfectivoId && $denominacionesContadas->isNotEmpty()) {
+            $valoresPorDenominacion = Denominacion::whereIn('id', $denominacionesContadas->keys())->pluck('valor', 'id');
+            $totalEfectivoContado = 0;
+            foreach ($denominacionesContadas as $denominacionId => $cantidad) {
+                $totalEfectivoContado += $cantidad * (float) ($valoresPorDenominacion[$denominacionId] ?? 0);
+            }
+            $validated['conteos'][$metodoEfectivoId] = $totalEfectivoContado;
+        }
+
+        DB::transaction(function () use ($caja, $validated, $metodoEfectivoId, $denominacionesContadas) {
             foreach ($validated['conteos'] as $metodoPagoId => $montoContado) {
                 CajaConteo::create([
                     'caja_id'        => $caja->id,
                     'metodo_pago_id' => $metodoPagoId,
                     'monto_contado'  => $montoContado,
                 ]);
+            }
+
+            if ($metodoEfectivoId && $denominacionesContadas->isNotEmpty()) {
+                foreach ($denominacionesContadas as $denominacionId => $cantidad) {
+                    CajaConteoDenominacion::create([
+                        'caja_id'         => $caja->id,
+                        'denominacion_id' => $denominacionId,
+                        'cantidad'        => $cantidad,
+                    ]);
+                }
             }
 
             $caja->update([
